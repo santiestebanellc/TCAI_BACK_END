@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Drenaje{% endblock %}
+
+{% block body %}
+    <h1>Edit Drenaje</h1>
+
+    {{ include('drenaje/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_drenaje_index') }}">back to list</a>
+
+    {{ include('drenaje/_delete_form.html.twig') }}
+{% endblock %}

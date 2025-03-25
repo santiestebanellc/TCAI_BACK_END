@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Observacion{% endblock %}
+
+{% block body %}
+    <h1>Observacion</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ observacion.id }}</td>
+            </tr>
+            <tr>
+                <th>Descripcion</th>
+                <td>{{ observacion.descripcion }}</td>
+            </tr>
+            <tr>
+                <th>Fecha</th>
+                <td>{{ observacion.fecha ? observacion.fecha|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_observacion_index') }}">back to list</a>
+
+    <a href="{{ path('app_observacion_edit', {'id': observacion.id}) }}">edit</a>
+
+    {{ include('observacion/_delete_form.html.twig') }}
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit ConstantesVitales{% endblock %}
+
+{% block body %}
+    <h1>Edit ConstantesVitales</h1>
+
+    {{ include('constantes_vitales/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_constantes_vitales_index') }}">back to list</a>
+
+    {{ include('constantes_vitales/_delete_form.html.twig') }}
+{% endblock %}

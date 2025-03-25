@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New ConstantesVitales{% endblock %}
+
+{% block body %}
+    <h1>Create new ConstantesVitales</h1>
+
+    {{ include('constantes_vitales/_form.html.twig') }}
+
+    <a href="{{ path('app_constantes_vitales_index') }}">back to list</a>
+{% endblock %}

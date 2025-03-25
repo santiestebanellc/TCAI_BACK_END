@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}DetalleDiagnostico{% endblock %}
+
+{% block body %}
+    <h1>DetalleDiagnostico</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ detalle_diagnostico.id }}</td>
+            </tr>
+            <tr>
+                <th>O2</th>
+                <td>{{ detalle_diagnostico.o2 }}</td>
+            </tr>
+            <tr>
+                <th>O2_descripcion</th>
+                <td>{{ detalle_diagnostico.o2Descripcion }}</td>
+            </tr>
+            <tr>
+                <th>Panales</th>
+                <td>{{ detalle_diagnostico.panales }}</td>
+            </tr>
+            <tr>
+                <th>Descripcion</th>
+                <td>{{ detalle_diagnostico.descripcion }}</td>
+            </tr>
+            <tr>
+                <th>Sv</th>
+                <td>{{ detalle_diagnostico.sv }}</td>
+            </tr>
+            <tr>
+                <th>Sv_tipo</th>
+                <td>{{ detalle_diagnostico.svTipo }}</td>
+            </tr>
+            <tr>
+                <th>Sv_debito</th>
+                <td>{{ detalle_diagnostico.svDebito }}</td>
+            </tr>
+            <tr>
+                <th>Sr</th>
+                <td>{{ detalle_diagnostico.sr }}</td>
+            </tr>
+            <tr>
+                <th>Sr_debito</th>
+                <td>{{ detalle_diagnostico.srDebito }}</td>
+            </tr>
+            <tr>
+                <th>Sng</th>
+                <td>{{ detalle_diagnostico.sng }}</td>
+            </tr>
+            <tr>
+                <th>Sng_descripcion</th>
+                <td>{{ detalle_diagnostico.sngDescripcion }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_detalle_diagnostico_index') }}">back to list</a>
+
+    <a href="{{ path('app_detalle_diagnostico_edit', {'id': detalle_diagnostico.id}) }}">edit</a>
+
+    {{ include('detalle_diagnostico/_delete_form.html.twig') }}
+{% endblock %}

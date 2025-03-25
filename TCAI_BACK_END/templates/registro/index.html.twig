@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Registro index{% endblock %}
+
+{% block body %}
+    <h1>Registro index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Fecha</th>
+                <th>Observaciones</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for registro in registros %}
+            <tr>
+                <td>{{ registro.id }}</td>
+                <td>{{ registro.fecha ? registro.fecha|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ registro.observaciones }}</td>
+                <td>
+                    <a href="{{ path('app_registro_show', {'id': registro.id}) }}">show</a>
+                    <a href="{{ path('app_registro_edit', {'id': registro.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_registro_new') }}">Create new</a>
+{% endblock %}

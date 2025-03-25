@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}TipoTextura index{% endblock %}
+
+{% block body %}
+    <h1>TipoTextura index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Descripcion</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for tipo_textura in tipo_texturas %}
+            <tr>
+                <td>{{ tipo_textura.id }}</td>
+                <td>{{ tipo_textura.descripcion }}</td>
+                <td>
+                    <a href="{{ path('app_tipo_textura_show', {'id': tipo_textura.id}) }}">show</a>
+                    <a href="{{ path('app_tipo_textura_edit', {'id': tipo_textura.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="3">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_tipo_textura_new') }}">Create new</a>
+{% endblock %}

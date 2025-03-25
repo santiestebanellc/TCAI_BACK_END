@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}PacienteHasHabitaciones index{% endblock %}
+
+{% block body %}
+    <h1>PacienteHasHabitaciones index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Timestamp</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for paciente_has_habitacione in paciente_has_habitaciones %}
+            <tr>
+                <td>{{ paciente_has_habitacione.id }}</td>
+                <td>{{ paciente_has_habitacione.timestamp ? paciente_has_habitacione.timestamp|date('Y-m-d H:i:s') : '' }}</td>
+                <td>
+                    <a href="{{ path('app_paciente_has_habitaciones_show', {'id': paciente_has_habitacione.id}) }}">show</a>
+                    <a href="{{ path('app_paciente_has_habitaciones_edit', {'id': paciente_has_habitacione.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="3">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_paciente_has_habitaciones_new') }}">Create new</a>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}DietaHasTipoDieta index{% endblock %}
+
+{% block body %}
+    <h1>DietaHasTipoDieta index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for dieta_has_tipo_dietum in dieta_has_tipo_dietas %}
+            <tr>
+                <td>{{ dieta_has_tipo_dietum.id }}</td>
+                <td>
+                    <a href="{{ path('app_dieta_has_tipo_dieta_show', {'id': dieta_has_tipo_dietum.id}) }}">show</a>
+                    <a href="{{ path('app_dieta_has_tipo_dieta_edit', {'id': dieta_has_tipo_dietum.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="2">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_dieta_has_tipo_dieta_new') }}">Create new</a>
+{% endblock %}

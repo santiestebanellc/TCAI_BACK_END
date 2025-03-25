@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ConstantesVitales index{% endblock %}
+
+{% block body %}
+    <h1>ConstantesVitales index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Ta_sistolica</th>
+                <th>Ta_diastolica</th>
+                <th>Frecuencia_respiratoria</th>
+                <th>Pulso</th>
+                <th>Temperatura</th>
+                <th>Saturacion_oxigeno</th>
+                <th>Peso</th>
+                <th>Talla</th>
+                <th>Diuresis</th>
+                <th>Deposiciones</th>
+                <th>Stp</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for constantes_vitale in constantes_vitales %}
+            <tr>
+                <td>{{ constantes_vitale.id }}</td>
+                <td>{{ constantes_vitale.taSistolica }}</td>
+                <td>{{ constantes_vitale.taDiastolica }}</td>
+                <td>{{ constantes_vitale.frecuenciaRespiratoria }}</td>
+                <td>{{ constantes_vitale.pulso }}</td>
+                <td>{{ constantes_vitale.temperatura }}</td>
+                <td>{{ constantes_vitale.saturacionOxigeno }}</td>
+                <td>{{ constantes_vitale.peso }}</td>
+                <td>{{ constantes_vitale.talla }}</td>
+                <td>{{ constantes_vitale.diuresis }}</td>
+                <td>{{ constantes_vitale.deposiciones }}</td>
+                <td>{{ constantes_vitale.stp }}</td>
+                <td>
+                    <a href="{{ path('app_constantes_vitales_show', {'id': constantes_vitale.id}) }}">show</a>
+                    <a href="{{ path('app_constantes_vitales_edit', {'id': constantes_vitale.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="13">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_constantes_vitales_new') }}">Create new</a>
+{% endblock %}

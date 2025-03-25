@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Diagnostico{% endblock %}
+
+{% block body %}
+    <h1>Diagnostico</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ diagnostico.id }}</td>
+            </tr>
+            <tr>
+                <th>Diagnostico</th>
+                <td>{{ diagnostico.diagnostico }}</td>
+            </tr>
+            <tr>
+                <th>Motivo</th>
+                <td>{{ diagnostico.motivo }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_diagnostico_index') }}">back to list</a>
+
+    <a href="{{ path('app_diagnostico_edit', {'id': diagnostico.id}) }}">edit</a>
+
+    {{ include('diagnostico/_delete_form.html.twig') }}
+{% endblock %}

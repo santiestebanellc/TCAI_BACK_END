@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}DetalleDiagnostico index{% endblock %}
+
+{% block body %}
+    <h1>DetalleDiagnostico index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>O2</th>
+                <th>O2_descripcion</th>
+                <th>Panales</th>
+                <th>Descripcion</th>
+                <th>Sv</th>
+                <th>Sv_tipo</th>
+                <th>Sv_debito</th>
+                <th>Sr</th>
+                <th>Sr_debito</th>
+                <th>Sng</th>
+                <th>Sng_descripcion</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for detalle_diagnostico in detalle_diagnosticos %}
+            <tr>
+                <td>{{ detalle_diagnostico.id }}</td>
+                <td>{{ detalle_diagnostico.o2 }}</td>
+                <td>{{ detalle_diagnostico.o2Descripcion }}</td>
+                <td>{{ detalle_diagnostico.panales }}</td>
+                <td>{{ detalle_diagnostico.descripcion }}</td>
+                <td>{{ detalle_diagnostico.sv }}</td>
+                <td>{{ detalle_diagnostico.svTipo }}</td>
+                <td>{{ detalle_diagnostico.svDebito }}</td>
+                <td>{{ detalle_diagnostico.sr }}</td>
+                <td>{{ detalle_diagnostico.srDebito }}</td>
+                <td>{{ detalle_diagnostico.sng }}</td>
+                <td>{{ detalle_diagnostico.sngDescripcion }}</td>
+                <td>
+                    <a href="{{ path('app_detalle_diagnostico_show', {'id': detalle_diagnostico.id}) }}">show</a>
+                    <a href="{{ path('app_detalle_diagnostico_edit', {'id': detalle_diagnostico.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="13">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_detalle_diagnostico_new') }}">Create new</a>
+{% endblock %}

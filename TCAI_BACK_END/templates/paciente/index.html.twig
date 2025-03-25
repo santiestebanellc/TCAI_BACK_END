@@ -1,0 +1,57 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Paciente index{% endblock %}
+
+{% block body %}
+    <h1>Paciente index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Num_historial</th>
+                <th>Nombre</th>
+                <th>Apellidos</th>
+                <th>Fecha_nacimiento</th>
+                <th>Direccion_completa</th>
+                <th>Lengua_materna</th>
+                <th>Antecedentes</th>
+                <th>Alergias</th>
+                <th>Nombre_cuidador</th>
+                <th>Telefono_cuidador</th>
+                <th>Fecha_ingreso</th>
+                <th>Timestamp</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for paciente in pacientes %}
+            <tr>
+                <td>{{ paciente.id }}</td>
+                <td>{{ paciente.numHistorial }}</td>
+                <td>{{ paciente.nombre }}</td>
+                <td>{{ paciente.apellidos }}</td>
+                <td>{{ paciente.fechaNacimiento ? paciente.fechaNacimiento|date('Y-m-d') : '' }}</td>
+                <td>{{ paciente.direccionCompleta }}</td>
+                <td>{{ paciente.lenguaMaterna }}</td>
+                <td>{{ paciente.antecedentes }}</td>
+                <td>{{ paciente.alergias }}</td>
+                <td>{{ paciente.nombreCuidador }}</td>
+                <td>{{ paciente.telefonoCuidador }}</td>
+                <td>{{ paciente.fechaIngreso ? paciente.fechaIngreso|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ paciente.timestamp ? paciente.timestamp|date('Y-m-d H:i:s') : '' }}</td>
+                <td>
+                    <a href="{{ path('app_paciente_show', {'id': paciente.id}) }}">show</a>
+                    <a href="{{ path('app_paciente_edit', {'id': paciente.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="14">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_paciente_new') }}">Create new</a>
+{% endblock %}

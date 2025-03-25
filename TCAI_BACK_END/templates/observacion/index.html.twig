@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Observacion index{% endblock %}
+
+{% block body %}
+    <h1>Observacion index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Descripcion</th>
+                <th>Fecha</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for observacion in observacions %}
+            <tr>
+                <td>{{ observacion.id }}</td>
+                <td>{{ observacion.descripcion }}</td>
+                <td>{{ observacion.fecha ? observacion.fecha|date('Y-m-d H:i:s') : '' }}</td>
+                <td>
+                    <a href="{{ path('app_observacion_show', {'id': observacion.id}) }}">show</a>
+                    <a href="{{ path('app_observacion_edit', {'id': observacion.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_observacion_new') }}">Create new</a>
+{% endblock %}

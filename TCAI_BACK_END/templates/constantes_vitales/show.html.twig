@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ConstantesVitales{% endblock %}
+
+{% block body %}
+    <h1>ConstantesVitales</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ constantes_vitale.id }}</td>
+            </tr>
+            <tr>
+                <th>Ta_sistolica</th>
+                <td>{{ constantes_vitale.taSistolica }}</td>
+            </tr>
+            <tr>
+                <th>Ta_diastolica</th>
+                <td>{{ constantes_vitale.taDiastolica }}</td>
+            </tr>
+            <tr>
+                <th>Frecuencia_respiratoria</th>
+                <td>{{ constantes_vitale.frecuenciaRespiratoria }}</td>
+            </tr>
+            <tr>
+                <th>Pulso</th>
+                <td>{{ constantes_vitale.pulso }}</td>
+            </tr>
+            <tr>
+                <th>Temperatura</th>
+                <td>{{ constantes_vitale.temperatura }}</td>
+            </tr>
+            <tr>
+                <th>Saturacion_oxigeno</th>
+                <td>{{ constantes_vitale.saturacionOxigeno }}</td>
+            </tr>
+            <tr>
+                <th>Peso</th>
+                <td>{{ constantes_vitale.peso }}</td>
+            </tr>
+            <tr>
+                <th>Talla</th>
+                <td>{{ constantes_vitale.talla }}</td>
+            </tr>
+            <tr>
+                <th>Diuresis</th>
+                <td>{{ constantes_vitale.diuresis }}</td>
+            </tr>
+            <tr>
+                <th>Deposiciones</th>
+                <td>{{ constantes_vitale.deposiciones }}</td>
+            </tr>
+            <tr>
+                <th>Stp</th>
+                <td>{{ constantes_vitale.stp }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_constantes_vitales_index') }}">back to list</a>
+
+    <a href="{{ path('app_constantes_vitales_edit', {'id': constantes_vitale.id}) }}">edit</a>
+
+    {{ include('constantes_vitales/_delete_form.html.twig') }}
+{% endblock %}

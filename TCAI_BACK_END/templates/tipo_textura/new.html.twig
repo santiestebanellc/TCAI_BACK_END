@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New TipoTextura{% endblock %}
+
+{% block body %}
+    <h1>Create new TipoTextura</h1>
+
+    {{ include('tipo_textura/_form.html.twig') }}
+
+    <a href="{{ path('app_tipo_textura_index') }}">back to list</a>
+{% endblock %}

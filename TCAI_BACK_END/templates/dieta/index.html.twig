@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dieta index{% endblock %}
+
+{% block body %}
+    <h1>Dieta index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Dia</th>
+                <th>Toma</th>
+                <th>Autonomo</th>
+                <th>Protesi</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for dietum in dietas %}
+            <tr>
+                <td>{{ dietum.id }}</td>
+                <td>{{ dietum.dia }}</td>
+                <td>{{ dietum.toma }}</td>
+                <td>{{ dietum.autonomo }}</td>
+                <td>{{ dietum.protesi }}</td>
+                <td>
+                    <a href="{{ path('app_dieta_show', {'id': dietum.id}) }}">show</a>
+                    <a href="{{ path('app_dieta_edit', {'id': dietum.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_dieta_new') }}">Create new</a>
+{% endblock %}

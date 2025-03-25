@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Observacion{% endblock %}
+
+{% block body %}
+    <h1>Edit Observacion</h1>
+
+    {{ include('observacion/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_observacion_index') }}">back to list</a>
+
+    {{ include('observacion/_delete_form.html.twig') }}
+{% endblock %}

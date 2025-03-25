@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Auxiliar{% endblock %}
+
+{% block body %}
+    <h1>Create new Auxiliar</h1>
+
+    {{ include('auxiliar/_form.html.twig') }}
+
+    <a href="{{ path('app_auxiliar_index') }}">back to list</a>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}TipoDrenaje{% endblock %}
+
+{% block body %}
+    <h1>TipoDrenaje</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ tipo_drenaje.id }}</td>
+            </tr>
+            <tr>
+                <th>Descripcion</th>
+                <td>{{ tipo_drenaje.descripcion }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_tipo_drenaje_index') }}">back to list</a>
+
+    <a href="{{ path('app_tipo_drenaje_edit', {'id': tipo_drenaje.id}) }}">edit</a>
+
+    {{ include('tipo_drenaje/_delete_form.html.twig') }}
+{% endblock %}

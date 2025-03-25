@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}PacienteHasHabitaciones{% endblock %}
+
+{% block body %}
+    <h1>PacienteHasHabitaciones</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ paciente_has_habitacione.id }}</td>
+            </tr>
+            <tr>
+                <th>Timestamp</th>
+                <td>{{ paciente_has_habitacione.timestamp ? paciente_has_habitacione.timestamp|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_paciente_has_habitaciones_index') }}">back to list</a>
+
+    <a href="{{ path('app_paciente_has_habitaciones_edit', {'id': paciente_has_habitacione.id}) }}">edit</a>
+
+    {{ include('paciente_has_habitaciones/_delete_form.html.twig') }}
+{% endblock %}

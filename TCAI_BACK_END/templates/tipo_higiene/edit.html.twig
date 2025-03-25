@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit TipoHigiene{% endblock %}
+
+{% block body %}
+    <h1>Edit TipoHigiene</h1>
+
+    {{ include('tipo_higiene/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_tipo_higiene_index') }}">back to list</a>
+
+    {{ include('tipo_higiene/_delete_form.html.twig') }}
+{% endblock %}

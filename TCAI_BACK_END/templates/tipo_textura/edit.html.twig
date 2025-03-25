@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit TipoTextura{% endblock %}
+
+{% block body %}
+    <h1>Edit TipoTextura</h1>
+
+    {{ include('tipo_textura/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_tipo_textura_index') }}">back to list</a>
+
+    {{ include('tipo_textura/_delete_form.html.twig') }}
+{% endblock %}

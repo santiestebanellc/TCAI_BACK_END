@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Movilizacion index{% endblock %}
+
+{% block body %}
+    <h1>Movilizacion index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Sedestacion</th>
+                <th>Ayuda_deambulacion</th>
+                <th>Ayuda_descripcion</th>
+                <th>Cambios</th>
+                <th>Decubitos</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for movilizacion in movilizacions %}
+            <tr>
+                <td>{{ movilizacion.id }}</td>
+                <td>{{ movilizacion.sedestacion }}</td>
+                <td>{{ movilizacion.ayudaDeambulacion }}</td>
+                <td>{{ movilizacion.ayudaDescripcion }}</td>
+                <td>{{ movilizacion.cambios }}</td>
+                <td>{{ movilizacion.decubitos }}</td>
+                <td>
+                    <a href="{{ path('app_movilizacion_show', {'id': movilizacion.id}) }}">show</a>
+                    <a href="{{ path('app_movilizacion_edit', {'id': movilizacion.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="7">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_movilizacion_new') }}">Create new</a>
+{% endblock %}

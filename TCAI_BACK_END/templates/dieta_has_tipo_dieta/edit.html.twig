@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit DietaHasTipoDieta{% endblock %}
+
+{% block body %}
+    <h1>Edit DietaHasTipoDieta</h1>
+
+    {{ include('dieta_has_tipo_dieta/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_dieta_has_tipo_dieta_index') }}">back to list</a>
+
+    {{ include('dieta_has_tipo_dieta/_delete_form.html.twig') }}
+{% endblock %}

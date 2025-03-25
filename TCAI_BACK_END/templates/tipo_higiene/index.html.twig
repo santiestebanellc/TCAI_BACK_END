@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}TipoHigiene index{% endblock %}
+
+{% block body %}
+    <h1>TipoHigiene index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Descripcion</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for tipo_higiene in tipo_higienes %}
+            <tr>
+                <td>{{ tipo_higiene.id }}</td>
+                <td>{{ tipo_higiene.descripcion }}</td>
+                <td>
+                    <a href="{{ path('app_tipo_higiene_show', {'id': tipo_higiene.id}) }}">show</a>
+                    <a href="{{ path('app_tipo_higiene_edit', {'id': tipo_higiene.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="3">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_tipo_higiene_new') }}">Create new</a>
+{% endblock %}

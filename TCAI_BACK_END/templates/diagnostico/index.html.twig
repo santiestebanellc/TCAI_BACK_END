@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Diagnostico index{% endblock %}
+
+{% block body %}
+    <h1>Diagnostico index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Diagnostico</th>
+                <th>Motivo</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for diagnostico in diagnosticos %}
+            <tr>
+                <td>{{ diagnostico.id }}</td>
+                <td>{{ diagnostico.diagnostico }}</td>
+                <td>{{ diagnostico.motivo }}</td>
+                <td>
+                    <a href="{{ path('app_diagnostico_show', {'id': diagnostico.id}) }}">show</a>
+                    <a href="{{ path('app_diagnostico_edit', {'id': diagnostico.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_diagnostico_new') }}">Create new</a>
+{% endblock %}

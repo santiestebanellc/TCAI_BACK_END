@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Diagnostico{% endblock %}
+
+{% block body %}
+    <h1>Create new Diagnostico</h1>
+
+    {{ include('diagnostico/_form.html.twig') }}
+
+    <a href="{{ path('app_diagnostico_index') }}">back to list</a>
+{% endblock %}

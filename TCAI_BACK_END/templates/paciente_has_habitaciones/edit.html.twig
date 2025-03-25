@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit PacienteHasHabitaciones{% endblock %}
+
+{% block body %}
+    <h1>Edit PacienteHasHabitaciones</h1>
+
+    {{ include('paciente_has_habitaciones/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_paciente_has_habitaciones_index') }}">back to list</a>
+
+    {{ include('paciente_has_habitaciones/_delete_form.html.twig') }}
+{% endblock %}

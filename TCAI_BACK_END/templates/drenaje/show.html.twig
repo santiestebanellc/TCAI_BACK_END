@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Drenaje{% endblock %}
+
+{% block body %}
+    <h1>Drenaje</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ drenaje.id }}</td>
+            </tr>
+            <tr>
+                <th>Debito</th>
+                <td>{{ drenaje.debito }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_drenaje_index') }}">back to list</a>
+
+    <a href="{{ path('app_drenaje_edit', {'id': drenaje.id}) }}">edit</a>
+
+    {{ include('drenaje/_delete_form.html.twig') }}
+{% endblock %}

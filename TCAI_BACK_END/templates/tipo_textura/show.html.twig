@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}TipoTextura{% endblock %}
+
+{% block body %}
+    <h1>TipoTextura</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ tipo_textura.id }}</td>
+            </tr>
+            <tr>
+                <th>Descripcion</th>
+                <td>{{ tipo_textura.descripcion }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_tipo_textura_index') }}">back to list</a>
+
+    <a href="{{ path('app_tipo_textura_edit', {'id': tipo_textura.id}) }}">edit</a>
+
+    {{ include('tipo_textura/_delete_form.html.twig') }}
+{% endblock %}
