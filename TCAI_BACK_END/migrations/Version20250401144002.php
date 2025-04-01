@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20250325164130 extends AbstractMigration
+final class Version20250401144002 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -20,14 +20,14 @@ final class Version20250325164130 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('CREATE TABLE auxiliar (id INT AUTO_INCREMENT NOT NULL, num_trabajador VARCHAR(10) DEFAULT NULL, nombre VARCHAR(50) DEFAULT NULL, apellidos VARCHAR(150) DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
+        $this->addSql('CREATE TABLE auxiliar (id INT AUTO_INCREMENT NOT NULL, num_trabajador VARCHAR(10) DEFAULT NULL, nombre VARCHAR(50) DEFAULT NULL, apellidos VARCHAR(150) DEFAULT NULL, contraseña VARCHAR(255) DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE constantes_vitales (id INT AUTO_INCREMENT NOT NULL, ta_sistolica NUMERIC(3, 1) DEFAULT NULL, ta_diastolica NUMERIC(3, 1) DEFAULT NULL, frecuencia_respiratoria NUMERIC(3, 1) DEFAULT NULL, pulso NUMERIC(3, 1) DEFAULT NULL, temperatura NUMERIC(3, 1) DEFAULT NULL, saturacion_oxigeno NUMERIC(3, 1) DEFAULT NULL, peso NUMERIC(3, 1) DEFAULT NULL, talla NUMERIC(3, 1) DEFAULT NULL, diuresis NUMERIC(3, 1) DEFAULT NULL, deposiciones VARCHAR(45) DEFAULT NULL, stp NUMERIC(3, 1) DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE detalle_diagnostico (id INT AUTO_INCREMENT NOT NULL, o2 INT DEFAULT NULL, o2_descripcion LONGTEXT DEFAULT NULL, panales INT DEFAULT NULL, descripcion LONGTEXT DEFAULT NULL, sv INT DEFAULT NULL, sv_tipo LONGTEXT DEFAULT NULL, sv_debito LONGTEXT DEFAULT NULL, sr INT DEFAULT NULL, sr_debito LONGTEXT DEFAULT NULL, sng VARCHAR(45) DEFAULT NULL, sng_descripcion LONGTEXT DEFAULT NULL, diagnostico_id_id INT DEFAULT NULL, INDEX IDX_D78E393B9EB8F283 (diagnostico_id_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE diagnostico (id INT AUTO_INCREMENT NOT NULL, diagnostico LONGTEXT DEFAULT NULL, motivo LONGTEXT DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE dieta (id INT AUTO_INCREMENT NOT NULL, dia INT DEFAULT NULL, toma VARCHAR(1) DEFAULT NULL, autonomo INT DEFAULT NULL, protesi INT DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE dieta_has_tipo_dieta (id INT AUTO_INCREMENT NOT NULL, dieta_id_id INT DEFAULT NULL, tipo_dieta_id_id INT DEFAULT NULL, INDEX IDX_60479CE8F1E9B454 (dieta_id_id), INDEX IDX_60479CE8C4CD9AAC (tipo_dieta_id_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE drenaje (id INT AUTO_INCREMENT NOT NULL, debito LONGTEXT DEFAULT NULL, tipo_drenaje_id_id INT DEFAULT NULL, INDEX IDX_C58BD4A270522D78 (tipo_drenaje_id_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
-        $this->addSql('CREATE TABLE habitacion (id INT AUTO_INCREMENT NOT NULL, observaciones VARCHAR(255) DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
+        $this->addSql('CREATE TABLE habitacion (id INT AUTO_INCREMENT NOT NULL, observaciones VARCHAR(255) DEFAULT NULL, codigo VARCHAR(5) DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE movilizacion (id INT AUTO_INCREMENT NOT NULL, sedestacion INT DEFAULT NULL, ayuda_deambulacion INT DEFAULT NULL, ayuda_descripcion VARCHAR(255) DEFAULT NULL, cambios VARCHAR(255) DEFAULT NULL, decubitos VARCHAR(45) DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE observacion (id INT AUTO_INCREMENT NOT NULL, descripcion LONGTEXT DEFAULT NULL, fecha DATETIME DEFAULT NULL, paciente_id_id INT DEFAULT NULL, INDEX IDX_8B8B4C68AA1655E (paciente_id_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE paciente (id INT AUTO_INCREMENT NOT NULL, num_historial INT DEFAULT NULL, nombre VARCHAR(50) DEFAULT NULL, apellidos VARCHAR(150) DEFAULT NULL, fecha_nacimiento DATE DEFAULT NULL, direccion_completa VARCHAR(255) DEFAULT NULL, lengua_materna VARCHAR(45) DEFAULT NULL, antecedentes LONGTEXT DEFAULT NULL, alergias LONGTEXT DEFAULT NULL, nombre_cuidador VARCHAR(150) DEFAULT NULL, telefono_cuidador VARCHAR(9) DEFAULT NULL, fecha_ingreso DATETIME DEFAULT NULL, timestamp DATETIME DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');

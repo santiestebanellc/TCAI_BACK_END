@@ -22,6 +22,9 @@ class Auxiliar
     #[ORM\Column(length: 150, nullable: true)]
     private ?string $apellidos = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $contraseña = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -59,6 +62,18 @@ class Auxiliar
     public function setApellidos(?string $apellidos): static
     {
         $this->apellidos = $apellidos;
+
+        return $this;
+    }
+
+    public function getContraseña(): ?string
+    {
+        return $this->contraseña;
+    }
+
+    public function setContraseña(?string $contraseña): static
+    {
+        $this->contraseña = $contraseña;
 
         return $this;
     }
