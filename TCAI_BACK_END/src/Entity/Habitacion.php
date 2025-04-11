@@ -13,9 +13,6 @@ class Habitacion
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $observaciones = null;
-
     #[ORM\Column(length: 5, nullable: true)]
     private ?string $codigo = null;
 
@@ -27,18 +24,6 @@ class Habitacion
     public function setId(?string $id): static
     {
         $this->id = $id;
-
-        return $this;
-    }
-
-    public function getObservaciones(): ?string
-    {
-        return $this->observaciones;
-    }
-
-    public function setObservaciones(?string $observaciones): static
-    {
-        $this->observaciones = $observaciones;
 
         return $this;
     }

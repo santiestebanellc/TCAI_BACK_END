@@ -14,10 +14,10 @@ class ConstantesVitales
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 3, scale: 1, nullable: true)]
+    #[ORM\Column(length: 7, nullable: true)]
     private ?string $ta_sistolica = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 3, scale: 1, nullable: true)]
+    #[ORM\Column(length: 7, nullable: true)]
     private ?string $ta_diastolica = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 3, scale: 1, nullable: true)]
@@ -33,19 +33,13 @@ class ConstantesVitales
     private ?string $saturacion_oxigeno = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 3, scale: 1, nullable: true)]
-    private ?string $peso = null;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 3, scale: 1, nullable: true)]
-    private ?string $talla = null;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 3, scale: 1, nullable: true)]
     private ?string $diuresis = null;
 
     #[ORM\Column(length: 45, nullable: true)]
     private ?string $deposiciones = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 3, scale: 1, nullable: true)]
-    private ?string $stp = null;
+    private ?string $sueroterapia = null;
 
     public function getId(): ?int
     {
@@ -124,30 +118,6 @@ class ConstantesVitales
         return $this;
     }
 
-    public function getPeso(): ?string
-    {
-        return $this->peso;
-    }
-
-    public function setPeso(?string $peso): static
-    {
-        $this->peso = $peso;
-
-        return $this;
-    }
-
-    public function getTalla(): ?string
-    {
-        return $this->talla;
-    }
-
-    public function setTalla(?string $talla): static
-    {
-        $this->talla = $talla;
-
-        return $this;
-    }
-
     public function getDiuresis(): ?string
     {
         return $this->diuresis;
@@ -172,14 +142,14 @@ class ConstantesVitales
         return $this;
     }
 
-    public function getStp(): ?string
+    public function getSueroterapia(): ?string
     {
-        return $this->stp;
+        return $this->sueroterapia;
     }
 
-    public function setStp(?string $stp): static
+    public function setSueroterapia(?string $sueroterapia): static
     {
-        $this->stp = $stp;
+        $this->sueroterapia = $sueroterapia;
 
         return $this;
     }

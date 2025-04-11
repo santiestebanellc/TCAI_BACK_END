@@ -20,14 +20,17 @@ class Registro
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $fecha = null;
 
+    #[ORM\Column(length: 1, nullable: true)]
+    private ?string $toma = null;
+
     #[ORM\ManyToOne]
     private ?paciente $paciente_id = null;
 
     #[ORM\ManyToOne]
     private ?tipohigiene $tipo_higiene_id = null;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $observaciones = null;
+    
+    #[ORM\ManyToOne]
+    private ?observacion $observacion_id = null;
 
     #[ORM\ManyToOne]
     private ?dieta $dieta_id = null;
@@ -73,6 +76,18 @@ class Registro
         return $this;
     }
 
+    public function getToma(): ?string
+    {
+        return $this->toma;
+    }
+
+    public function setToma(?string $toma): static
+    {
+        $this->toma = $toma;
+
+        return $this;
+    }
+
     public function getPacienteId(): ?paciente
     {
         return $this->paciente_id;
@@ -97,14 +112,14 @@ class Registro
         return $this;
     }
 
-    public function getObservaciones(): ?string
+    public function getObservacion(): ?observacion
     {
-        return $this->observaciones;
+        return $this->observacion_id;
     }
 
-    public function setObservaciones(?string $observaciones): static
+    public function setObservacion(?observacion $observacion_id): static
     {
-        $this->observaciones = $observaciones;
+        $this->observacion_id = $observacion_id;
 
         return $this;
     }

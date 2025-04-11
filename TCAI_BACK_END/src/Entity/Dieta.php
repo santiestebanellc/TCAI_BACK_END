@@ -14,44 +14,15 @@ class Dieta
     private ?int $id = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $dia = null;
-
-    #[ORM\Column(length: 1, nullable: true)]
-    private ?string $toma = null;
-
-    #[ORM\Column(nullable: true)]
     private ?int $autonomo = null;
 
     #[ORM\Column(nullable: true)]
     private ?int $protesi = null;
 
+
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getDia(): ?int
-    {
-        return $this->dia;
-    }
-
-    public function setDia(?int $dia): static
-    {
-        $this->dia = $dia;
-
-        return $this;
-    }
-
-    public function getToma(): ?string
-    {
-        return $this->toma;
-    }
-
-    public function setToma(?string $toma): static
-    {
-        $this->toma = $toma;
-
-        return $this;
     }
 
     public function getAutonomo(): ?int

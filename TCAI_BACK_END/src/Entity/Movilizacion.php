@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\MovilizacionRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: MovilizacionRepository::class)]
@@ -13,8 +14,8 @@ class Movilizacion
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?int $sedestacion = null;
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $sedestacion = null;
 
     #[ORM\Column(nullable: true)]
     private ?int $ayuda_deambulacion = null;
@@ -33,12 +34,12 @@ class Movilizacion
         return $this->id;
     }
 
-    public function getSedestacion(): ?int
+    public function getSedestacion(): ?string
     {
         return $this->sedestacion;
     }
 
-    public function setSedestacion(?int $sedestacion): static
+    public function setSedestacion(?string $sedestacion): static
     {
         $this->sedestacion = $sedestacion;
 
