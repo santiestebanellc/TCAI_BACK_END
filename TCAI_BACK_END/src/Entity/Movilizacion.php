@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\MovilizacionRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: MovilizacionRepository::class)]
@@ -13,32 +14,29 @@ class Movilizacion
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?int $sedestacion = null;
+    #[ORM\Column(type: 'text', columnDefinition: 'LONGTEXT', nullable: true)]
+    private ?string $sedestacion = null;
 
     #[ORM\Column(nullable: true)]
     private ?int $ayuda_deambulacion = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(type: 'text', columnDefinition: 'LONGTEXT', nullable: true)]
     private ?string $ayuda_descripcion = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $cambios = null;
-
-    #[ORM\Column(length: 45, nullable: true)]
-    private ?string $decubitos = null;
+    #[ORM\Column(type: 'text', columnDefinition: 'LONGTEXT', nullable: true)]
+    private ?string $cambios_posturales = null;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getSedestacion(): ?int
+    public function getSedestacion(): ?string
     {
         return $this->sedestacion;
     }
 
-    public function setSedestacion(?int $sedestacion): static
+    public function setSedestacion(?string $sedestacion): static
     {
         $this->sedestacion = $sedestacion;
 
@@ -69,26 +67,14 @@ class Movilizacion
         return $this;
     }
 
-    public function getCambios(): ?string
+    public function getCambiosPosturales(): ?string
     {
-        return $this->cambios;
+        return $this->cambios_posturales;
     }
 
-    public function setCambios(?string $cambios): static
+    public function setCambiosPosturales(?string $cambios_posturales): static
     {
-        $this->cambios = $cambios;
-
-        return $this;
-    }
-
-    public function getDecubitos(): ?string
-    {
-        return $this->decubitos;
-    }
-
-    public function setDecubitos(?string $decubitos): static
-    {
-        $this->decubitos = $decubitos;
+        $this->cambios_posturales = $cambios_posturales;
 
         return $this;
     }

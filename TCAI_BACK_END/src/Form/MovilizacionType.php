@@ -15,8 +15,7 @@ class MovilizacionType extends AbstractType
             ->add('sedestacion')
             ->add('ayuda_deambulacion')
             ->add('ayuda_descripcion')
-            ->add('cambios')
-            ->add('decubitos')
+            ->add('cambios_posturales')
         ;
     }
 

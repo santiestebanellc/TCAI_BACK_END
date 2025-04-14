@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Sueroterapia{% endblock %}
+
+{% block body %}
+    <h1>Edit Sueroterapia</h1>
+
+    {{ include('sueroterapia/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_sueroterapia_index') }}">back to list</a>
+
+    {{ include('sueroterapia/_delete_form.html.twig') }}
+{% endblock %}

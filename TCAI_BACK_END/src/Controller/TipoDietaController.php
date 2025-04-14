@@ -12,8 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/tipo/dieta')]
-final class TipoDietaController extends AbstractController
-{
+final class TipoDietaController extends AbstractController{
     #[Route(name: 'app_tipo_dieta_index', methods: ['GET'])]
     public function index(TipoDietaRepository $tipoDietaRepository): Response
     {

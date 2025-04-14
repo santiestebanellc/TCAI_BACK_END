@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Auxiliar;
-use App\Form\AuxiliarType;
+use App\Form\Auxiliar1Type;
 use App\Repository\AuxiliarRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
@@ -16,10 +16,9 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/auxiliar')]
-final class AuxiliarController extends AbstractController
-{
+final class AuxiliarController extends AbstractController{
     #[Route(name: 'app_auxiliar_index', methods: ['GET'])]
-    public function index(AuxiliarRepository $auxiliarRepository): JsonResponse
+    public function index(AuxiliarRepository $auxiliarRepository): Response
     {
         try {
             $auxiliars = $auxiliarRepository->findAll();
@@ -48,18 +47,18 @@ final class AuxiliarController extends AbstractController
         }
 
         try {
-            // Obtener el num_trabajador del auxiliar
+            // Get num_trabajador from auxiliar
             $numTrabajador = $auxiliar->getNumTrabajador();
 
-            // Si num_trabajador no es null, verificar si ya existe en la tabla
+            // If num_trabajador is not null, verify if exists in the table
             if ($numTrabajador !== null) {
-                // Usar una consulta SQL directa para verificar duplicados
+                // Use a direct SQL query to verify duplicates
                 $connection = $entityManager->getConnection();
                 $sql = 'SELECT COUNT(*) FROM auxiliar WHERE num_trabajador = :num_trabajador';
                 $stmt = $connection->prepare($sql);
                 $stmt->bindValue('num_trabajador', $numTrabajador);
                 $result = $stmt->executeQuery();
-                $count = $result->fetchNumeric()[0]; // fetchNumeric() devuelve un array, tomamos el primer valor
+                $count = $result->fetchNumeric()[0]; // fetchNumeric() returns an array, we take the first value
 
                 if ($count > 0) {
                     return $this->json(
@@ -69,7 +68,7 @@ final class AuxiliarController extends AbstractController
                 }
             }
 
-            // Si no hay duplicados, proceder a guardar
+            // If there are no duplicates, it proceeds to save
             $entityManager->persist($auxiliar);
             $entityManager->flush();
 
@@ -121,6 +120,4 @@ final class AuxiliarController extends AbstractController
             );
         }
     }
-
-
 }

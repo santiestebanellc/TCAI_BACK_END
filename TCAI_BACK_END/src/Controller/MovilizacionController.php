@@ -12,8 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/movilizacion')]
-final class MovilizacionController extends AbstractController
-{
+final class MovilizacionController extends AbstractController{
     #[Route(name: 'app_movilizacion_index', methods: ['GET'])]
     public function index(MovilizacionRepository $movilizacionRepository): Response
     {

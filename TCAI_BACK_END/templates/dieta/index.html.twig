@@ -9,8 +9,6 @@
         <thead>
             <tr>
                 <th>Id</th>
-                <th>Dia</th>
-                <th>Toma</th>
                 <th>Autonomo</th>
                 <th>Protesi</th>
                 <th>actions</th>
@@ -20,8 +18,6 @@
         {% for dietum in dietas %}
             <tr>
                 <td>{{ dietum.id }}</td>
-                <td>{{ dietum.dia }}</td>
-                <td>{{ dietum.toma }}</td>
                 <td>{{ dietum.autonomo }}</td>
                 <td>{{ dietum.protesi }}</td>
                 <td>
@@ -31,7 +27,7 @@
             </tr>
         {% else %}
             <tr>
-                <td colspan="6">no records found</td>
+                <td colspan="4">no records found</td>
             </tr>
         {% endfor %}
         </tbody>

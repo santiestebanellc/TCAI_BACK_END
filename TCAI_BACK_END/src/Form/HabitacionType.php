@@ -12,7 +12,7 @@ class HabitacionType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('observaciones')
+            ->add('codigo')
         ;
     }
 

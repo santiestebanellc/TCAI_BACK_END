@@ -1,9 +1,9 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}TipoDrenaje index{% endblock %}
+{% block title %}Higiene index{% endblock %}
 
 {% block body %}
-    <h1>TipoDrenaje index</h1>
+    <h1>Higiene index</h1>
 
     <table class="table">
         <thead>
@@ -14,13 +14,13 @@
             </tr>
         </thead>
         <tbody>
-        {% for tipo_drenaje in tipo_drenajes %}
+        {% for higiene in higienes %}
             <tr>
-                <td>{{ tipo_drenaje.id }}</td>
-                <td>{{ tipo_drenaje.descripcion }}</td>
+                <td>{{ higiene.id }}</td>
+                <td>{{ higiene.descripcion }}</td>
                 <td>
-                    <a href="{{ path('app_tipo_drenaje_show', {'id': tipo_drenaje.id}) }}">show</a>
-                    <a href="{{ path('app_tipo_drenaje_edit', {'id': tipo_drenaje.id}) }}">edit</a>
+                    <a href="{{ path('app_higiene_show', {'id': higiene.id}) }}">show</a>
+                    <a href="{{ path('app_higiene_edit', {'id': higiene.id}) }}">edit</a>
                 </td>
             </tr>
         {% else %}
@@ -31,5 +31,5 @@
         </tbody>
     </table>
 
-    <a href="{{ path('app_tipo_drenaje_new') }}">Create new</a>
+    <a href="{{ path('app_higiene_new') }}">Create new</a>
 {% endblock %}

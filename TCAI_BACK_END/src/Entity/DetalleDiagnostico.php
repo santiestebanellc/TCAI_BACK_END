@@ -24,31 +24,22 @@ class DetalleDiagnostico
     private ?int $panales = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $descripcion = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?int $sv = null;
+    private ?string $panales_descripcion = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $sv_tipo = null;
+    private ?string $sv = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $sv_debito = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?int $sr = null;
+    private ?string $sr = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $sr_debito = null;
-
-    #[ORM\Column(length: 45, nullable: true)]
-    private ?string $sng = null;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $sng_descripcion = null;
+    private ?string $sng= null;
 
     #[ORM\ManyToOne]
     private ?diagnostico $diagnostico_id = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $avd = null;
 
     public function getId(): ?int
     {
@@ -91,74 +82,38 @@ class DetalleDiagnostico
         return $this;
     }
 
-    public function getDescripcion(): ?string
+    public function getPanalesDescripcion(): ?string
     {
-        return $this->descripcion;
+        return $this->panales_descripcion;
     }
 
-    public function setDescripcion(?string $descripcion): static
+    public function setPanalesDescripcion(?string $panales_descripcion): static
     {
-        $this->descripcion = $descripcion;
+        $this->panales_descripcion = $panales_descripcion;
 
         return $this;
     }
 
-    public function getSv(): ?int
+    public function getSv(): ?string
     {
         return $this->sv;
     }
 
-    public function setSv(?int $sv): static
+    public function setSv(?string $sv): static
     {
         $this->sv = $sv;
 
         return $this;
     }
 
-    public function getSvTipo(): ?string
-    {
-        return $this->sv_tipo;
-    }
-
-    public function setSvTipo(?string $sv_tipo): static
-    {
-        $this->sv_tipo = $sv_tipo;
-
-        return $this;
-    }
-
-    public function getSvDebito(): ?string
-    {
-        return $this->sv_debito;
-    }
-
-    public function setSvDebito(?string $sv_debito): static
-    {
-        $this->sv_debito = $sv_debito;
-
-        return $this;
-    }
-
-    public function getSr(): ?int
+    public function getSr(): ?string
     {
         return $this->sr;
     }
 
-    public function setSr(?int $sr): static
+    public function setSr(?string $sr): static
     {
         $this->sr = $sr;
-
-        return $this;
-    }
-
-    public function getSrDebito(): ?string
-    {
-        return $this->sr_debito;
-    }
-
-    public function setSrDebito(?string $sr_debito): static
-    {
-        $this->sr_debito = $sr_debito;
 
         return $this;
     }
@@ -175,18 +130,6 @@ class DetalleDiagnostico
         return $this;
     }
 
-    public function getSngDescripcion(): ?string
-    {
-        return $this->sng_descripcion;
-    }
-
-    public function setSngDescripcion(?string $sng_descripcion): static
-    {
-        $this->sng_descripcion = $sng_descripcion;
-
-        return $this;
-    }
-
     public function getDiagnosticoId(): ?diagnostico
     {
         return $this->diagnostico_id;
@@ -195,6 +138,18 @@ class DetalleDiagnostico
     public function setDiagnosticoId(?diagnostico $diagnostico_id): static
     {
         $this->diagnostico_id = $diagnostico_id;
+
+        return $this;
+    }
+
+    public function getAvd(): ?string
+    {
+        return $this->avd;
+    }
+
+    public function setAvd(?string $avd): static
+    {
+        $this->avd = $avd;
 
         return $this;
     }

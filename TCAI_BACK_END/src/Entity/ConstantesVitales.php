@@ -14,10 +14,10 @@ class ConstantesVitales
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 3, scale: 1, nullable: true)]
+    #[ORM\Column(length: 7, nullable: true)]
     private ?string $ta_sistolica = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 3, scale: 1, nullable: true)]
+    #[ORM\Column(length: 7, nullable: true)]
     private ?string $ta_diastolica = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 3, scale: 1, nullable: true)]
@@ -31,21 +31,6 @@ class ConstantesVitales
 
     #[ORM\Column(type: Types::DECIMAL, precision: 3, scale: 1, nullable: true)]
     private ?string $saturacion_oxigeno = null;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 3, scale: 1, nullable: true)]
-    private ?string $peso = null;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 3, scale: 1, nullable: true)]
-    private ?string $talla = null;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 3, scale: 1, nullable: true)]
-    private ?string $diuresis = null;
-
-    #[ORM\Column(length: 45, nullable: true)]
-    private ?string $deposiciones = null;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 3, scale: 1, nullable: true)]
-    private ?string $stp = null;
 
     public function getId(): ?int
     {
@@ -120,66 +105,6 @@ class ConstantesVitales
     public function setSaturacionOxigeno(?string $saturacion_oxigeno): static
     {
         $this->saturacion_oxigeno = $saturacion_oxigeno;
-
-        return $this;
-    }
-
-    public function getPeso(): ?string
-    {
-        return $this->peso;
-    }
-
-    public function setPeso(?string $peso): static
-    {
-        $this->peso = $peso;
-
-        return $this;
-    }
-
-    public function getTalla(): ?string
-    {
-        return $this->talla;
-    }
-
-    public function setTalla(?string $talla): static
-    {
-        $this->talla = $talla;
-
-        return $this;
-    }
-
-    public function getDiuresis(): ?string
-    {
-        return $this->diuresis;
-    }
-
-    public function setDiuresis(?string $diuresis): static
-    {
-        $this->diuresis = $diuresis;
-
-        return $this;
-    }
-
-    public function getDeposiciones(): ?string
-    {
-        return $this->deposiciones;
-    }
-
-    public function setDeposiciones(?string $deposiciones): static
-    {
-        $this->deposiciones = $deposiciones;
-
-        return $this;
-    }
-
-    public function getStp(): ?string
-    {
-        return $this->stp;
-    }
-
-    public function setStp(?string $stp): static
-    {
-        $this->stp = $stp;
 
         return $this;
     }

@@ -12,8 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/registro')]
-final class RegistroController extends AbstractController
-{
+final class RegistroController extends AbstractController{
     #[Route(name: 'app_registro_index', methods: ['GET'])]
     public function index(RegistroRepository $registroRepository): Response
     {

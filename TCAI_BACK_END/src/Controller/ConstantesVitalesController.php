@@ -12,8 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/constantes/vitales')]
-final class ConstantesVitalesController extends AbstractController
-{
+final class ConstantesVitalesController extends AbstractController{
     #[Route(name: 'app_constantes_vitales_index', methods: ['GET'])]
     public function index(ConstantesVitalesRepository $constantesVitalesRepository): Response
     {

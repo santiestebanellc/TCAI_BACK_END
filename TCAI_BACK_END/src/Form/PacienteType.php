@@ -16,7 +16,7 @@ class PacienteType extends AbstractType
             ->add('nombre')
             ->add('apellidos')
             ->add('fecha_nacimiento', null, [
-                'widget' => 'single_text',
+                'widget' => 'single_text'
             ])
             ->add('direccion_completa')
             ->add('lengua_materna')
@@ -25,10 +25,10 @@ class PacienteType extends AbstractType
             ->add('nombre_cuidador')
             ->add('telefono_cuidador')
             ->add('fecha_ingreso', null, [
-                'widget' => 'single_text',
+                'widget' => 'single_text'
             ])
             ->add('timestamp', null, [
-                'widget' => 'single_text',
+                'widget' => 'single_text'
             ])
         ;
     }

@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Sueroterapia{% endblock %}
+
+{% block body %}
+    <h1>Create new Sueroterapia</h1>
+
+    {{ include('sueroterapia/_form.html.twig') }}
+
+    <a href="{{ path('app_sueroterapia_index') }}">back to list</a>
+{% endblock %}

@@ -2,24 +2,24 @@
 
 namespace App\Form;
 
-use App\Entity\TipoDrenaje;
+use App\Entity\Sueroterapia;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class TipoDrenajeType extends AbstractType
+class SueroterapiaType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('descripcion')
+            ->add('dosis')
         ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => TipoDrenaje::class,
+            'data_class' => Sueroterapia::class,
         ]);
     }
 }

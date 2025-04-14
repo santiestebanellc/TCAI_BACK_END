@@ -15,36 +15,21 @@ class Drenaje
     private ?int $id = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $debito = null;
-
-    #[ORM\ManyToOne]
-    private ?TipoDrenaje $tipo_drenaje_id = null;
+    private ?string $descripcion = null;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getDebito(): ?string
+    public function getDescripcion(): ?string
     {
-        return $this->debito;
+        return $this->descripcion;
     }
 
-    public function setDebito(?string $debito): static
+    public function setDescripcion(?string $descripcion): static
     {
-        $this->debito = $debito;
-
-        return $this;
-    }
-
-    public function getTipoDrenajeId(): ?TipoDrenaje
-    {
-        return $this->tipo_drenaje_id;
-    }
-
-    public function setTipoDrenajeId(?TipoDrenaje $tipo_drenaje_id): static
-    {
-        $this->tipo_drenaje_id = $tipo_drenaje_id;
+        $this->descripcion = $descripcion;
 
         return $this;
     }

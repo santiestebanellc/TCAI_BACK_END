@@ -12,6 +12,7 @@
                 <th>Num_trabajador</th>
                 <th>Nombre</th>
                 <th>Apellidos</th>
+                <th>Contraseña</th>
                 <th>actions</th>
             </tr>
         </thead>
@@ -22,6 +23,7 @@
                 <td>{{ auxiliar.numTrabajador }}</td>
                 <td>{{ auxiliar.nombre }}</td>
                 <td>{{ auxiliar.apellidos }}</td>
+                <td>{{ auxiliar.contraseña }}</td>
                 <td>
                     <a href="{{ path('app_auxiliar_show', {'id': auxiliar.id}) }}">show</a>
                     <a href="{{ path('app_auxiliar_edit', {'id': auxiliar.id}) }}">edit</a>
@@ -29,7 +31,7 @@
             </tr>
         {% else %}
             <tr>
-                <td colspan="5">no records found</td>
+                <td colspan="6">no records found</td>
             </tr>
         {% endfor %}
         </tbody>

@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}BalanceHidrico{% endblock %}
+
+{% block body %}
+    <h1>BalanceHidrico</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ balance_hidrico.id }}</td>
+            </tr>
+            <tr>
+                <th>Diuresis</th>
+                <td>{{ balance_hidrico.diuresis }}</td>
+            </tr>
+            <tr>
+                <th>Deposicion</th>
+                <td>{{ balance_hidrico.deposicion }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_balance_hidrico_index') }}">back to list</a>
+
+    <a href="{{ path('app_balance_hidrico_edit', {'id': balance_hidrico.id}) }}">edit</a>
+
+    {{ include('balance_hidrico/_delete_form.html.twig') }}
+{% endblock %}
