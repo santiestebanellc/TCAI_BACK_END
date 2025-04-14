@@ -2,23 +2,39 @@
 
 namespace App\Entity;
 
-use App\Repository\TipoDrenajeRepository;
+use App\Repository\HigieneRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: TipoDrenajeRepository::class)]
-class TipoDrenaje
+#[ORM\Entity(repositoryClass: HigieneRepository::class)]
+class Higiene
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\ManyToOne]
+    private ?TipoHigiene $tipo = null;
+
+    #[ORM\Column(type: Types::TEXT, columnDefinition: 'LONGTEXT', nullable: true)]
     private ?string $descripcion = null;
 
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getTipo(): ?TipoHigiene
+    {
+        return $this->tipo;
+    }
+
+    public function setTipo(?TipoHigiene $tipo): static
+    {
+        $this->tipo = $tipo;
+
+        return $this;
     }
 
     public function getDescripcion(): ?string

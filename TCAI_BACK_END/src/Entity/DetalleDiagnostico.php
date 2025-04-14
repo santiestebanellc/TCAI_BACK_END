@@ -38,6 +38,9 @@ class DetalleDiagnostico
     #[ORM\ManyToOne]
     private ?diagnostico $diagnostico_id = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $avd = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -135,6 +138,18 @@ class DetalleDiagnostico
     public function setDiagnosticoId(?diagnostico $diagnostico_id): static
     {
         $this->diagnostico_id = $diagnostico_id;
+
+        return $this;
+    }
+
+    public function getAvd(): ?string
+    {
+        return $this->avd;
+    }
+
+    public function setAvd(?string $avd): static
+    {
+        $this->avd = $avd;
 
         return $this;
     }

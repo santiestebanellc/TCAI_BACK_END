@@ -26,26 +26,29 @@ class Registro
     #[ORM\ManyToOne]
     private ?paciente $paciente_id = null;
 
-    #[ORM\ManyToOne]
-    private ?tipohigiene $tipo_higiene_id = null;
-    
-    #[ORM\ManyToOne]
+    #[ORM\OneToOne]
     private ?observacion $observacion_id = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\OneToOne]
     private ?dieta $dieta_id = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\OneToOne]
     private ?drenaje $drenaje_id = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\OneToOne]
     private ?movilizacion $movilizacion_id = null;
 
-    #[ORM\ManyToOne]
-    private ?diagnostico $diagnostico_id = null;
-
-    #[ORM\ManyToOne]
+    #[ORM\OneToOne]
     private ?constantesvitales $constantes_vitales_id = null;
+
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    private ?BalanceHidrico $balance_hidrico_id = null;
+
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    private ?Sueroterapia $sueroterapia_id = null;
+
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    private ?Higiene $higiene_id = null;
 
     public function getId(): ?int
     {
@@ -100,18 +103,6 @@ class Registro
         return $this;
     }
 
-    public function getTipoHigieneId(): ?tipohigiene
-    {
-        return $this->tipo_higiene_id;
-    }
-
-    public function setTipoHigieneId(?tipohigiene $tipo_higiene_id): static
-    {
-        $this->tipo_higiene_id = $tipo_higiene_id;
-
-        return $this;
-    }
-
     public function getObservacion(): ?observacion
     {
         return $this->observacion_id;
@@ -160,18 +151,6 @@ class Registro
         return $this;
     }
 
-    public function getDiagnosticoId(): ?diagnostico
-    {
-        return $this->diagnostico_id;
-    }
-
-    public function setDiagnosticoId(?diagnostico $diagnostico_id): static
-    {
-        $this->diagnostico_id = $diagnostico_id;
-
-        return $this;
-    }
-
     public function getConstantesVitalesId(): ?constantesvitales
     {
         return $this->constantes_vitales_id;
@@ -180,6 +159,42 @@ class Registro
     public function setConstantesVitalesId(?constantesvitales $constantes_vitales_id): static
     {
         $this->constantes_vitales_id = $constantes_vitales_id;
+
+        return $this;
+    }
+
+    public function getBalanceHidricoId(): ?BalanceHidrico
+    {
+        return $this->balance_hidrico_id;
+    }
+
+    public function setBalanceHidricoId(?BalanceHidrico $balance_hidrico_id): static
+    {
+        $this->balance_hidrico_id = $balance_hidrico_id;
+
+        return $this;
+    }
+
+    public function getSueroterapiaId(): ?Sueroterapia
+    {
+        return $this->sueroterapia_id;
+    }
+
+    public function setSueroterapiaId(?Sueroterapia $sueroterapia_id): static
+    {
+        $this->sueroterapia_id = $sueroterapia_id;
+
+        return $this;
+    }
+
+    public function getHigieneId(): ?Higiene
+    {
+        return $this->higiene_id;
+    }
+
+    public function setHigieneId(?Higiene $higiene_id): static
+    {
+        $this->higiene_id = $higiene_id;
 
         return $this;
     }

@@ -32,15 +32,6 @@ class ConstantesVitales
     #[ORM\Column(type: Types::DECIMAL, precision: 3, scale: 1, nullable: true)]
     private ?string $saturacion_oxigeno = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 3, scale: 1, nullable: true)]
-    private ?string $diuresis = null;
-
-    #[ORM\Column(length: 45, nullable: true)]
-    private ?string $deposiciones = null;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 3, scale: 1, nullable: true)]
-    private ?string $sueroterapia = null;
-
     public function getId(): ?int
     {
         return $this->id;
@@ -114,42 +105,6 @@ class ConstantesVitales
     public function setSaturacionOxigeno(?string $saturacion_oxigeno): static
     {
         $this->saturacion_oxigeno = $saturacion_oxigeno;
-
-        return $this;
-    }
-
-    public function getDiuresis(): ?string
-    {
-        return $this->diuresis;
-    }
-
-    public function setDiuresis(?string $diuresis): static
-    {
-        $this->diuresis = $diuresis;
-
-        return $this;
-    }
-
-    public function getDeposiciones(): ?string
-    {
-        return $this->deposiciones;
-    }
-
-    public function setDeposiciones(?string $deposiciones): static
-    {
-        $this->deposiciones = $deposiciones;
-
-        return $this;
-    }
-
-    public function getSueroterapia(): ?string
-    {
-        return $this->sueroterapia;
-    }
-
-    public function setSueroterapia(?string $sueroterapia): static
-    {
-        $this->sueroterapia = $sueroterapia;
 
         return $this;
     }

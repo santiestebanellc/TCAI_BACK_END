@@ -19,6 +19,9 @@ class Dieta
     #[ORM\Column(nullable: true)]
     private ?int $protesi = null;
 
+    #[ORM\ManyToOne]
+    private ?TipoTextura $tipo_textura_id = null;
+
 
     public function getId(): ?int
     {
@@ -45,6 +48,18 @@ class Dieta
     public function setProtesi(?int $protesi): static
     {
         $this->protesi = $protesi;
+
+        return $this;
+    }
+
+    public function getTipoTexturaId(): ?TipoTextura
+    {
+        return $this->tipo_textura_id;
+    }
+
+    public function setTipoTexturaId(?TipoTextura $tipo_textura_id): static
+    {
+        $this->tipo_textura_id = $tipo_textura_id;
 
         return $this;
     }
