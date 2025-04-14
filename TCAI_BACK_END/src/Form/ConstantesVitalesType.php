@@ -18,11 +18,6 @@ class ConstantesVitalesType extends AbstractType
             ->add('pulso')
             ->add('temperatura')
             ->add('saturacion_oxigeno')
-            ->add('peso')
-            ->add('talla')
-            ->add('diuresis')
-            ->add('deposiciones')
-            ->add('stp')
         ;
     }
 

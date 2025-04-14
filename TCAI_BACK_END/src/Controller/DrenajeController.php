@@ -12,8 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/drenaje')]
-final class DrenajeController extends AbstractController
-{
+final class DrenajeController extends AbstractController{
     #[Route(name: 'app_drenaje_index', methods: ['GET'])]
     public function index(DrenajeRepository $drenajeRepository): Response
     {

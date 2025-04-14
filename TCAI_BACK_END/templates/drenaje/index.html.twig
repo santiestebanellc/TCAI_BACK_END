@@ -9,7 +9,7 @@
         <thead>
             <tr>
                 <th>Id</th>
-                <th>Debito</th>
+                <th>Descripcion</th>
                 <th>actions</th>
             </tr>
         </thead>
@@ -17,7 +17,7 @@
         {% for drenaje in drenajes %}
             <tr>
                 <td>{{ drenaje.id }}</td>
-                <td>{{ drenaje.debito }}</td>
+                <td>{{ drenaje.descripcion }}</td>
                 <td>
                     <a href="{{ path('app_drenaje_show', {'id': drenaje.id}) }}">show</a>
                     <a href="{{ path('app_drenaje_edit', {'id': drenaje.id}) }}">edit</a>

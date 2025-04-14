@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}BalanceHidrico index{% endblock %}
+
+{% block body %}
+    <h1>BalanceHidrico index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Diuresis</th>
+                <th>Deposicion</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for balance_hidrico in balance_hidricos %}
+            <tr>
+                <td>{{ balance_hidrico.id }}</td>
+                <td>{{ balance_hidrico.diuresis }}</td>
+                <td>{{ balance_hidrico.deposicion }}</td>
+                <td>
+                    <a href="{{ path('app_balance_hidrico_show', {'id': balance_hidrico.id}) }}">show</a>
+                    <a href="{{ path('app_balance_hidrico_edit', {'id': balance_hidrico.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_balance_hidrico_new') }}">Create new</a>
+{% endblock %}

@@ -7,7 +7,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class AuxiliarType extends AbstractType
+class Auxiliar1Type extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -15,6 +15,7 @@ class AuxiliarType extends AbstractType
             ->add('num_trabajador')
             ->add('nombre')
             ->add('apellidos')
+            ->add('contraseña')
         ;
     }
 

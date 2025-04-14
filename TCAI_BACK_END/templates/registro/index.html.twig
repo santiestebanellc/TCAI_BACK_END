@@ -10,7 +10,7 @@
             <tr>
                 <th>Id</th>
                 <th>Fecha</th>
-                <th>Observaciones</th>
+                <th>Toma</th>
                 <th>actions</th>
             </tr>
         </thead>
@@ -19,7 +19,7 @@
             <tr>
                 <td>{{ registro.id }}</td>
                 <td>{{ registro.fecha ? registro.fecha|date('Y-m-d H:i:s') : '' }}</td>
-                <td>{{ registro.observaciones }}</td>
+                <td>{{ registro.toma }}</td>
                 <td>
                     <a href="{{ path('app_registro_show', {'id': registro.id}) }}">show</a>
                     <a href="{{ path('app_registro_edit', {'id': registro.id}) }}">edit</a>

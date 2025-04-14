@@ -17,17 +17,14 @@ class DetalleDiagnosticoType extends AbstractType
             ->add('o2')
             ->add('o2_descripcion')
             ->add('panales')
-            ->add('descripcion')
+            ->add('panales_descripcion')
             ->add('sv')
-            ->add('sv_tipo')
-            ->add('sv_debito')
             ->add('sr')
-            ->add('sr_debito')
             ->add('sng')
-            ->add('sng_descripcion')
+            ->add('avd')
             ->add('diagnostico_id', EntityType::class, [
                 'class' => diagnostico::class,
-                'choice_label' => 'id',
+'choice_label' => 'id',
             ])
         ;
     }

@@ -12,8 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/observacion')]
-final class ObservacionController extends AbstractController
-{
+final class ObservacionController extends AbstractController{
     #[Route(name: 'app_observacion_index', methods: ['GET'])]
     public function index(ObservacionRepository $observacionRepository): Response
     {

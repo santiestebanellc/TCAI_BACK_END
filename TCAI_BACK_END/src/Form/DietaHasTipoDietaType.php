@@ -2,8 +2,8 @@
 
 namespace App\Form;
 
-use App\Entity\dieta;
 use App\Entity\DietaHasTipoDieta;
+use App\Entity\dieta;
 use App\Entity\tipodieta;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -17,11 +17,11 @@ class DietaHasTipoDietaType extends AbstractType
         $builder
             ->add('dieta_id', EntityType::class, [
                 'class' => dieta::class,
-                'choice_label' => 'id',
+'choice_label' => 'id',
             ])
             ->add('tipo_dieta_id', EntityType::class, [
                 'class' => tipodieta::class,
-                'choice_label' => 'id',
+'choice_label' => 'id',
             ])
         ;
     }

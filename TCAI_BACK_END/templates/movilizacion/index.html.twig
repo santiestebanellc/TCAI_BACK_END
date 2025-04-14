@@ -12,8 +12,7 @@
                 <th>Sedestacion</th>
                 <th>Ayuda_deambulacion</th>
                 <th>Ayuda_descripcion</th>
-                <th>Cambios</th>
-                <th>Decubitos</th>
+                <th>Cambios_posturales</th>
                 <th>actions</th>
             </tr>
         </thead>
@@ -24,8 +23,7 @@
                 <td>{{ movilizacion.sedestacion }}</td>
                 <td>{{ movilizacion.ayudaDeambulacion }}</td>
                 <td>{{ movilizacion.ayudaDescripcion }}</td>
-                <td>{{ movilizacion.cambios }}</td>
-                <td>{{ movilizacion.decubitos }}</td>
+                <td>{{ movilizacion.cambiosPosturales }}</td>
                 <td>
                     <a href="{{ path('app_movilizacion_show', {'id': movilizacion.id}) }}">show</a>
                     <a href="{{ path('app_movilizacion_edit', {'id': movilizacion.id}) }}">edit</a>
@@ -33,7 +31,7 @@
             </tr>
         {% else %}
             <tr>
-                <td colspan="7">no records found</td>
+                <td colspan="6">no records found</td>
             </tr>
         {% endfor %}
         </tbody>

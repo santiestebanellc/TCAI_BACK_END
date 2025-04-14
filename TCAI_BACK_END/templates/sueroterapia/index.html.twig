@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Sueroterapia index{% endblock %}
+
+{% block body %}
+    <h1>Sueroterapia index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Dosis</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for sueroterapium in sueroterapias %}
+            <tr>
+                <td>{{ sueroterapium.id }}</td>
+                <td>{{ sueroterapium.dosis }}</td>
+                <td>
+                    <a href="{{ path('app_sueroterapia_show', {'id': sueroterapium.id}) }}">show</a>
+                    <a href="{{ path('app_sueroterapia_edit', {'id': sueroterapium.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="3">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_sueroterapia_new') }}">Create new</a>
+{% endblock %}

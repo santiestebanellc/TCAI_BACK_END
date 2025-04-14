@@ -15,11 +15,6 @@
                 <th>Pulso</th>
                 <th>Temperatura</th>
                 <th>Saturacion_oxigeno</th>
-                <th>Peso</th>
-                <th>Talla</th>
-                <th>Diuresis</th>
-                <th>Deposiciones</th>
-                <th>Stp</th>
                 <th>actions</th>
             </tr>
         </thead>
@@ -33,11 +28,6 @@
                 <td>{{ constantes_vitale.pulso }}</td>
                 <td>{{ constantes_vitale.temperatura }}</td>
                 <td>{{ constantes_vitale.saturacionOxigeno }}</td>
-                <td>{{ constantes_vitale.peso }}</td>
-                <td>{{ constantes_vitale.talla }}</td>
-                <td>{{ constantes_vitale.diuresis }}</td>
-                <td>{{ constantes_vitale.deposiciones }}</td>
-                <td>{{ constantes_vitale.stp }}</td>
                 <td>
                     <a href="{{ path('app_constantes_vitales_show', {'id': constantes_vitale.id}) }}">show</a>
                     <a href="{{ path('app_constantes_vitales_edit', {'id': constantes_vitale.id}) }}">edit</a>
@@ -45,7 +35,7 @@
             </tr>
         {% else %}
             <tr>
-                <td colspan="13">no records found</td>
+                <td colspan="8">no records found</td>
             </tr>
         {% endfor %}
         </tbody>

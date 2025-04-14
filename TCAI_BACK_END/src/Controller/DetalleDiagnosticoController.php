@@ -12,8 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/detalle/diagnostico')]
-final class DetalleDiagnosticoController extends AbstractController
-{
+final class DetalleDiagnosticoController extends AbstractController{
     #[Route(name: 'app_detalle_diagnostico_index', methods: ['GET'])]
     public function index(DetalleDiagnosticoRepository $detalleDiagnosticoRepository): Response
     {
