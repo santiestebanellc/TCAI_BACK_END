@@ -19,6 +19,14 @@
                 <th>Motivo</th>
                 <td>{{ diagnostico.motivo }}</td>
             </tr>
+            <tr>
+                <th>Fecha</th>
+                <td>{{ diagnostico.fecha ? diagnostico.fecha|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+            <tr>
+                <th>Toma</th>
+                <td>{{ diagnostico.toma }}</td>
+            </tr>
         </tbody>
     </table>
 

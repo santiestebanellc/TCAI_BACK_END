@@ -26,6 +26,12 @@ class Diagnostico
     #[ORM\ManyToOne]
     private ?Auxiliar $auxiliar_id = null;
 
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $fecha = null;
+
+    #[ORM\Column(length: 1, nullable: true)]
+    private ?string $toma = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -75,6 +81,30 @@ class Diagnostico
     public function setAuxiliarId(?Auxiliar $auxiliar_id): static
     {
         $this->auxiliar_id = $auxiliar_id;
+
+        return $this;
+    }
+
+    public function getFecha(): ?\DateTimeInterface
+    {
+        return $this->fecha;
+    }
+
+    public function setFecha(?\DateTimeInterface $fecha): static
+    {
+        $this->fecha = $fecha;
+
+        return $this;
+    }
+
+    public function getToma(): ?string
+    {
+        return $this->toma;
+    }
+
+    public function setToma(?string $toma): static
+    {
+        $this->toma = $toma;
 
         return $this;
     }
