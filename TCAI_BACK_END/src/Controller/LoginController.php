@@ -19,22 +19,22 @@ final class LoginController extends AbstractController
         $password = $data['contraseña'] ?? null;
 
         if (!$numTrabajador || !$password) {
-            return $this->json(['success' => false, 'error' => 'Faltan credenciales'], 400);
+            return $this->json(['success' => false, 'error' => 'Missing credentials'], 400);
         }
 
         $auxiliar = $repo->findOneBy(['num_trabajador' => $numTrabajador]);
 
         if (!$auxiliar) {
-            return $this->json(['success' => false, 'error' => 'Usuario no encontrado'], 401);
+            return $this->json(['success' => false, 'error' => 'User not found'], 401);
         }
 
         if ($auxiliar->getContraseña() !== $password) {
-            return $this->json(['success' => false, 'error' => 'Contraseña incorrecta'], 401);
+            return $this->json(['success' => false, 'error' => 'Incorrect password'], 401);
         }
 
         return $this->json([
             'success' => true,
-            'message' => 'Login correcto',
+            'message' => 'Login correct',
             'auxiliar' => [
                 'id' => $auxiliar->getId(),
                 'num_trabajador' => $auxiliar->getNumTrabajador(),
