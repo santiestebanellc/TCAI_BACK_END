@@ -11,6 +11,8 @@
                 <th>Id</th>
                 <th>Diagnostico</th>
                 <th>Motivo</th>
+                <th>Fecha</th>
+                <th>Toma</th>
                 <th>actions</th>
             </tr>
         </thead>
@@ -20,6 +22,8 @@
                 <td>{{ diagnostico.id }}</td>
                 <td>{{ diagnostico.diagnostico }}</td>
                 <td>{{ diagnostico.motivo }}</td>
+                <td>{{ diagnostico.fecha ? diagnostico.fecha|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ diagnostico.toma }}</td>
                 <td>
                     <a href="{{ path('app_diagnostico_show', {'id': diagnostico.id}) }}">show</a>
                     <a href="{{ path('app_diagnostico_edit', {'id': diagnostico.id}) }}">edit</a>
@@ -27,7 +31,7 @@
             </tr>
         {% else %}
             <tr>
-                <td colspan="4">no records found</td>
+                <td colspan="6">no records found</td>
             </tr>
         {% endfor %}
         </tbody>

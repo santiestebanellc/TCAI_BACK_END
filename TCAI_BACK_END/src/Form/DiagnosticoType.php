@@ -17,13 +17,17 @@ class DiagnosticoType extends AbstractType
         $builder
             ->add('diagnostico')
             ->add('motivo')
+            ->add('fecha', null, [
+                'widget' => 'single_text',
+            ])
+            ->add('toma')
             ->add('paciente_id', EntityType::class, [
                 'class' => Paciente::class,
-'choice_label' => 'id',
+                'choice_label' => 'id',
             ])
             ->add('auxiliar_id', EntityType::class, [
                 'class' => Auxiliar::class,
-'choice_label' => 'id',
+                'choice_label' => 'id',
             ])
         ;
     }
