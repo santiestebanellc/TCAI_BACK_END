@@ -110,7 +110,7 @@ final class RegistroController extends AbstractController{
                     'toma' => $registro->getToma(),
                     'nombre_auxiliar' => $registro->getAuxiliarId()->getNombre(),
                     'numero_auxiliar' => $registro->getAuxiliarId()->getNumTrabajador(),
-                    'observacion' => $registro->getObservacion()
+                    'observacion' => $registro->getObservacion()->getDescripcion()
                 ]
             ];
         }
