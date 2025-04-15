@@ -10,6 +10,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Repository\PacienteRepository;
+
 
 #[Route('/registro')]
 final class RegistroController extends AbstractController{
@@ -77,4 +80,54 @@ final class RegistroController extends AbstractController{
 
         return $this->redirectToRoute('app_registro_index', [], Response::HTTP_SEE_OTHER);
     }
+    #[Route('/api/registros/paciente', name: 'get_registros_por_paciente', methods: ['POST'])]
+    public function getRegistrosPorPaciente(Request $request, RegistroRepository $registroRepository): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        if (!isset($data['paciente_id'])) {
+            return new JsonResponse([
+                'success' => false,
+                'content' => [
+                    'message' => 'Falta el campo paciente_id'
+                ]
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $pacienteId = $data['paciente_id'];
+
+        $registros = $registroRepository->findBy(['paciente' => $pacienteId]);
+
+        if (!$registros) {
+            return new JsonResponse([
+                'success' => false,
+                'content' => [
+                    'message' => 'No se encontraron registros para este paciente'
+                ]
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        $contenido = [];
+
+        foreach ($registros as $registro) {
+            $contenido[] = [
+                'registro_id' => $registro->getId(),
+                'registro' => [
+                    'fecha' => $registro->getFecha()->format('Y-m-d H:i:s'),
+                    'toma' => $registro->getToma(),
+                    'nombre_auxiliar' => $registro->getNombreAuxiliar(),
+                    'numero_auxiliar' => $registro->getNumeroAuxiliar(),
+                    'observacion' => $registro->getObservacion()
+                ]
+            ];
+        }
+
+        return new JsonResponse([
+            'success' => true,
+            'content' => $contenido
+        ], Response::HTTP_OK);
+    }
+    
+
+
 }
