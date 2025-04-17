@@ -14,7 +14,7 @@ class Sueroterapia
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 3, scale: 1, nullable: true)]
+    #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 1, nullable: true)]
     private ?string $dosis = null;
 
     public function getId(): ?int
