@@ -10,6 +10,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Repository\PacienteRepository;
+
 
 #[Route('/registro')]
 final class RegistroController extends AbstractController{
@@ -65,16 +68,5 @@ final class RegistroController extends AbstractController{
             'registro' => $registro,
             'form' => $form,
         ]);
-    }
-
-    #[Route('/{id}', name: 'app_registro_delete', methods: ['POST'])]
-    public function delete(Request $request, Registro $registro, EntityManagerInterface $entityManager): Response
-    {
-        if ($this->isCsrfTokenValid('delete'.$registro->getId(), $request->getPayload()->getString('_token'))) {
-            $entityManager->remove($registro);
-            $entityManager->flush();
-        }
-
-        return $this->redirectToRoute('app_registro_index', [], Response::HTTP_SEE_OTHER);
     }
 }

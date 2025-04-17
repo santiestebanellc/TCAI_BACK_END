@@ -11,8 +11,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/detalle/diagnostico')]
-final class DetalleDiagnosticoController extends AbstractController{
+#[Route('/detalle-diagnostico')]
+final class DetalleDiagnosticoController extends AbstractController
+{
     #[Route(name: 'app_detalle_diagnostico_index', methods: ['GET'])]
     public function index(DetalleDiagnosticoRepository $detalleDiagnosticoRepository): Response
     {
@@ -70,7 +71,7 @@ final class DetalleDiagnosticoController extends AbstractController{
     #[Route('/{id}', name: 'app_detalle_diagnostico_delete', methods: ['POST'])]
     public function delete(Request $request, DetalleDiagnostico $detalleDiagnostico, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$detalleDiagnostico->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $detalleDiagnostico->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($detalleDiagnostico);
             $entityManager->flush();
         }
