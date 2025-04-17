@@ -10,8 +10,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use App\Repository\PacienteRepository;
 
 
 #[Route('/registro')]
@@ -69,64 +67,4 @@ final class RegistroController extends AbstractController{
             'form' => $form,
         ]);
     }
-
-    #[Route('/paciente/{id}', name: 'api_registros_by_paciente', methods: ['GET'])]
-    public function getRegistrosByPaciente(int $id, RegistroRepository $registroRepository, PacienteRepository $pacienteRepository): JsonResponse
-    {
-    try {
-        // Buscar el paciente por ID
-        $paciente = $pacienteRepository->find($id);
-
-        // Verificar si el paciente existe
-        if (!$paciente) {
-            return new JsonResponse([
-                'success' => false,
-                'content' => [
-                    'message' => 'Paciente no encontrado'
-                ]
-            ], Response::HTTP_NOT_FOUND);
-        }
-
-        // Obtener todos los registros asociados al paciente
-        $registros = $registroRepository->findBy(['paciente_id' => $paciente]);
-
-        // Si no se encuentran registros, devolver un mensaje apropiado
-        if (empty($registros)) {
-            return new JsonResponse([
-                'success' => false,
-                'content' => [
-                    'message' => 'No se encontraron registros para este paciente'
-                ]
-            ], Response::HTTP_NOT_FOUND);
-        }
-
-        // Formatear los resultados para la respuesta JSON
-        $formattedResults = [];
-        foreach ($registros as $registro) {
-            $formattedResults[] = [
-                'registro_id' => $registro->getId(),
-                'registro' => [
-                    'fecha' => $registro->getFecha() ? $registro->getFecha()->format('Y-m-d H:i:s') : null,
-                    'toma' => $registro->getToma(),
-                    'nombre_auxiliar' => $registro->getAuxiliarId()->getNombre(),
-                    'numero_auxiliar' => $registro->getAuxiliarId()->getNumTrabajador(),
-                    'observacion' => $registro->getObservacion()->getDescripcion()
-                ]
-            ];
-        }
-
-        return new JsonResponse([
-            'success' => true,
-            'content' => $formattedResults
-        ], Response::HTTP_OK);
-
-    } catch (\Exception $e) {
-        return new JsonResponse([
-            'success' => false,
-            'content' => [
-                'message' => 'Error interno: ' . $e->getMessage()
-            ]
-        ], Response::HTTP_INTERNAL_SERVER_ERROR);
-    }
-}
 }
