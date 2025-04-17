@@ -117,13 +117,6 @@ final class HospitalDataController extends AbstractController
 
             // Get the entities associated with the registro
             $dieta = $registro->getDietaId();
-            $cv = $registro->getConstantesVitalesId();
-            $stp = $registro->getSueroterapiaId();
-            $balance_hidrico = $registro->getBalanceHidricoId();
-            $drenaje = $registro->getDrenajeId();
-            $movilizacion = $registro->getMovilizacionId();
-            $higiene = $registro->getHigieneId();
-            $observacion = $registro->getObservacionId();
 
             // Handle the tipo_dieta many-to-many relationship
             $tipoDietaDescriptions = [];
@@ -149,11 +142,11 @@ final class HospitalDataController extends AbstractController
                 'registro' => [
                     // Constantes vitales section
                     'constantes_vitales' => [
-                        'ta_sistolica' => $cv->getTaSistolica(), 
-                        'ta_diastolica' => $cv->getTaDiastolica(),
-                        'frecuencia_respiratoria' => $cv->getFrecuenciaRespiratoria(),
-                        'temperatura' => $cv->getTemperatura(),
-                        'saturacion_oxigeno' => $cv->getSaturacionOxigeno()
+                        'ta_sistolica' => $registro->getConstantesVitalesId()->getTaSistolica(), 
+                        'ta_diastolica' => $registro->getConstantesVitalesId()->getTaDiastolica(),
+                        'frecuencia_respiratoria' => $registro->getConstantesVitalesId()->getFrecuenciaRespiratoria(),
+                        'temperatura' => $registro->getConstantesVitalesId()->getTemperatura(),
+                        'saturacion_oxigeno' => $registro->getConstantesVitalesId()->getSaturacionOxigeno()
                     ],
 
                     // Dieta section with the tipo_dieta relationship
@@ -165,33 +158,33 @@ final class HospitalDataController extends AbstractController
                     ],
 
                     // Sueroterapia section
-                    'sueroterapia' =>  $stp->getDosis(),
+                    'sueroterapia' => $registro->getSueroterapiaId()->getDosis(),
 
                     // Balance hidrico section
                     'balance_hidrico' => [
-                        'diuresis' => $balance_hidrico->getDiuresis(),
-                        'deposicion' => $balance_hidrico->getDeposicion(),
+                        'diuresis' => $registro->getBalanceHidricoId()->getDiuresis(),
+                        'deposicion' => $registro->getBalanceHidricoId()->getDeposicion(),
                     ],
 
                     // Drenaje section
-                    'drenaje' =>  $drenaje->getDescripcion(),
+                    'drenaje' => $registro->getDrenajeId()->getDescripcion(),
 
                     // Movilizacion section
                     'movilizacion' => [
-                        'sedestacion' => $movilizacion->getSedestacion(),
-                        'ayuda_deambulacion' => $movilizacion->getAyudaDeambulacion(),
-                        'ayuda_decripcion' => $movilizacion->getAyudaDecripcion(),
-                        'cambios_posturales' => $movilizacion->getCambiosPosturales(), 
+                        'sedestacion' => $registro->getMovilizacionId()->getSedestacion(),
+                        'ayuda_deambulacion' => $registro->getMovilizacionId()->getAyudaDeambulacion(),
+                        'ayuda_decripcion' => $registro->getMovilizacionId()->getAyudaDescripcion(),
+                        'cambios_posturales' => $registro->getMovilizacionId()->getCambiosPosturales(), 
                     ],
 
                     // Higiene section
                     'higiene' => [
-                        'tipo_higiene' => $higiene->getTipoId()->getDescripcion(),
-                        'higiene_descripcion' => $higiene->getDescripcion(),
+                        'tipo_higiene' => $registro->getHigieneId()->getTipo()->getDescripcion(),
+                        'higiene_descripcion' => $registro->getHigieneId()->getDescripcion(),
                     ],
 
                     // Observacion section
-                    'observacion' => $observacion->getDescripcion()
+                    'observacion' => $registro->getObservacion()->getDescripcion()
                 ]
             ];
 
