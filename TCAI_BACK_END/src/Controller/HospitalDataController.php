@@ -115,8 +115,15 @@ final class HospitalDataController extends AbstractController
                 ], Response::HTTP_NOT_FOUND);
             }
 
-            // Get the dieta entity associated with the registro
+            // Get the entities associated with the registro
             $dieta = $registro->getDietaId();
+            $cv = $registro->getConstantesVitalesId();
+            $stp = $registro->getSueroterapiaId();
+            $balance_hidrico = $registro->getBalanceHidricoId();
+            $drenaje = $registro->getDrenajeId();
+            $movilizacion = $registro->getMovilizacionId();
+            $higiene = $registro->getHigieneId();
+            $observacion = $registro->getObservacionId();
 
             // Handle the tipo_dieta many-to-many relationship
             $tipoDietaDescriptions = [];
@@ -141,14 +148,13 @@ final class HospitalDataController extends AbstractController
             $responseData = [
                 'registro' => [
                     // Constantes vitales section
-                    // 'constantes_vitales' => [
-                    //     'ta_sistolica' => $registro->getTaSistolica(), 
-                    //     'ta_diastolica' => $registro->getTaDiastolica(),
-                    //     'frecuencia_respiratoria' => $registro->getFrecuenciaRespiratoria(),
-                    //     'pulso' => $registro->getPulso(),
-                    //     'temperatura' => $registro->getTemperatura(),
-                    //     'saturation_oxigeno' => $registro->getSaturationOxigeno()
-                    // ],
+                    'constantes_vitales' => [
+                        'ta_sistolica' => $cv->getTaSistolica(), 
+                        'ta_diastolica' => $cv->getTaDiastolica(),
+                        'frecuencia_respiratoria' => $cv->getFrecuenciaRespiratoria(),
+                        'temperatura' => $cv->getTemperatura(),
+                        'saturacion_oxigeno' => $cv->getSaturacionOxigeno()
+                    ],
 
                     // Dieta section with the tipo_dieta relationship
                     'dieta' => [
@@ -158,22 +164,34 @@ final class HospitalDataController extends AbstractController
                         'tipo_textura' => $dieta->getTipoTexturaId()->getDescripcion(),
                     ],
 
-                    // Other fields
-                    // 'sueroterapia' => $registro->getSueroterapia(),
-                    // 'diuresis' => $registro->getDiuresis(),
-                    // 'deposicion' => $registro->getDeposicion(),
-                    // 'drenaje' => $registro->getDrenaje(),
+                    // Sueroterapia section
+                    'sueroterapia' =>  $stp->getDosis(),
+
+                    // Balance hidrico section
+                    'balance_hidrico' => [
+                        'diuresis' => $balance_hidrico->getDiuresis(),
+                        'deposicion' => $balance_hidrico->getDeposicion(),
+                    ],
+
+                    // Drenaje section
+                    'drenaje' =>  $drenaje->getDescripcion(),
 
                     // Movilizacion section
-                    // 'movilizacion' => [
-                    //     'sedestacion' => $registro->getSedestacion(),
-                    //     'ayuda_deambulacion' => $registro->getAyudaDeambulacion(),
-                    //     'ayuda_decripcion' => $registro->getAyudaDecripcion(),
-                    //     'cambios_posturales' => $registro->getCambiosPosturales(), 
-                    // ],
+                    'movilizacion' => [
+                        'sedestacion' => $movilizacion->getSedestacion(),
+                        'ayuda_deambulacion' => $movilizacion->getAyudaDeambulacion(),
+                        'ayuda_decripcion' => $movilizacion->getAyudaDecripcion(),
+                        'cambios_posturales' => $movilizacion->getCambiosPosturales(), 
+                    ],
 
-                    // 'higiene' => $registro->getHigiene(),
-                    // 'observacion' => $registro->getObservacion()
+                    // Higiene section
+                    'higiene' => [
+                        'tipo_higiene' => $higiene->getTipoId()->getDescripcion(),
+                        'higiene_descripcion' => $higiene->getDescripcion(),
+                    ],
+
+                    // Observacion section
+                    'observacion' => $observacion->getDescripcion()
                 ]
             ];
 
