@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20250415113744 extends AbstractMigration
+final class Version20250417152741 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -22,7 +22,7 @@ final class Version20250415113744 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('CREATE TABLE auxiliar (id INT AUTO_INCREMENT NOT NULL, num_trabajador VARCHAR(10) DEFAULT NULL, nombre VARCHAR(50) DEFAULT NULL, apellidos VARCHAR(150) DEFAULT NULL, contraseña VARCHAR(255) DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE balance_hidrico (id INT AUTO_INCREMENT NOT NULL, diuresis INT DEFAULT NULL, deposicion VARCHAR(255) DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
-        $this->addSql('CREATE TABLE constantes_vitales (id INT AUTO_INCREMENT NOT NULL, ta_sistolica VARCHAR(7) DEFAULT NULL, ta_diastolica VARCHAR(7) DEFAULT NULL, frecuencia_respiratoria NUMERIC(3, 1) DEFAULT NULL, pulso NUMERIC(3, 1) DEFAULT NULL, temperatura NUMERIC(3, 1) DEFAULT NULL, saturacion_oxigeno NUMERIC(3, 1) DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
+        $this->addSql('CREATE TABLE constantes_vitales (id INT AUTO_INCREMENT NOT NULL, ta_sistolica VARCHAR(7) DEFAULT NULL, ta_diastolica VARCHAR(7) DEFAULT NULL, frecuencia_respiratoria NUMERIC(4, 1) DEFAULT NULL, pulso NUMERIC(4, 1) DEFAULT NULL, temperatura NUMERIC(4, 1) DEFAULT NULL, saturacion_oxigeno NUMERIC(4, 1) DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE detalle_diagnostico (id INT AUTO_INCREMENT NOT NULL, o2 INT DEFAULT NULL, o2_descripcion LONGTEXT DEFAULT NULL, panales INT DEFAULT NULL, panales_descripcion LONGTEXT DEFAULT NULL, sv LONGTEXT DEFAULT NULL, sr LONGTEXT DEFAULT NULL, sng LONGTEXT DEFAULT NULL, avd VARCHAR(255) DEFAULT NULL, diagnostico_id_id INT DEFAULT NULL, INDEX IDX_D78E393B9EB8F283 (diagnostico_id_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE diagnostico (id INT AUTO_INCREMENT NOT NULL, diagnostico LONGTEXT DEFAULT NULL, motivo LONGTEXT DEFAULT NULL, fecha DATETIME DEFAULT NULL, toma VARCHAR(1) DEFAULT NULL, paciente_id_id INT DEFAULT NULL, auxiliar_id_id INT DEFAULT NULL, INDEX IDX_9B91D4488AA1655E (paciente_id_id), INDEX IDX_9B91D448767EE6F6 (auxiliar_id_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE dieta (id INT AUTO_INCREMENT NOT NULL, autonomo INT DEFAULT NULL, protesi INT DEFAULT NULL, tipo_textura_id_id INT DEFAULT NULL, INDEX IDX_D3447AEE43060ACC (tipo_textura_id_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
@@ -35,7 +35,7 @@ final class Version20250415113744 extends AbstractMigration
         $this->addSql('CREATE TABLE paciente (id INT AUTO_INCREMENT NOT NULL, num_historial INT DEFAULT NULL, nombre VARCHAR(50) DEFAULT NULL, apellidos VARCHAR(150) DEFAULT NULL, fecha_nacimiento DATE DEFAULT NULL, direccion_completa VARCHAR(255) DEFAULT NULL, lengua_materna VARCHAR(45) DEFAULT NULL, antecedentes LONGTEXT DEFAULT NULL, alergias LONGTEXT DEFAULT NULL, nombre_cuidador VARCHAR(150) DEFAULT NULL, telefono_cuidador VARCHAR(9) DEFAULT NULL, fecha_ingreso DATETIME DEFAULT NULL, timestamp DATETIME DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE paciente_has_habitaciones (id INT AUTO_INCREMENT NOT NULL, timestamp DATETIME DEFAULT NULL, paciente_id_id INT DEFAULT NULL, habitacion_id_id INT DEFAULT NULL, INDEX IDX_C4D69A798AA1655E (paciente_id_id), INDEX IDX_C4D69A795303719C (habitacion_id_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE registro (id INT AUTO_INCREMENT NOT NULL, fecha DATETIME DEFAULT NULL, toma VARCHAR(1) DEFAULT NULL, auxiliar_id_id INT DEFAULT NULL, paciente_id_id INT DEFAULT NULL, observacion_id_id INT DEFAULT NULL, dieta_id_id INT DEFAULT NULL, drenaje_id_id INT DEFAULT NULL, movilizacion_id_id INT DEFAULT NULL, constantes_vitales_id_id INT DEFAULT NULL, balance_hidrico_id_id INT DEFAULT NULL, sueroterapia_id_id INT DEFAULT NULL, higiene_id_id INT DEFAULT NULL, INDEX IDX_397CA85B767EE6F6 (auxiliar_id_id), INDEX IDX_397CA85B8AA1655E (paciente_id_id), UNIQUE INDEX UNIQ_397CA85B15F167B (observacion_id_id), UNIQUE INDEX UNIQ_397CA85BF1E9B454 (dieta_id_id), UNIQUE INDEX UNIQ_397CA85B70E17E26 (drenaje_id_id), UNIQUE INDEX UNIQ_397CA85B522214C8 (movilizacion_id_id), UNIQUE INDEX UNIQ_397CA85B1DA1E444 (constantes_vitales_id_id), UNIQUE INDEX UNIQ_397CA85B496611F6 (balance_hidrico_id_id), UNIQUE INDEX UNIQ_397CA85BE7CBC1E1 (sueroterapia_id_id), UNIQUE INDEX UNIQ_397CA85BF4C77361 (higiene_id_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
-        $this->addSql('CREATE TABLE sueroterapia (id INT AUTO_INCREMENT NOT NULL, dosis NUMERIC(3, 1) DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
+        $this->addSql('CREATE TABLE sueroterapia (id INT AUTO_INCREMENT NOT NULL, dosis NUMERIC(5, 1) DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE tipo_dieta (id INT AUTO_INCREMENT NOT NULL, descripcion VARCHAR(255) DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE tipo_higiene (id INT AUTO_INCREMENT NOT NULL, descripcion VARCHAR(255) DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE tipo_textura (id INT AUTO_INCREMENT NOT NULL, descripcion VARCHAR(255) DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
@@ -283,6 +283,7 @@ final class Version20250415113744 extends AbstractMigration
             ('2025-04-18 16:00:00', 'T', 3, 7, 48, 48, 48, 48, 48, 48, 48, 48),
             ('2025-04-19 08:00:00', 'M', 1, 7, 49, 49, 49, 49, 49, 49, 49, 49)");
     }
+
 
     public function down(Schema $schema): void
     {
