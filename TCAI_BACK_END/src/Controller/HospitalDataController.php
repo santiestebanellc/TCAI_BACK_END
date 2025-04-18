@@ -7,12 +7,15 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 use App\Entity\DetalleDiagnostico;
+use App\Entity\DietaHasTipoDieta;
 use App\Form\DetalleDiagnosticoType;
 use App\Repository\DetalleDiagnosticoRepository;
 use App\Repository\DiagnosticoRepository;
+use App\Repository\DietaHasTipoDietaRepository;
 use App\Repository\HabitacionRepository;
 use App\Repository\PacienteRepository;
 use App\Repository\RegistroRepository;
+use App\Repository\TipoDietaRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
@@ -93,6 +96,109 @@ final class HospitalDataController extends AbstractController
                 ['success' => false, 'content' => ['error' => $e->getMessage()]],
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
+        }
+    }
+
+    #[Route('/registro/{id}', name: 'api_registros_by_id', methods: ['GET'])]
+    public function getRegistrosById(int $id, RegistroRepository $registroRepository, DietaHasTipoDietaRepository $dietaHasTipoDietaRepository, TipoDietaRepository $tipoDietaRepository): JsonResponse
+    {
+        try {
+
+            // Find the registro by ID
+            $registro = $registroRepository->find($id);
+
+            // Return 404 if not found
+            if (!$registro) {
+                return $this->json([
+                    'success' => false,
+                    'message' => 'Registro not found'
+                ], Response::HTTP_NOT_FOUND);
+            }
+
+            // Get the entities associated with the registro
+            $dieta = $registro->getDietaId();
+
+            // Handle the tipo_dieta many-to-many relationship
+            $tipoDietaDescriptions = [];
+
+            // Get all DietaHasTipoDieta records for this dieta
+            $dietaHasTipoDietas = $dietaHasTipoDietaRepository->findBy(['dieta_id' => $dieta->getId()]);
+
+            // Extract the description from each TipoDieta
+            foreach ($dietaHasTipoDietas as $relation) {
+                $tipoDietaId = $relation->getTipoDietaId();
+                $tipoDieta = $tipoDietaRepository->find($tipoDietaId);
+
+                if ($tipoDieta) {
+                    $tipoDietaDescriptions[] = $tipoDieta->getDescripcion();
+                }
+            }
+
+            // Combine all descriptions into a single string
+            $tipoDietaString = implode(', ', $tipoDietaDescriptions);
+
+            // Construct the response data according to the required format
+            $responseData = [
+                'registro' => [
+                    // Constantes vitales section
+                    'constantes_vitales' => [
+                        'ta_sistolica' => $registro->getConstantesVitalesId()->getTaSistolica(), 
+                        'ta_diastolica' => $registro->getConstantesVitalesId()->getTaDiastolica(),
+                        'frecuencia_respiratoria' => $registro->getConstantesVitalesId()->getFrecuenciaRespiratoria(),
+                        'temperatura' => $registro->getConstantesVitalesId()->getTemperatura(),
+                        'saturacion_oxigeno' => $registro->getConstantesVitalesId()->getSaturacionOxigeno()
+                    ],
+
+                    // Dieta section with the tipo_dieta relationship
+                    'dieta' => [
+                        'autonomo' => $dieta->getAutonomo(),
+                        'protesi' => $dieta->getProtesi(),
+                        'tipo_dieta' => $tipoDietaString,
+                        'tipo_textura' => $dieta->getTipoTexturaId()->getDescripcion(),
+                    ],
+
+                    // Sueroterapia section
+                    'sueroterapia' => $registro->getSueroterapiaId()->getDosis(),
+
+                    // Balance hidrico section
+                    'balance_hidrico' => [
+                        'diuresis' => $registro->getBalanceHidricoId()->getDiuresis(),
+                        'deposicion' => $registro->getBalanceHidricoId()->getDeposicion(),
+                    ],
+
+                    // Drenaje section
+                    'drenaje' => $registro->getDrenajeId()->getDescripcion(),
+
+                    // Movilizacion section
+                    'movilizacion' => [
+                        'sedestacion' => $registro->getMovilizacionId()->getSedestacion(),
+                        'ayuda_deambulacion' => $registro->getMovilizacionId()->getAyudaDeambulacion(),
+                        'ayuda_decripcion' => $registro->getMovilizacionId()->getAyudaDescripcion(),
+                        'cambios_posturales' => $registro->getMovilizacionId()->getCambiosPosturales(), 
+                    ],
+
+                    // Higiene section
+                    'higiene' => [
+                        'tipo_higiene' => $registro->getHigieneId()->getTipo()->getDescripcion(),
+                        'higiene_descripcion' => $registro->getHigieneId()->getDescripcion(),
+                    ],
+
+                    // Observacion section
+                    'observacion' => $registro->getObservacion()->getDescripcion()
+                ]
+            ];
+
+            return new JsonResponse([
+                'success' => true,
+                'content' => $responseData
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'success' => false,
+                'content' => [
+                    'message' => 'Error interno: ' . $e->getMessage()
+                ]
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
