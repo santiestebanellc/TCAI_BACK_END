@@ -206,10 +206,8 @@ final class HospitalDataController extends AbstractController
     public function getRegistrosByPaciente(int $id, RegistroRepository $registroRepository, PacienteRepository $pacienteRepository): JsonResponse
     {
         try {
-            // Buscar el paciente por ID
             $paciente = $pacienteRepository->find($id);
-
-            // Verificar si el paciente existe
+    
             if (!$paciente) {
                 return new JsonResponse([
                     'success' => false,
@@ -218,11 +216,9 @@ final class HospitalDataController extends AbstractController
                     ]
                 ], Response::HTTP_NOT_FOUND);
             }
-
-            // Obtener todos los registros asociados al paciente
-            $registros = $registroRepository->findBy(['paciente_id' => $paciente]);
-
-            // Si no se encuentran registros, devolver un mensaje apropiado
+    
+            $registros = $registroRepository->findBy(['paciente' => $paciente]);
+    
             if (empty($registros)) {
                 return new JsonResponse([
                     'success' => false,
@@ -231,26 +227,29 @@ final class HospitalDataController extends AbstractController
                     ]
                 ], Response::HTTP_NOT_FOUND);
             }
-
-            // Formatear los resultados para la respuesta JSON
+    
             $formattedResults = [];
             foreach ($registros as $registro) {
+                $auxiliar = $registro->getAuxiliar();
+                $observacion = $registro->getObservacion();
+    
                 $formattedResults[] = [
                     'registro_id' => $registro->getId(),
                     'registro' => [
                         'fecha' => $registro->getFecha() ? $registro->getFecha()->format('Y-m-d H:i:s') : null,
                         'toma' => $registro->getToma(),
-                        'nombre_auxiliar' => $registro->getAuxiliarId()->getNombre(),
-                        'numero_auxiliar' => $registro->getAuxiliarId()->getNumTrabajador(),
-                        'observacion' => $registro->getObservacion()->getDescripcion()
+                        'nombre_auxiliar' => $auxiliar ? $auxiliar->getNombre() : null,
+                        'numero_auxiliar' => $auxiliar ? $auxiliar->getNumTrabajador() : null,
+                        'observacion' => $observacion ? $observacion->getDescripcion() : null
                     ]
                 ];
             }
-
+    
             return new JsonResponse([
                 'success' => true,
                 'content' => $formattedResults
             ], Response::HTTP_OK);
+            
         } catch (\Exception $e) {
             return new JsonResponse([
                 'success' => false,
@@ -260,4 +259,5 @@ final class HospitalDataController extends AbstractController
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+    
 }
