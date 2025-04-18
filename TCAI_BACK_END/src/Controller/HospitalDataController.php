@@ -260,4 +260,66 @@ final class HospitalDataController extends AbstractController
         }
     }
     
+    #[Route('/detalle_diagnostico', name: 'api_create_detalle_diagnostico', methods: ['POST'])]
+    public function createDetalleDiagnostico(
+        Request $request,
+        EntityManagerInterface $em,
+        PacienteRepository $pacienteRepository,
+        DetalleDiagnosticoRepository $detalleDiagnosticoRepository
+    ): JsonResponse {
+        try {
+            $data = json_decode($request->getContent(), true);
+    
+            // Validar datos necesarios
+            if (!isset($data['paciente_id'], $data['avd'], $data['o2'], $data['panales'])) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Faltan datos requeridos (paciente_id, avd, o2, panales)'
+                ], Response::HTTP_BAD_REQUEST);
+            }
+    
+            $paciente = $pacienteRepository->find($data['paciente_id']);
+            if (!$paciente) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Paciente no encontrado'
+                ], Response::HTTP_NOT_FOUND);
+            }
+    
+            // Crear Diagnostico básico
+            $diagnostico = new \App\Entity\Diagnostico();
+            $diagnostico->setPacienteId($paciente);
+            $diagnostico->setFecha(new \DateTime());
+            $diagnostico->setToma('Automática');
+    
+            // Simulación de auxiliar (puedes cambiarlo por autenticado o fijo)
+            $auxiliar = $paciente->getHabitacion()->getAuxiliar(); // O cualquier lógica
+            $diagnostico->setAuxiliarId($auxiliar);
+    
+            $em->persist($diagnostico);
+            $em->flush();
+    
+            // Crear DetalleDiagnostico
+            $detalle = new \App\Entity\DetalleDiagnostico();
+            $detalle->setDiagnosticoId($diagnostico);
+            $detalle->setAvd($data['avd']);
+            $detalle->setO2((int)$data['o2']);
+            $detalle->setPanales((int)$data['panales']);
+    
+            $em->persist($detalle);
+            $em->flush();
+    
+            return new JsonResponse([
+                'success' => true,
+                'message' => 'DetalleDiagnostico creado con éxito',
+                'detalle_diagnostico_id' => $detalle->getId()
+            ], Response::HTTP_CREATED);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Error interno: ' . $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+    
 }
