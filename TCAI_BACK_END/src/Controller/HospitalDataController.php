@@ -35,7 +35,7 @@ final class HospitalDataController extends AbstractController
     }
 
     #[Route('/diagnostico/paciente/{id}', name: 'api_diagnostico_by_paciente', methods: ['GET'])]
-    public function summaryShow(int $id, DetalleDiagnosticoRepository $detalleDiagnosticoRepository, DiagnosticoRepository $diagnosticoRepository, PacienteRepository $pacienteRepository): JsonResponse
+    public function getDiagnosticosByPaciente(int $id, DetalleDiagnosticoRepository $detalleDiagnosticoRepository, DiagnosticoRepository $diagnosticoRepository, PacienteRepository $pacienteRepository): JsonResponse
     {
         try {
             // REVISAR VALIDACION !!!
@@ -99,8 +99,8 @@ final class HospitalDataController extends AbstractController
         }
     }
 
-    #[Route('/registro/{id}', name: 'api_registros_by_id', methods: ['GET'])]
-    public function getRegistrosById(int $id, RegistroRepository $registroRepository, DietaHasTipoDietaRepository $dietaHasTipoDietaRepository, TipoDietaRepository $tipoDietaRepository): JsonResponse
+    #[Route('/registro/{id}', name: 'api_registro_by_id', methods: ['GET'])]
+    public function getRegistroById(int $id, RegistroRepository $registroRepository, DietaHasTipoDietaRepository $dietaHasTipoDietaRepository, TipoDietaRepository $tipoDietaRepository): JsonResponse
     {
         try {
 
