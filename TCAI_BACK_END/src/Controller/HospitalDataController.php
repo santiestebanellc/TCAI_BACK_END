@@ -2,12 +2,24 @@
 
 namespace App\Controller;
 
+use App\Dto\CreateRegistroDto;
+use App\Entity\BalanceHidrico;
+use App\Entity\ConstantesVitales;
+use App\Entity\Dieta;
+use App\Entity\Observacion;
+use App\Entity\Registro;
+use App\Repository\TipoTexturaRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 use App\Entity\DetalleDiagnostico;
 use App\Entity\DietaHasTipoDieta;
+use App\Entity\Drenaje;
+use App\Entity\Higiene;
+use App\Entity\Movilizacion;
+use App\Entity\Sueroterapia;
+use App\Entity\TipoDieta;
 use App\Form\DetalleDiagnosticoType;
 use App\Repository\DetalleDiagnosticoRepository;
 use App\Repository\DiagnosticoRepository;
@@ -142,7 +154,7 @@ final class HospitalDataController extends AbstractController
                 'registro' => [
                     // Constantes vitales section
                     'constantes_vitales' => [
-                        'ta_sistolica' => $registro->getConstantesVitalesId()->getTaSistolica(), 
+                        'ta_sistolica' => $registro->getConstantesVitalesId()->getTaSistolica(),
                         'ta_diastolica' => $registro->getConstantesVitalesId()->getTaDiastolica(),
                         'frecuencia_respiratoria' => $registro->getConstantesVitalesId()->getFrecuenciaRespiratoria(),
                         'temperatura' => $registro->getConstantesVitalesId()->getTemperatura(),
@@ -174,7 +186,7 @@ final class HospitalDataController extends AbstractController
                         'sedestacion' => $registro->getMovilizacionId()->getSedestacion(),
                         'ayuda_deambulacion' => $registro->getMovilizacionId()->getAyudaDeambulacion(),
                         'ayuda_decripcion' => $registro->getMovilizacionId()->getAyudaDescripcion(),
-                        'cambios_posturales' => $registro->getMovilizacionId()->getCambiosPosturales(), 
+                        'cambios_posturales' => $registro->getMovilizacionId()->getCambiosPosturales(),
                     ],
 
                     // Higiene section
@@ -207,7 +219,7 @@ final class HospitalDataController extends AbstractController
     {
         try {
             $paciente = $pacienteRepository->find($id);
-    
+
             if (!$paciente) {
                 return new JsonResponse([
                     'success' => false,
@@ -216,9 +228,9 @@ final class HospitalDataController extends AbstractController
                     ]
                 ], Response::HTTP_NOT_FOUND);
             }
-    
-            $registros = $registroRepository->findBy(['paciente' => $paciente]);
-    
+
+            $registros = $registroRepository->findBy(['paciente_id' => $paciente]);
+
             if (empty($registros)) {
                 return new JsonResponse([
                     'success' => false,
@@ -227,12 +239,12 @@ final class HospitalDataController extends AbstractController
                     ]
                 ], Response::HTTP_NOT_FOUND);
             }
-    
+
             $formattedResults = [];
             foreach ($registros as $registro) {
-                $auxiliar = $registro->getAuxiliar();
+                $auxiliar = $registro->getAuxiliarId();
                 $observacion = $registro->getObservacion();
-    
+
                 $formattedResults[] = [
                     'registro_id' => $registro->getId(),
                     'registro' => [
@@ -244,12 +256,11 @@ final class HospitalDataController extends AbstractController
                     ]
                 ];
             }
-    
+
             return new JsonResponse([
                 'success' => true,
                 'content' => $formattedResults
             ], Response::HTTP_OK);
-            
         } catch (\Exception $e) {
             return new JsonResponse([
                 'success' => false,
