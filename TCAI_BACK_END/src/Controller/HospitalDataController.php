@@ -321,5 +321,113 @@ final class HospitalDataController extends AbstractController
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    #[Route('/diets', name: 'api_all_diets', methods: ['GET'])]
+    public function getAllDiets(
+        EntityManagerInterface $entityManager,
+        HabitacionRepository $habitacionRepository,
+        RegistroRepository $registroRepository,
+        DietaHasTipoDietaRepository $dietaHasTipoDietaRepository,
+        TipoDietaRepository $tipoDietaRepository
+    ): JsonResponse
+    {
+        try {
+            // Obtener todas las habitaciones
+            $habitaciones = $habitacionRepository->findAll();
+
+            if (empty($habitaciones)) {
+                return $this->json([
+                    'success' => false,
+                    'content' => [
+                        'message' => 'No se encontraron habitaciones'
+                    ]
+                ], Response::HTTP_NOT_FOUND);
+            }
+
+            $formattedResults = [];
+
+            foreach ($habitaciones as $habitacion) {
+                $habitacionCodigo = $habitacion->getCodigo();
+
+                // Buscar asignación de paciente a la habitación (paciente_has_habitaciones)
+                $asignacion = $entityManager->getRepository('App\Entity\PacienteHasHabitaciones')
+                    ->findOneBy(['habitacion_id' => $habitacion], ['timestamp' => 'DESC']);
+
+                if (!$asignacion) {
+                    // Habitación vacía
+                    $formattedResults[] = [
+                        'habitacion_codigo' => $habitacionCodigo,
+                        'message' => 'empty room'
+                    ];
+                    continue;
+                }
+
+                // Obtener el paciente
+                $paciente = $asignacion->getPacienteId(); // Ajustado de getPacienteIdId() a getPacienteId()
+
+                // Calcular la edad del paciente
+                $fechaNacimiento = $paciente->getFechaNacimiento();
+                $edad = $fechaNacimiento ? (new \DateTime())->diff($fechaNacimiento)->y : null;
+
+                // Buscar el registro más reciente del paciente
+                $registro = $registroRepository->findOneBy(
+                    ['paciente_id' => $paciente], // Esto depende de la entidad Registro
+                    ['fecha' => 'DESC']
+                );
+
+                if (!$registro) {
+                    // Si no hay registros, omitimos esta habitación
+                    continue;
+                }
+
+                // Obtener los datos de dieta
+                $dieta = $registro->getDietaId();
+
+                // Obtener los tipos de dieta asociados
+                $tipoDietaDescriptions = [];
+                $dietaHasTipoDietas = $dietaHasTipoDietaRepository->findBy(['dieta_id' => $dieta->getId()]);
+
+                foreach ($dietaHasTipoDietas as $relation) {
+                    $tipoDietaId = $relation->getTipoDietaId(); // Esto depende de la entidad DietaHasTipoDieta
+                    $tipoDieta = $tipoDietaRepository->find($tipoDietaId);
+
+                    if ($tipoDieta) {
+                        $tipoDietaDescriptions[] = $tipoDieta->getDescripcion();
+                    }
+                }
+
+                $tipoDietaString = implode(', ', $tipoDietaDescriptions);
+
+                // Formatear la respuesta
+                $formattedResults[] = [
+                    'habitacion_codigo' => $habitacionCodigo,
+                    'paciente' => [
+                        'nombre' => $paciente->getNombre(),
+                        'apellidos' => $paciente->getApellidos(),
+                        'edad' => $edad
+                    ],
+                    'detalle' => [
+                        'tipo_dieta' => $tipoDietaString,
+                        'textura' => $dieta->getTipoTexturaId()->getDescripcion(),
+                        'protesis' => $dieta->getProtesi() ? 'Sí' : 'No',
+                        'asistencia' => $dieta->getAutonomo() ? 'Independiente' : 'Dependiente',
+                        'observaciones' => $registro->getObservacion()->getDescripcion()
+                    ]
+                ];
+            }
+
+            return $this->json([
+                'success' => true,
+                'content' => $formattedResults
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return $this->json([
+                'success' => false,
+                'content' => [
+                    'message' => 'Error interno: ' . $e->getMessage()
+                ]
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
     
 }
