@@ -18,10 +18,10 @@ class PacienteHasHabitaciones
     private ?\DateTimeInterface $timestamp = null;
 
     #[ORM\ManyToOne]
-    private ?paciente $paciente_id = null;
+    private ?Paciente $paciente_id = null;
 
     #[ORM\ManyToOne]
-    private ?habitacion $habitacion_id = null;
+    private ?Habitacion $habitacion_id = null;
 
     public function getId(): ?int
     {
@@ -40,24 +40,24 @@ class PacienteHasHabitaciones
         return $this;
     }
 
-    public function getPacienteId(): ?paciente
+    public function getPacienteId(): ?Paciente
     {
         return $this->paciente_id;
     }
 
-    public function setPacienteId(?paciente $paciente_id): static
+    public function setPacienteId(?Paciente $paciente_id): static
     {
         $this->paciente_id = $paciente_id;
 
         return $this;
     }
 
-    public function getHabitacionId(): ?habitacion
+    public function getHabitacionId(): ?Habitacion
     {
         return $this->habitacion_id;
     }
 
-    public function setHabitacionId(?habitacion $habitacion_id): static
+    public function setHabitacionId(?Habitacion $habitacion_id): static
     {
         $this->habitacion_id = $habitacion_id;
 

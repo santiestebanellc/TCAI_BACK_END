@@ -20,7 +20,7 @@ class Diagnostico
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $motivo = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(inversedBy: 'diagnosticos')]
     private ?Paciente $paciente_id = null;
 
     #[ORM\ManyToOne]
@@ -42,7 +42,7 @@ class Diagnostico
         return $this->diagnostico;
     }
 
-    public function setDiagnostico(?string $diagnostico): static
+    public function setDiagnostico(?string $diagnostico)
     {
         $this->diagnostico = $diagnostico;
 
