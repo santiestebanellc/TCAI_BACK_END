@@ -26,13 +26,13 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 final class HospitalDataController extends AbstractController
 {
-    #[Route('/hospital/data', name: 'app_hospital_data')]
-    public function index(): Response
-    {
-        return $this->render('hospital_data/index.html.twig', [
-            'controller_name' => 'HospitalDataController',
-        ]);
-    }
+    // #[Route('/hospital/data', name: 'app_hospital_data')]
+    // public function index(): Response
+    // {
+    //     return $this->render('hospital_data/index.html.twig', [
+    //         'controller_name' => 'HospitalDataController',
+    //     ]);
+    // }
 
     #[Route('/diagnostico/paciente/{id}', name: 'api_diagnostico_by_paciente', methods: ['GET'])]
     public function getDiagnosticosByPaciente(int $id, DetalleDiagnosticoRepository $detalleDiagnosticoRepository, DiagnosticoRepository $diagnosticoRepository, PacienteRepository $pacienteRepository): JsonResponse
@@ -142,7 +142,7 @@ final class HospitalDataController extends AbstractController
                 'registro' => [
                     // Constantes vitales section
                     'constantes_vitales' => [
-                        'ta_sistolica' => $registro->getConstantesVitalesId()->getTaSistolica(), 
+                        'ta_sistolica' => $registro->getConstantesVitalesId()->getTaSistolica(),
                         'ta_diastolica' => $registro->getConstantesVitalesId()->getTaDiastolica(),
                         'frecuencia_respiratoria' => $registro->getConstantesVitalesId()->getFrecuenciaRespiratoria(),
                         'temperatura' => $registro->getConstantesVitalesId()->getTemperatura(),
@@ -174,7 +174,7 @@ final class HospitalDataController extends AbstractController
                         'sedestacion' => $registro->getMovilizacionId()->getSedestacion(),
                         'ayuda_deambulacion' => $registro->getMovilizacionId()->getAyudaDeambulacion(),
                         'ayuda_decripcion' => $registro->getMovilizacionId()->getAyudaDescripcion(),
-                        'cambios_posturales' => $registro->getMovilizacionId()->getCambiosPosturales(), 
+                        'cambios_posturales' => $registro->getMovilizacionId()->getCambiosPosturales(),
                     ],
 
                     // Higiene section
@@ -207,7 +207,7 @@ final class HospitalDataController extends AbstractController
     {
         try {
             $paciente = $pacienteRepository->find($id);
-    
+
             if (!$paciente) {
                 return new JsonResponse([
                     'success' => false,
@@ -216,9 +216,9 @@ final class HospitalDataController extends AbstractController
                     ]
                 ], Response::HTTP_NOT_FOUND);
             }
-    
+
             $registros = $registroRepository->findBy(['paciente' => $paciente]);
-    
+
             if (empty($registros)) {
                 return new JsonResponse([
                     'success' => false,
@@ -227,12 +227,12 @@ final class HospitalDataController extends AbstractController
                     ]
                 ], Response::HTTP_NOT_FOUND);
             }
-    
+
             $formattedResults = [];
             foreach ($registros as $registro) {
                 $auxiliar = $registro->getAuxiliar();
                 $observacion = $registro->getObservacion();
-    
+
                 $formattedResults[] = [
                     'registro_id' => $registro->getId(),
                     'registro' => [
@@ -244,12 +244,11 @@ final class HospitalDataController extends AbstractController
                     ]
                 ];
             }
-    
+
             return new JsonResponse([
                 'success' => true,
                 'content' => $formattedResults
             ], Response::HTTP_OK);
-            
         } catch (\Exception $e) {
             return new JsonResponse([
                 'success' => false,
@@ -259,7 +258,7 @@ final class HospitalDataController extends AbstractController
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-    
+
     #[Route('/detalle_diagnostico', name: 'api_create_detalle_diagnostico', methods: ['POST'])]
     public function createDetalleDiagnostico(
         Request $request,
@@ -269,7 +268,7 @@ final class HospitalDataController extends AbstractController
     ): JsonResponse {
         try {
             $data = json_decode($request->getContent(), true);
-    
+
             // Validar datos necesarios
             if (!isset($data['paciente_id'], $data['avd'], $data['o2'], $data['panales'])) {
                 return new JsonResponse([
@@ -277,7 +276,7 @@ final class HospitalDataController extends AbstractController
                     'message' => 'Faltan datos requeridos (paciente_id, avd, o2, panales)'
                 ], Response::HTTP_BAD_REQUEST);
             }
-    
+
             $paciente = $pacienteRepository->find($data['paciente_id']);
             if (!$paciente) {
                 return new JsonResponse([
@@ -285,30 +284,30 @@ final class HospitalDataController extends AbstractController
                     'message' => 'Paciente no encontrado'
                 ], Response::HTTP_NOT_FOUND);
             }
-    
+
             // Crear Diagnostico básico
             $diagnostico = new \App\Entity\Diagnostico();
             $diagnostico->setPacienteId($paciente);
             $diagnostico->setFecha(new \DateTime());
             $diagnostico->setToma('Automática');
-    
+
             // Simulación de auxiliar (puedes cambiarlo por autenticado o fijo)
             $auxiliar = $paciente->getHabitacion()->getAuxiliar(); // O cualquier lógica
             $diagnostico->setAuxiliarId($auxiliar);
-    
+
             $em->persist($diagnostico);
             $em->flush();
-    
+
             // Crear DetalleDiagnostico
             $detalle = new \App\Entity\DetalleDiagnostico();
             $detalle->setDiagnosticoId($diagnostico);
             $detalle->setAvd($data['avd']);
             $detalle->setO2((int)$data['o2']);
             $detalle->setPanales((int)$data['panales']);
-    
+
             $em->persist($detalle);
             $em->flush();
-    
+
             return new JsonResponse([
                 'success' => true,
                 'message' => 'DetalleDiagnostico creado con éxito',
@@ -329,8 +328,7 @@ final class HospitalDataController extends AbstractController
         RegistroRepository $registroRepository,
         DietaHasTipoDietaRepository $dietaHasTipoDietaRepository,
         TipoDietaRepository $tipoDietaRepository
-    ): JsonResponse
-    {
+    ): JsonResponse {
         try {
             // Obtener todas las habitaciones
             $habitaciones = $habitacionRepository->findAll();
@@ -429,5 +427,73 @@ final class HospitalDataController extends AbstractController
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-    
+
+    #[Route('/general', name: 'app_habitacion_index', methods: ['GET'])]
+    public function getAllRooms(HabitacionRepository $habitacionRepository): JsonResponse
+    {
+        $habitaciones = $habitacionRepository->findAll();
+
+        if (!empty($habitaciones)) {
+
+            foreach ($habitaciones as $habitacion) {
+                $habitacionInfo = [
+                    'habitacion_codigo' => $habitacion->getCodigo(),
+                ];
+
+                $pacientesRelacionados = $habitacion->getPacienteHasHabitaciones();
+
+                if ($pacientesRelacionados->isEmpty()) {
+                    $habitacionInfo['isEmpty'] = true;
+                } else {
+                    $habitacionInfo['isEmpty'] = false;
+
+                    $paciente = $pacientesRelacionados->last()?->getPacienteId();
+
+                    if ($paciente) {
+                        $registros = $paciente->getRegistros()->toArray();
+
+                        usort($registros, function ($a, $b) {
+                            return $b->getFecha() <=> $a->getFecha();
+                        });
+
+                        // dd($registros);
+                        $ultimoRegistro = $registros[0] ?? null;
+
+                        $habitacionInfo['paciente'] = [
+                            'nombre' => $paciente->getNombre(),
+                            'apellidos' => $paciente->getApellidos(),
+                            'edad' => $paciente->getFechaNacimiento() /* cambiar por calcular la edad*/,
+                            'diagnostico' => $paciente->getDiagnostico()->last()->getDiagnostico(),
+                        ];
+
+                        if ($ultimoRegistro) {
+                            $habitacionInfo['registro'] = [
+                                'fecha' => $ultimoRegistro->getFecha()->format('Y-m-d H:i:s'),
+                                'nombre_auxiliar' => $ultimoRegistro->getAuxiliarId()->getNombre(),
+                                'numero_auxiliar' => $ultimoRegistro->getAuxiliarId()->getNumTrabajador(),
+                                'observaciones' => $ultimoRegistro->getObservacion()->getDescripcion(),
+                                'alerta' => true/*arreglar mas tarde*/,
+                            ];
+                        } else {
+                            $habitacionInfo['registro'] = null;
+                        }
+                    }
+                }
+
+                $data[] = $habitacionInfo;
+            }
+
+            return $this->json([
+                'success' => true,
+                'message' => 'List rooms correct',
+                'habitacion' => $data,
+            ]);
+        } else {
+            return $this->json([
+                'success' => false,
+                'message' => 'There are no rooms',
+                'habitacion' => [],
+            ]);
+        }
+    }
 }
