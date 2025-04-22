@@ -230,7 +230,7 @@ final class HospitalDataController extends AbstractController
 
             $formattedResults = [];
             foreach ($registros as $registro) {
-                $auxiliar = $registro->getAuxiliar();
+                $auxiliar = $registro->getAuxiliarId();
                 $observacion = $registro->getObservacion();
 
                 $formattedResults[] = [
@@ -264,7 +264,6 @@ final class HospitalDataController extends AbstractController
         Request $request,
         EntityManagerInterface $em,
         PacienteRepository $pacienteRepository,
-        DetalleDiagnosticoRepository $detalleDiagnosticoRepository
     ): JsonResponse {
         try {
             $data = json_decode($request->getContent(), true);
@@ -299,7 +298,7 @@ final class HospitalDataController extends AbstractController
             $em->flush();
 
             // Crear DetalleDiagnostico
-            $detalle = new \App\Entity\DetalleDiagnostico();
+            $detalle = new DetalleDiagnostico();
             $detalle->setDiagnosticoId($diagnostico);
             $detalle->setAvd($data['avd']);
             $detalle->setO2((int)$data['o2']);
