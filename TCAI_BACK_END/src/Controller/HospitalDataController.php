@@ -111,7 +111,7 @@ final class HospitalDataController extends AbstractController
                 ], Response::HTTP_NOT_FOUND);
             }
     
-            $registros = $registroRepository->findBy(['paciente' => $paciente]);
+            $registros = $registroRepository->findBy(['paciente_id' => $paciente]);
     
             if (empty($registros)) {
                 return new JsonResponse([
@@ -124,7 +124,7 @@ final class HospitalDataController extends AbstractController
     
             $formattedResults = [];
             foreach ($registros as $registro) {
-                $auxiliar = $registro->getAuxiliar();
+                $auxiliar = $registro->getAuxiliarId();
                 $observacion = $registro->getObservacion();
     
                 $formattedResults[] = [
