@@ -270,5 +270,172 @@ final class HospitalDataController extends AbstractController
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    #[Route('/registro/paciente/{id}', name: 'create_registros_by_paciente', methods: ['POST'])]
+    public function createRegistroByPaciente(#[MapRequestPayload] CreateRegistroDto $dto, EntityManagerInterface $entityManager, int $id, PacienteRepository $pacienteRepository, TipoTexturaRepository $tipoTexturaRepository, TipoDietaRepository $tipoDietaRepository, DietaHasTipoDietaRepository $dietaHasTipoDietaRepository, RegistroRepository $registroRepository): JsonResponse
+    {
+        try {
+            
+            // Get paciente
+            $paciente = $pacienteRepository->find($id);
+
+            if (!$paciente) {
+                return new JsonResponse([
+                    'success' => false,
+                    'content' => [
+                        'message' => 'Paciente no encontrado'
+                    ]
+                ], Response::HTTP_NOT_FOUND);
+            }
+
+            // Parse JSON request body
+            // $data = json_decode($request->getContent(), true);
+
+            // if (!$data) {
+            //     return $this->json([
+            //         'success' => false,
+            //         'content' => [
+            //             'message' => 'Invalid JSON format'
+            //         ]
+            //     ], 400);
+            // }
+
+            // Validate required fields
+            // if (!isset($data['paciente_id']) || !isset($data['registro'])) {
+            //     return $this->json([
+            //         'success' => false,
+            //         'content' => [
+            //             'message' => 'Missing required fields: paciente_id or registro'
+            //         ]
+            //     ], 400);
+            // }
+
+            // Process the data 
+
+            // OBSERVACION
+            $observacion = new Observacion();
+            $observacion->setDescripcion($dto->observacion_descripcion);
+            $entityManager->persist($observacion);
+
+            // DIETA
+            $dieta = new Dieta();
+            $dieta->setAutonomo($dto->dieta_autonomo);
+            $dieta->setProtesi($dto->dieta_protesi);
+            // $dieta->setTipoTexturaId(); !!!
+            $entityManager->persist($dieta);
+
+            // Dieta Has Tipo Dieta
+
+            // to make iteration !!!
+            // $dietaHasTipoDieta = new DietaHasTipoDieta();
+            // $dietaHasTipoDieta->setDietaId($dieta->getId());
+            
+
+            // DRENAJE
+            // $drenaje = new Drenaje();
+            // $drenaje->setDescripcion($dto->drenajeDescripcion);
+            // $entityManager->persist($drenaje);
+
+            // MOVILIZACIÓN
+            // $movilizacion = new Movilizacion();
+            // $movilizacion->setSedestacion($dto->sedestacion);
+            // $movilizacion->setAyudaDeambulacion($dto->ayudaDeambulacion);
+            // $movilizacion->setAyudaDescripcion($dto->ayudaDescripcion);
+            // $movilizacion->setCambiosPosturales($dto->cambiosPosturales);
+            // $entityManager->persist($movilizacion);
+
+            // CONSTANTES VITALES
+            // $constantesVitales = new ConstantesVitales();
+            // $constantesVitales->setTaSistolica($dto->taSistolica);
+            // $constantesVitales->setTaDiastolica($dto->taDiastolica);
+            // $constantesVitales->setFrecuenciaRespiratoria($dto->frecuenciaRespiratoria);
+            // $constantesVitales->setPulso($dto->pulso);
+            // $constantesVitales->setTemperatura($dto->temperatura);
+            // $constantesVitales->setSaturacionOxigeno($dto->saturacionOxigeno);
+            // $entityManager->persist($constantesVitales);
+
+            // BALANCE HIDRICO
+            // $balanceHidrico = new BalanceHidrico();
+            // $balanceHidrico->setDiuresis($dto->diuresis);
+            // $balanceHidrico->setDeposicion($dto->deposicion);
+            // $entityManager->persist($balanceHidrico);
+
+            // SUEROTERAPIA
+            // $sueroterapia = new Sueroterapia();
+            // $sueroterapia->setDosis($dto->dosis);
+            // $entityManager->persist($sueroterapia);
+
+            // HIGIENE
+            // $higiene = new Higiene();
+            // $higiene->setDescripcion($dto->higieneDescripcion);
+            // $entityManager->persist($higiene);
+
+            // REGISTRO
+            $registro = new Registro();
+
+            // $registro->setFecha(new \DateTime());
+            // $registro->setToma($dto->toma);
+
+            // auxiliar: to get the auth user !!!
+
+            // paciente
+            $registro->setPacienteId($paciente);
+
+            $registro->setObservacion($observacion);
+            $registro->setDietaId($dieta);
+            // $registro->setDrenajeId($drenaje);
+            // $registro->setMovilizacionId($movilizacion);
+            // $registro->setConstantesVitalesId($constantesVitales);
+            // $registro->setBalanceHidricoId($balanceHidrico);
+            // $registro->setSueroterapiaId($sueroterapia);
+            // $registro->setHigieneId($higiene);
+            $entityManager->persist($registro);
+
+            // Flush all changes to the database
+            $entityManager->flush();
+
+            return $this->json([
+                'success' => true,
+                'content' => [
+                    'message' => 'Registro created successfully',
+                    'observacion' => $dto->observacion_descripcion,
+                    'dieta' => [
+                        'autonomo' => $dto->dieta_autonomo,
+                        'protesi' => $dto->dieta_protesi,
+                    ],
+                    // 'registro_id' => $registro->getId() !!!
+                ]
+            ], 201);
+        } catch (\Exception $e) {
+            return $this->json([
+                'success' => false,
+                'content' => [
+                    'message' => $e->getMessage()
+                ]
+            ], 400);
+        }
+    }
+
+    // #[Route('/product/edit/{id}', name: 'product_edit')]
+    // public function update(EntityManagerInterface $entityManager, int $id): Response
+    // {
+    //     $product = $entityManager->getRepository(Product::class)->find($id);
+
+    //     if (!$product) {
+    //         throw $this->createNotFoundException(
+    //             'No product found for id '.$id
+    //         );
+    //     }
+
+    //     $product->setName('New product name!');
+    //     $entityManager->flush();
+
+    //     return $this->redirectToRoute('product_show', [
+    //         'id' => $product->getId()
+    //     ]);
+    // }
+
+    // https://www.adcisolutions.com/knowledge/getting-started-rest-api-symfony-4
+
     
 }
