@@ -10,15 +10,80 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+
+use function PHPUnit\Framework\isEmpty;
 
 #[Route('/habitacion')]
-final class HabitacionController extends AbstractController{
-    #[Route(name: 'app_habitacion_index', methods: ['GET'])]
-    public function index(HabitacionRepository $habitacionRepository): Response
+final class HabitacionController extends AbstractController
+{
+    #[Route('/general', name: 'app_habitacion_index', methods: ['GET'])]
+    public function index(HabitacionRepository $habitacionRepository): JsonResponse
     {
-        return $this->render('habitacion/index.html.twig', [
-            'habitacions' => $habitacionRepository->findAll(),
-        ]);
+        $habitaciones = $habitacionRepository->findAll();
+
+        if (!empty($habitaciones)) {
+
+            foreach ($habitaciones as $habitacion) {
+                $habitacionInfo = [
+                    'habitacion_codigo' => $habitacion->getCodigo(),
+                ];
+
+                $pacientesRelacionados = $habitacion->getPacienteHasHabitaciones();
+
+                if ($pacientesRelacionados->isEmpty()) {
+                    $habitacionInfo['isEmpty'] = true;
+                } else {
+                    $habitacionInfo['isEmpty'] = false;
+
+                    $paciente = $pacientesRelacionados->last()?->getPacienteId();
+
+                    if ($paciente) {
+                        $registros = $paciente->getRegistros()->toArray();
+
+                        usort($registros, function ($a, $b) {
+                            return $b->getFecha() <=> $a->getFecha();
+                        });
+
+                        // dd($registros);
+                        $ultimoRegistro = $registros[0] ?? null;
+
+                        $habitacionInfo['paciente'] = [
+                            'nombre' => $paciente->getNombre(),
+                            'apellidos' => $paciente->getApellidos(),
+                            'edad' => $paciente->getFechaNacimiento() /* cambiar por calcular la edad*/,
+                            'diagnostico' => $paciente->getDiagnostico()->last()->getDiagnostico(),
+                        ];
+
+                        if ($ultimoRegistro) {
+                            $habitacionInfo['registro'] = [
+                                'fecha' => $ultimoRegistro->getFecha()->format('Y-m-d H:i:s'),
+                                'nombre_auxiliar' => $ultimoRegistro->getAuxiliarId()->getNombre(),
+                                'numero_auxiliar' => $ultimoRegistro->getAuxiliarId()->getNumTrabajador(),
+                                'observaciones' => $ultimoRegistro->getObservacion()->getDescripcion(),
+                                'alerta' => true/*arreglar mas tarde*/,
+                            ];
+                        } else {
+                            $habitacionInfo['registro'] = null;
+                        }
+                    }
+                }
+
+                $data[] = $habitacionInfo;
+            }
+
+            return $this->json([
+                'success' => true,
+                'message' => 'List rooms correct',
+                'habitacion' => $data,
+            ]);
+        } else {
+            return $this->json([
+                'success' => false,
+                'message' => 'There are no rooms',
+                'habitacion' => [],
+            ]);
+        }
     }
 
     #[Route('/new', name: 'app_habitacion_new', methods: ['GET', 'POST'])]
@@ -70,7 +135,7 @@ final class HabitacionController extends AbstractController{
     #[Route('/{id}', name: 'app_habitacion_delete', methods: ['POST'])]
     public function delete(Request $request, Habitacion $habitacion, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$habitacion->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $habitacion->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($habitacion);
             $entityManager->flush();
         }

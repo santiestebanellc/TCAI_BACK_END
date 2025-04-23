@@ -3,8 +3,8 @@
 namespace App\Form;
 
 use App\Entity\PacienteHasHabitaciones;
-use App\Entity\habitacion;
-use App\Entity\paciente;
+use App\Entity\Habitacion;
+use App\Entity\Paciente;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -19,12 +19,12 @@ class PacienteHasHabitacionesType extends AbstractType
                 'widget' => 'single_text'
             ])
             ->add('paciente_id', EntityType::class, [
-                'class' => paciente::class,
-'choice_label' => 'id',
+                'class' => Paciente::class,
+                'choice_label' => 'id',
             ])
             ->add('habitacion_id', EntityType::class, [
-                'class' => habitacion::class,
-'choice_label' => 'id',
+                'class' => Habitacion::class,
+                'choice_label' => 'id',
             ])
         ;
     }

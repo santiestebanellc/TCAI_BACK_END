@@ -5,6 +5,9 @@ namespace App\Entity;
 use App\Repository\PacienteRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use App\Entity\PacienteHasHabitaciones;
 
 #[ORM\Entity(repositoryClass: PacienteRepository::class)]
 class Paciente
@@ -49,6 +52,15 @@ class Paciente
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $timestamp = null;
+
+    #[ORM\OneToMany(mappedBy: 'paciente_id', targetEntity: PacienteHasHabitaciones::class)]
+    private Collection $pacienteHasHabitaciones;
+
+    #[ORM\OneToMany(mappedBy: 'paciente_id', targetEntity: Registro::class)]
+    private Collection $registros;
+
+    #[ORM\OneToMany(mappedBy: 'paciente_id', targetEntity: Diagnostico::class)]
+    private Collection $diagnosticos;
 
     public function getId(): ?int
     {
@@ -197,5 +209,26 @@ class Paciente
         $this->timestamp = $timestamp;
 
         return $this;
+    }
+    public function __construct()
+    {
+        $this->pacienteHasHabitaciones = new ArrayCollection();
+        $this->registros = new ArrayCollection();
+        $this->diagnosticos = new ArrayCollection();
+    }
+
+    public function getPacienteHasHabitaciones(): Collection
+    {
+        return $this->pacienteHasHabitaciones;
+    }
+
+    public function getRegistros(): Collection
+    {
+        return $this->registros;
+    }
+
+    public function getDiagnostico(): Collection
+    {
+        return $this->diagnosticos;
     }
 }
