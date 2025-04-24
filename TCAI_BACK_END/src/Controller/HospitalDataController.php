@@ -358,7 +358,7 @@ final class HospitalDataController extends AbstractController
                 $dieta->setTipoTexturaId($em->getReference(TipoTextura::class, $registroInput->dieta->tipoTexturaId));
                 $em->persist($dieta);
                 
-                foreach ($registroInput->dieta->tipoDieta as $tipo) {
+                foreach ($registroInput->dieta->tipoDietaId as $tipo) {
                     $tipoDieta = new DietaHasTipoDieta();
                     
                     $tipoDieta->setDietaId($dieta);
