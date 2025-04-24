@@ -14,34 +14,34 @@ class DietaHasTipoDieta
     private ?int $id = null;
 
     #[ORM\ManyToOne]
-    private ?dieta $dieta_id = null;
+    private ?Dieta $dieta_id = null;
 
     #[ORM\ManyToOne]
-    private ?tipodieta $tipo_dieta_id = null;
+    private ?TipoDieta $tipo_dieta_id = null;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getDietaId(): ?dieta
+    public function getDietaId(): ?Dieta
     {
         return $this->dieta_id;
     }
 
-    public function setDietaId(?dieta $dieta_id): static
+    public function setDietaId(?Dieta $dieta_id): static
     {
         $this->dieta_id = $dieta_id;
 
         return $this;
     }
 
-    public function getTipoDietaId(): ?tipodieta
+    public function getTipoDietaId(): ?TipoDieta
     {
         return $this->tipo_dieta_id;
     }
 
-    public function setTipoDietaId(?tipodieta $tipo_dieta_id): static
+    public function setTipoDietaId(?TipoDieta $tipo_dieta_id): static
     {
         $this->tipo_dieta_id = $tipo_dieta_id;
 

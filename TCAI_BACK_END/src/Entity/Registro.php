@@ -15,7 +15,7 @@ class Registro
     private ?int $id = null;
 
     #[ORM\ManyToOne]
-    private ?auxiliar $auxiliar_id = null;
+    private ?Auxiliar $auxiliar_id = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $fecha = null;
@@ -24,22 +24,22 @@ class Registro
     private ?string $toma = null;
 
     #[ORM\ManyToOne]
-    private ?paciente $paciente_id = null;
+    private ?Paciente $paciente_id = null;
 
     #[ORM\OneToOne]
-    private ?observacion $observacion_id = null;
+    private ?Observacion $observacion_id = null;
 
     #[ORM\OneToOne]
-    private ?dieta $dieta_id = null;
+    private ?Dieta $dieta_id = null;
 
     #[ORM\OneToOne]
-    private ?drenaje $drenaje_id = null;
+    private ?Drenaje $drenaje_id = null;
 
     #[ORM\OneToOne]
-    private ?movilizacion $movilizacion_id = null;
+    private ?Movilizacion $movilizacion_id = null;
 
     #[ORM\OneToOne]
-    private ?constantesvitales $constantes_vitales_id = null;
+    private ?ConstantesVitales $constantes_vitales_id = null;
 
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
     private ?BalanceHidrico $balance_hidrico_id = null;
@@ -55,12 +55,12 @@ class Registro
         return $this->id;
     }
 
-    public function getAuxiliarId(): ?auxiliar
+    public function getAuxiliarId(): ?Auxiliar
     {
         return $this->auxiliar_id;
     }
 
-    public function setAuxiliarId(?auxiliar $auxiliar_id): static
+    public function setAuxiliarId(?Auxiliar $auxiliar_id): static
     {
         $this->auxiliar_id = $auxiliar_id;
 
@@ -91,72 +91,72 @@ class Registro
         return $this;
     }
 
-    public function getPacienteId(): ?paciente
+    public function getPacienteId(): ?Paciente
     {
         return $this->paciente_id;
     }
 
-    public function setPacienteId(?paciente $paciente_id): static
+    public function setPacienteId(?Paciente $paciente_id): static
     {
         $this->paciente_id = $paciente_id;
 
         return $this;
     }
 
-    public function getObservacion(): ?observacion
+    public function getObservacion(): ?Observacion
     {
         return $this->observacion_id;
     }
 
-    public function setObservacion(?observacion $observacion_id): static
+    public function setObservacion(?Observacion $observacion_id): static
     {
         $this->observacion_id = $observacion_id;
 
         return $this;
     }
 
-    public function getDietaId(): ?dieta
+    public function getDietaId(): ?Dieta
     {
         return $this->dieta_id;
     }
 
-    public function setDietaId(?dieta $dieta_id): static
+    public function setDietaId(?Dieta $dieta_id): static
     {
         $this->dieta_id = $dieta_id;
 
         return $this;
     }
 
-    public function getDrenajeId(): ?drenaje
+    public function getDrenajeId(): ?Drenaje
     {
         return $this->drenaje_id;
     }
 
-    public function setDrenajeId(?drenaje $drenaje_id): static
+    public function setDrenajeId(?Drenaje $drenaje_id): static
     {
         $this->drenaje_id = $drenaje_id;
 
         return $this;
     }
 
-    public function getMovilizacionId(): ?movilizacion
+    public function getMovilizacionId(): ?Movilizacion
     {
         return $this->movilizacion_id;
     }
 
-    public function setMovilizacionId(?movilizacion $movilizacion_id): static
+    public function setMovilizacionId(?Movilizacion $movilizacion_id): static
     {
         $this->movilizacion_id = $movilizacion_id;
 
         return $this;
     }
 
-    public function getConstantesVitalesId(): ?constantesvitales
+    public function getConstantesVitalesId(): ?ConstantesVitales
     {
         return $this->constantes_vitales_id;
     }
 
-    public function setConstantesVitalesId(?constantesvitales $constantes_vitales_id): static
+    public function setConstantesVitalesId(?ConstantesVitales $constantes_vitales_id): static
     {
         $this->constantes_vitales_id = $constantes_vitales_id;
 

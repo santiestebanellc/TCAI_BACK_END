@@ -3,7 +3,7 @@
 namespace App\Form;
 
 use App\Entity\DetalleDiagnostico;
-use App\Entity\diagnostico;
+use App\Entity\Diagnostico;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -23,8 +23,8 @@ class DetalleDiagnosticoType extends AbstractType
             ->add('sng')
             ->add('avd')
             ->add('diagnostico_id', EntityType::class, [
-                'class' => diagnostico::class,
-'choice_label' => 'id',
+                'class' => Diagnostico::class,
+                'choice_label' => 'id',
             ])
         ;
     }

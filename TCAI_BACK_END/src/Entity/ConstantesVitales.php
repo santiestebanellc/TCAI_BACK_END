@@ -20,16 +20,16 @@ class ConstantesVitales
     #[ORM\Column(length: 7, nullable: true)]
     private ?string $ta_diastolica = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 3, scale: 1, nullable: true)]
+    #[ORM\Column(type: Types::DECIMAL, precision: 4, scale: 1, nullable: true)]
     private ?string $frecuencia_respiratoria = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 3, scale: 1, nullable: true)]
+    #[ORM\Column(type: Types::DECIMAL, precision: 4, scale: 1, nullable: true)]
     private ?string $pulso = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 3, scale: 1, nullable: true)]
+    #[ORM\Column(type: Types::DECIMAL, precision: 4, scale: 1, nullable: true)]
     private ?string $temperatura = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 3, scale: 1, nullable: true)]
+    #[ORM\Column(type: Types::DECIMAL, precision: 4, scale: 1, nullable: true)]
     private ?string $saturacion_oxigeno = null;
 
     public function getId(): ?int
