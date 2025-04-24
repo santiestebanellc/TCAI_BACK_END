@@ -58,16 +58,18 @@ final class HospitalDataController extends AbstractController
     public function getDiagnosticosByPaciente(int $id, DetalleDiagnosticoRepository $detalleDiagnosticoRepository, DiagnosticoRepository $diagnosticoRepository, PacienteRepository $pacienteRepository): JsonResponse
     {
         try {
-            // REVISAR VALIDACION !!!
-            // if (!$codigo) {
-            //     return $this->json(
-            //         ['success' => false, 'content' => ['message' => 'Room code is required']],
-            //         Response::HTTP_BAD_REQUEST
-            //     );
-            // }
 
             // Find the paciente by codigo
             $paciente = $pacienteRepository->find($id);
+
+            if (!$paciente) {
+                return new JsonResponse([
+                    'success' => false,
+                    'content' => [
+                        'message' => 'Paciente no encontrado'
+                    ]
+                ], Response::HTTP_NOT_FOUND);
+            }
 
             // Get all diagnostico entities related to the paciente
             $diagnosticos = $diagnosticoRepository->findBy(['paciente_id' => $paciente]);
@@ -279,6 +281,7 @@ final class HospitalDataController extends AbstractController
         }
     }
 
+    // Calcula la toma (Mañana, Tarde, Noche) según la fecha
     private function calcularToma(\DateTimeInterface $fecha): string
     {
         $hora = (int) $fecha->format('H');
@@ -332,15 +335,11 @@ final class HospitalDataController extends AbstractController
             $registro->setPacienteId($paciente);
             // $registro->setAuxiliarId($em->getReference(Auxiliar::class, $registroInput->auxiliarId));
 
-            // AUXILIAR AND PACIENTE
+            // AUXILIAR AUTH 
             // $auxiliar = $em->getRepository(Auxiliar::class)->findOneBy([
             //     'numTrabajador' => $this->getUser()->getUserIdentifier()
             // ]);
             // $registro->setAuxiliar($auxiliar);
-
-            // // paciente from query parameter (or route param)
-            // $pacienteId = $request->query->get('pacienteId');
-            // $registro->setPaciente($em->getReference(Paciente::class, $pacienteId));
 
             // Observacion
             if ($registroInput->observacion) {
