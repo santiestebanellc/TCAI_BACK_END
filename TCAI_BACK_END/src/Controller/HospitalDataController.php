@@ -447,5 +447,75 @@ final class HospitalDataController extends AbstractController
         }
     }
 
+    // https://www.adcisolutions.com/knowledge/getting-started-rest-api-symfony-4
+
+    #[Route('/personal-data/{habitacion_codigo}', name: 'api_personal_data', methods: ['GET'])]
+    public function getPersonalData(
+        string $habitacion_codigo,
+        EntityManagerInterface $entityManager,
+        HabitacionRepository $habitacionRepository,
+        PacienteRepository $pacienteRepository
+    ): JsonResponse
+    {
+        try {
+            // Buscar la habitación por su código
+            $habitacion = $habitacionRepository->findOneBy(['codigo' => $habitacion_codigo]);
+
+            if (!$habitacion) {
+                return $this->json([
+                    'success' => false,
+                    'content' => [
+                        'message' => 'Habitación no encontrada'
+                    ]
+                ], Response::HTTP_NOT_FOUND);
+            }
+
+            // Buscar la asignación más reciente de paciente a la habitación
+            $asignacion = $entityManager->getRepository('App\Entity\PacienteHasHabitaciones')
+                ->findOneBy(['habitacion_id' => $habitacion], ['timestamp' => 'DESC']);
+
+            if (!$asignacion) {
+                return $this->json([
+                    'success' => true,
+                    'content' => [
+                        [
+                            'habitacion_codigo' => $habitacion_codigo,
+                            'message' => 'empty room'
+                        ]
+                    ]
+                ], Response::HTTP_OK);
+            }
+
+            // Obtener el paciente
+            $paciente = $asignacion->getPacienteId();
+
+            // Formatear la respuesta
+            $formattedResult = [
+                'habitacion_codigo' => $habitacion_codigo,
+                'paciente' => [
+                    'nombre' => $paciente->getNombre(),
+                    'apellidos' => $paciente->getApellidos(),
+                    'fecha_nacimiento' => $paciente->getFechaNacimiento() ? $paciente->getFechaNacimiento()->format('Y-m-d') : null,
+                    'direccion_completa' => $paciente->getDireccionCompleta(),
+                    'lengua_materna' => $paciente->getLenguaMaterna(),
+                    'antecedentes' => $paciente->getAntecedentes(),
+                    'telefono_cuidador' => $paciente->getTelefonoCuidador()
+                ]
+            ];
+
+            return $this->json([
+                'success' => true,
+                'content' => [$formattedResult]
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return $this->json([
+                'success' => false,
+                'content' => [
+                    'message' => 'Error interno: ' . $e->getMessage()
+                ]
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
 }
