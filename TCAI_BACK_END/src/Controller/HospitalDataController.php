@@ -447,8 +447,6 @@ final class HospitalDataController extends AbstractController
         }
     }
 
-    // https://www.adcisolutions.com/knowledge/getting-started-rest-api-symfony-4
-
     #[Route('/personal-data/{habitacion_codigo}', name: 'api_personal_data', methods: ['GET'])]
     public function getPersonalData(
         string $habitacion_codigo,
