@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Paciente;
+use App\Entity\Habitacion;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,6 +15,21 @@ class PacienteRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Paciente::class);
+    }
+
+    public function findPacienteActualPorHabitacion(Habitacion $habitacion): ?Paciente
+    {
+        return $this->getEntityManager()
+            ->createQuery(
+                'SELECT p FROM App\Entity\Paciente p
+             JOIN App\Entity\PacienteHasHabitaciones phh
+             WITH phh.paciente_id = p.id
+             WHERE phh.habitacion_id = :habitacion
+             ORDER BY phh.timestamp DESC'
+            )
+            ->setParameter('habitacion', $habitacion)
+            ->setMaxResults(1)
+            ->getOneOrNullResult();
     }
 
     //    /**
