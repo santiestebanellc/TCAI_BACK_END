@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\DetalleDiagnostico;
+use App\Entity\Diagnostico;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,6 +15,18 @@ class DetalleDiagnosticoRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, DetalleDiagnostico::class);
+    }
+
+    public function findUltimoPorDiagnostico(Diagnostico $diagnostico): ?DetalleDiagnostico
+    {
+        return $this->createQueryBuilder('d')
+            ->join('d.diagnostico_id', 'diag')  // Hacemos un JOIN con la entidad Diagnostico
+            ->where('d.diagnostico_id = :diagnostico')
+            ->setParameter('diagnostico', $diagnostico)
+            ->orderBy('diag.fecha', 'DESC')  // Ordenamos por la fecha en Diagnostico
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 
     //    /**

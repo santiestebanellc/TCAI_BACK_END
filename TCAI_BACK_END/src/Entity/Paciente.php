@@ -53,15 +53,6 @@ class Paciente
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $timestamp = null;
 
-    #[ORM\OneToMany(mappedBy: 'paciente_id', targetEntity: PacienteHasHabitaciones::class)]
-    private Collection $pacienteHasHabitaciones;
-
-    #[ORM\OneToMany(mappedBy: 'paciente_id', targetEntity: Registro::class)]
-    private Collection $registros;
-
-    #[ORM\OneToMany(mappedBy: 'paciente_id', targetEntity: Diagnostico::class)]
-    private Collection $diagnosticos;
-
     public function getId(): ?int
     {
         return $this->id;
@@ -209,26 +200,5 @@ class Paciente
         $this->timestamp = $timestamp;
 
         return $this;
-    }
-    public function __construct()
-    {
-        $this->pacienteHasHabitaciones = new ArrayCollection();
-        $this->registros = new ArrayCollection();
-        $this->diagnosticos = new ArrayCollection();
-    }
-
-    public function getPacienteHasHabitaciones(): Collection
-    {
-        return $this->pacienteHasHabitaciones;
-    }
-
-    public function getRegistros(): Collection
-    {
-        return $this->registros;
-    }
-
-    public function getDiagnostico(): Collection
-    {
-        return $this->diagnosticos;
     }
 }

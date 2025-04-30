@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Registro;
+use App\Entity\Paciente;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,6 +15,17 @@ class RegistroRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Registro::class);
+    }
+
+    public function findByUltimoPorPaciente(Paciente $paciente): ?Registro
+    {
+        return $this->createQueryBuilder('r')
+            ->where('r.paciente_id = :paciente')
+            ->setParameter('paciente', $paciente)
+            ->orderBy('r.fecha', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 
     //    /**

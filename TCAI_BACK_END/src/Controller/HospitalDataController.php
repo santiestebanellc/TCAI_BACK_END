@@ -2,19 +2,34 @@
 
 namespace App\Controller;
 
+// OTHER
 use App\Dto\CreateRegistroDto;
 use App\Dto\RegistroInput;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Form\DetalleDiagnosticoType;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
+use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
+use Symfony\Component\Serializer\SerializerInterface as SerializerSerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+
+// DOCTRINE
+use Doctrine\ORM\EntityManagerInterface;
+
+// RESPONSES
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
+
+// ENTITIES
 use App\Entity\Auxiliar;
 use App\Entity\BalanceHidrico;
 use App\Entity\ConstantesVitales;
 use App\Entity\Dieta;
 use App\Entity\Observacion;
 use App\Entity\Registro;
-use App\Repository\TipoTexturaRepository;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
-
 use App\Entity\DetalleDiagnostico;
 use App\Entity\DietaHasTipoDieta;
 use App\Entity\Drenaje;
@@ -25,34 +40,20 @@ use App\Entity\Sueroterapia;
 use App\Entity\TipoDieta;
 use App\Entity\TipoHigiene;
 use App\Entity\TipoTextura;
-use App\Form\DetalleDiagnosticoType;
+
+// REPOSITORIES
+use App\Repository\TipoTexturaRepository;
+use App\Repository\PacienteRepository;
 use App\Repository\DetalleDiagnosticoRepository;
 use App\Repository\DiagnosticoRepository;
 use App\Repository\DietaHasTipoDietaRepository;
 use App\Repository\HabitacionRepository;
-use App\Repository\PacienteRepository;
 use App\Repository\RegistroRepository;
 use App\Repository\TipoDietaRepository;
-use Doctrine\ORM\EntityManagerInterface;
-
-use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
-use Symfony\Component\Serializer\SerializerInterface as SerializerSerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
+use App\Repository\PacienteHasHabitacionesRepository;
 
 final class HospitalDataController extends AbstractController
 {
-    #[Route('/hospital/data', name: 'app_hospital_data')]
-    public function index(): Response
-    {
-        return $this->render('hospital_data/index.html.twig', [
-            'controller_name' => 'HospitalDataController',
-        ]);
-    }
 
     #[Route('/diagnostico/paciente/{id}', name: 'api_diagnostico_by_paciente', methods: ['GET'])]
     public function getDiagnosticosByPaciente(int $id, DetalleDiagnosticoRepository $detalleDiagnosticoRepository, DiagnosticoRepository $diagnosticoRepository, PacienteRepository $pacienteRepository): JsonResponse
@@ -224,77 +225,6 @@ final class HospitalDataController extends AbstractController
         }
     }
 
-    #[Route('/registro/paciente/{id}', name: 'api_registros_by_paciente', methods: ['GET'])]
-    public function getRegistrosByPaciente(int $id, RegistroRepository $registroRepository, PacienteRepository $pacienteRepository): JsonResponse
-    {
-        try {
-            $paciente = $pacienteRepository->find($id);
-
-            if (!$paciente) {
-                return new JsonResponse([
-                    'success' => false,
-                    'content' => [
-                        'message' => 'Paciente no encontrado'
-                    ]
-                ], Response::HTTP_NOT_FOUND);
-            }
-
-            $registros = $registroRepository->findBy(['paciente_id' => $paciente]);
-
-            if (empty($registros)) {
-                return new JsonResponse([
-                    'success' => false,
-                    'content' => [
-                        'message' => 'No se encontraron registros para este paciente'
-                    ]
-                ], Response::HTTP_NOT_FOUND);
-            }
-
-            $formattedResults = [];
-            foreach ($registros as $registro) {
-                $auxiliar = $registro->getAuxiliarId();
-                $observacion = $registro->getObservacion();
-
-                $formattedResults[] = [
-                    'registro_id' => $registro->getId(),
-                    'registro' => [
-                        'fecha' => $registro->getFecha() ? $registro->getFecha()->format('Y-m-d H:i:s') : null,
-                        'toma' => $registro->getToma(),
-                        'nombre_auxiliar' => $auxiliar ? $auxiliar->getNombre() : null,
-                        'numero_auxiliar' => $auxiliar ? $auxiliar->getNumTrabajador() : null,
-                        'observacion' => $observacion ? $observacion->getDescripcion() : null
-                    ]
-                ];
-            }
-
-            return new JsonResponse([
-                'success' => true,
-                'content' => $formattedResults
-            ], Response::HTTP_OK);
-        } catch (\Exception $e) {
-            return new JsonResponse([
-                'success' => false,
-                'content' => [
-                    'message' => 'Error interno: ' . $e->getMessage()
-                ]
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    // Calcula la toma (Mañana, Tarde, Noche) según la fecha
-    private function calcularToma(\DateTimeInterface $fecha): string
-    {
-        $hora = (int) $fecha->format('H');
-
-        if ($hora >= 6 && $hora < 14) {
-            return 'M'; // Mañana
-        } elseif ($hora >= 14 && $hora < 22) {
-            return 'T'; // Tarde
-        } else {
-            return 'N'; // Noche
-        }
-    }
-
     #[Route('/registro/paciente/{id}', name: 'create_registros_by_paciente', methods: ['POST'])]
     public function createRegistroByPaciente(
         Request $request,
@@ -348,7 +278,7 @@ final class HospitalDataController extends AbstractController
                 $em->persist($obs);
                 $registro->setObservacion($obs);
             }
-            
+
             // Dieta
             if ($registroInput->dieta) {
                 $dieta = new Dieta();
@@ -356,15 +286,15 @@ final class HospitalDataController extends AbstractController
                 $dieta->setProtesi($registroInput->dieta->protesi);
                 $dieta->setTipoTexturaId($em->getReference(TipoTextura::class, $registroInput->dieta->tipoTexturaId));
                 $em->persist($dieta);
-                
+
                 foreach ($registroInput->dieta->tipoDietaId as $tipo) {
                     $tipoDieta = new DietaHasTipoDieta();
-                    
+
                     $tipoDieta->setDietaId($dieta);
                     $tipoDieta->setTipoDietaId($em->getReference(TipoDieta::class, $tipo));
                     $em->persist($tipoDieta);
                 }
-                
+
                 $registro->setDietaId($dieta);
             }
 
@@ -447,64 +377,89 @@ final class HospitalDataController extends AbstractController
         }
     }
 
+
+
+
+
+    // Calcula la toma (Mañana, Tarde, Noche) según la fecha
+    private function calcularToma(\DateTimeInterface $fecha): string
+    {
+        $hora = (int) $fecha->format('H');
+
+        if ($hora >= 6 && $hora < 14) {
+            return 'M'; // Mañana
+        } elseif ($hora >= 14 && $hora < 22) {
+            return 'T'; // Tarde
+        } else {
+            return 'N'; // Noche
+        }
+    }
+
     #[Route('/personal-data/{habitacion_codigo}', name: 'api_personal_data', methods: ['GET'])]
     public function getPersonalData(
         string $habitacion_codigo,
-        EntityManagerInterface $entityManager,
         HabitacionRepository $habitacionRepository,
-        PacienteRepository $pacienteRepository
-    ): JsonResponse
-    {
+        PacienteRepository $pacienteRepository,
+        DiagnosticoRepository $diagnosticoRepository,
+        RegistroRepository $registroRepository,
+        PacienteHasHabitacionesRepository $pacienteHasHabitacionesRepository
+    ): JsonResponse {
         try {
-            // Buscar la habitación por su código
-            $habitacion = $habitacionRepository->findOneBy(['codigo' => $habitacion_codigo]);
+            $habitaciones = $habitacionRepository->findAll();
+            $data = [];
 
-            if (!$habitacion) {
-                return $this->json([
-                    'success' => false,
-                    'content' => [
-                        'message' => 'Habitación no encontrada'
-                    ]
-                ], Response::HTTP_NOT_FOUND);
-            }
+            if (!empty($habitaciones)) {
+                foreach ($habitaciones as $habitacion) {
+                    $habitacionInfo = [
+                        'habitacion_codigo' => $habitacion->getCodigo(),
+                    ];
 
-            // Buscar la asignación más reciente de paciente a la habitación
-            $asignacion = $entityManager->getRepository('App\Entity\PacienteHasHabitaciones')
-                ->findOneBy(['habitacion_id' => $habitacion], ['timestamp' => 'DESC']);
+                    // Obtener el último paciente relacionado con la habitación
+                    $paciente = $pacienteHasHabitacionesRepository->findUltimoPacientePorHabitacion($habitacion);
 
-            if (!$asignacion) {
+                    if (!$paciente) {
+                        $habitacionInfo['isEmpty'] = true;
+                    } else {
+                        $habitacionInfo['isEmpty'] = false;
+
+                        // Obtener el último diagnóstico del paciente
+                        $ultimoDiagnostico = $diagnosticoRepository->findUltimoDiagnosticoPorPaciente($paciente);
+
+                        // Obtener el último registro del paciente
+                        $ultimoRegistro = $registroRepository->findByUltimoPorPaciente($paciente);
+
+                        // Detalles del paciente
+                        $habitacionInfo['paciente'] = [
+                            'nombre' => $paciente->getNombre(),
+                            'apellidos' => $paciente->getApellidos(),
+                            'edad' => $this->calcularEdad($paciente->getFechaNacimiento()),
+                            'diagnostico' => $ultimoDiagnostico ? $ultimoDiagnostico->getDiagnostico() : null,
+                        ];
+
+                        // Detalles del último registro
+                        $habitacionInfo['registro'] = $ultimoRegistro ? [
+                            'fecha' => $ultimoRegistro->getFecha()->format('Y-m-d H:i:s'),
+                            'nombre_auxiliar' => $ultimoRegistro->getAuxiliarId()->getNombre(),
+                            'numero_auxiliar' => $ultimoRegistro->getAuxiliarId()->getNumTrabajador(),
+                            'observaciones' => $ultimoRegistro->getObservacion()->getDescripcion(),
+                            'alerta' => true,
+                        ] : null;
+                    }
+                }
+
+                $data[] = $habitacionInfo;
+
                 return $this->json([
                     'success' => true,
-                    'content' => [
-                        [
-                            'habitacion_codigo' => $habitacion_codigo,
-                            'message' => 'empty room'
-                        ]
-                    ]
+                    'content' => [$data]
                 ], Response::HTTP_OK);
+            } else {
+                return $this->json([
+                    'success' => false,
+                    'message' => 'There are no rooms',
+                    'habitacion' => [],
+                ]);
             }
-
-            // Obtener el paciente
-            $paciente = $asignacion->getPacienteId();
-
-            // Formatear la respuesta
-            $formattedResult = [
-                'habitacion_codigo' => $habitacion_codigo,
-                'paciente' => [
-                    'nombre' => $paciente->getNombre(),
-                    'apellidos' => $paciente->getApellidos(),
-                    'fecha_nacimiento' => $paciente->getFechaNacimiento() ? $paciente->getFechaNacimiento()->format('Y-m-d') : null,
-                    'direccion_completa' => $paciente->getDireccionCompleta(),
-                    'lengua_materna' => $paciente->getLenguaMaterna(),
-                    'antecedentes' => $paciente->getAntecedentes(),
-                    'telefono_cuidador' => $paciente->getTelefonoCuidador()
-                ]
-            ];
-
-            return $this->json([
-                'success' => true,
-                'content' => [$formattedResult]
-            ], Response::HTTP_OK);
         } catch (\Exception $e) {
             return $this->json([
                 'success' => false,
@@ -516,4 +471,245 @@ final class HospitalDataController extends AbstractController
     }
 
 
+
+    #[Route('/detalle_diagnostico', name: 'api_create_detalle_diagnostico', methods: ['POST'])]
+    public function createDetalleDiagnostico(
+        Request $request,
+        EntityManagerInterface $em,
+        PacienteRepository $pacienteRepository,
+    ): JsonResponse {
+        try {
+            $data = json_decode($request->getContent(), true);
+
+            // Validar datos necesarios
+            if (!isset($data['paciente_id'], $data['avd'], $data['o2'], $data['panales'])) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Faltan datos requeridos (paciente_id, avd, o2, panales)'
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            $paciente = $pacienteRepository->find($data['paciente_id']);
+            if (!$paciente) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Paciente no encontrado'
+                ], Response::HTTP_NOT_FOUND);
+            }
+
+            // Crear Diagnostico básico
+            $diagnostico = new \App\Entity\Diagnostico();
+            $diagnostico->setPacienteId($paciente);
+            $diagnostico->setFecha(new \DateTime());
+            $diagnostico->setToma('Automática');
+
+            // Simulación de auxiliar (puedes cambiarlo por autenticado o fijo)
+            $auxiliar = $paciente->getHabitacion()->getAuxiliar(); // O cualquier lógica
+            $diagnostico->setAuxiliarId($auxiliar);
+
+            $em->persist($diagnostico);
+            $em->flush();
+
+            // Crear DetalleDiagnostico
+            $detalle = new DetalleDiagnostico();
+            $detalle->setDiagnosticoId($diagnostico);
+            $detalle->setAvd($data['avd']);
+            $detalle->setO2((int)$data['o2']);
+            $detalle->setPanales((int)$data['panales']);
+
+            $em->persist($detalle);
+            $em->flush();
+
+            return new JsonResponse([
+                'success' => true,
+                'message' => 'DetalleDiagnostico creado con éxito',
+                'detalle_diagnostico_id' => $detalle->getId()
+            ], Response::HTTP_CREATED);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Error interno: ' . $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    private function calcularEdad(\DateTimeInterface $fechaNacimiento): int
+    {
+        $hoy = new \DateTime();
+        $edad = $hoy->diff($fechaNacimiento);
+        return $edad->y;
+    }
+
+    #[Route('/diets', name: 'api_all_diets', methods: ['GET'])]
+    public function getAllDiets(
+        EntityManagerInterface $entityManager,
+        HabitacionRepository $habitacionRepository,
+        RegistroRepository $registroRepository,
+        DietaHasTipoDietaRepository $dietaHasTipoDietaRepository,
+        TipoDietaRepository $tipoDietaRepository
+    ): JsonResponse {
+        try {
+            // Obtener todas las habitaciones
+            $habitaciones = $habitacionRepository->findAll();
+
+            if (empty($habitaciones)) {
+                return $this->json([
+                    'success' => false,
+                    'content' => [
+                        'message' => 'No se encontraron habitaciones'
+                    ]
+                ], Response::HTTP_NOT_FOUND);
+            }
+
+            $formattedResults = [];
+
+            foreach ($habitaciones as $habitacion) {
+                $habitacionCodigo = $habitacion->getCodigo();
+
+                // Buscar asignación de paciente a la habitación (paciente_has_habitaciones)
+                $asignacion = $entityManager->getRepository('App\Entity\PacienteHasHabitaciones')
+                    ->findOneBy(['habitacion_id' => $habitacion], ['timestamp' => 'DESC']);
+
+                if (!$asignacion) {
+                    // Habitación vacía
+                    $formattedResults[] = [
+                        'habitacion_codigo' => $habitacionCodigo,
+                        'message' => 'empty room'
+                    ];
+                    continue;
+                }
+
+                // Obtener el paciente
+                $paciente = $asignacion->getPacienteId(); // Ajustado de getPacienteIdId() a getPacienteId()
+
+                // Calcular la edad del paciente
+                $edad = $this->calcularEdad($paciente->getFechaNacimiento());
+
+                // Buscar el registro más reciente del paciente
+                $registro = $registroRepository->findOneBy(
+                    ['paciente_id' => $paciente], // Esto depende de la entidad Registro
+                    ['fecha' => 'DESC']
+                );
+
+                if (!$registro) {
+                    // Si no hay registros, omitimos esta habitación
+                    continue;
+                }
+
+                // Obtener los datos de dieta
+                $dieta = $registro->getDietaId();
+
+                // Obtener los tipos de dieta asociados
+                $tipoDietaDescriptions = [];
+                $dietaHasTipoDietas = $dietaHasTipoDietaRepository->findBy(['dieta_id' => $dieta->getId()]);
+
+                foreach ($dietaHasTipoDietas as $relation) {
+                    $tipoDietaId = $relation->getTipoDietaId(); // Esto depende de la entidad DietaHasTipoDieta
+                    $tipoDieta = $tipoDietaRepository->find($tipoDietaId);
+
+                    if ($tipoDieta) {
+                        $tipoDietaDescriptions[] = $tipoDieta->getDescripcion();
+                    }
+                }
+
+                $tipoDietaString = implode(', ', $tipoDietaDescriptions);
+
+                // Formatear la respuesta
+                $formattedResults[] = [
+                    'habitacion_codigo' => $habitacionCodigo,
+                    'paciente' => [
+                        'nombre' => $paciente->getNombre(),
+                        'apellidos' => $paciente->getApellidos(),
+                        'edad' => $edad
+                    ],
+                    'detalle' => [
+                        'tipo_dieta' => $tipoDietaString,
+                        'textura' => $dieta->getTipoTexturaId()->getDescripcion(),
+                        'protesis' => $dieta->getProtesi() ? 'Sí' : 'No',
+                        'asistencia' => $dieta->getAutonomo() ? 'Independiente' : 'Dependiente',
+                        'observaciones' => $registro->getObservacion()->getDescripcion()
+                    ]
+                ];
+            }
+
+            return $this->json([
+                'success' => true,
+                'content' => $formattedResults
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return $this->json([
+                'success' => false,
+                'content' => [
+                    'message' => 'Error interno: ' . $e->getMessage()
+                ]
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    #[Route('/general', name: 'app_habitacion_index', methods: ['GET'])]
+    public function getAllRooms(
+        HabitacionRepository $habitacionRepository,
+        PacienteRepository $pacienteRepository,
+        DiagnosticoRepository $diagnosticoRepository,
+        RegistroRepository $registroRepository,
+        PacienteHasHabitacionesRepository $pacienteHasHabitacionesRepository
+    ): JsonResponse {
+        $habitaciones = $habitacionRepository->findAll();
+        $data = [];
+
+        if (!empty($habitaciones)) {
+
+            foreach ($habitaciones as $habitacion) {
+                $habitacionInfo = [
+                    'habitacion_codigo' => $habitacion->getCodigo(),
+                ];
+
+                // Obtener el último paciente relacionado con la habitación
+                $paciente = $pacienteHasHabitacionesRepository->findUltimoPacientePorHabitacion($habitacion);
+
+                if (!$paciente) {
+                    $habitacionInfo['isEmpty'] = true;
+                } else {
+                    $habitacionInfo['isEmpty'] = false;
+
+                    // Obtener el último diagnóstico del paciente
+                    $ultimoDiagnostico = $diagnosticoRepository->findUltimoDiagnosticoPorPaciente($paciente);
+
+                    // Obtener el último registro del paciente
+                    $ultimoRegistro = $registroRepository->findByUltimoPorPaciente($paciente);
+
+                    // Detalles del paciente
+                    $habitacionInfo['paciente'] = [
+                        'nombre' => $paciente->getNombre(),
+                        'apellidos' => $paciente->getApellidos(),
+                        'edad' => $this->calcularEdad($paciente->getFechaNacimiento()),
+                        'diagnostico' => $ultimoDiagnostico ? $ultimoDiagnostico->getDiagnostico() : null,
+                    ];
+
+                    // Detalles del último registro
+                    $habitacionInfo['registro'] = $ultimoRegistro ? [
+                        'fecha' => $ultimoRegistro->getFecha()->format('Y-m-d H:i:s'),
+                        'nombre_auxiliar' => $ultimoRegistro->getAuxiliarId()->getNombre(),
+                        'numero_auxiliar' => $ultimoRegistro->getAuxiliarId()->getNumTrabajador(),
+                        'observaciones' => $ultimoRegistro->getObservacion()->getDescripcion(),
+                        'alerta' => true,
+                    ] : null;
+                }
+                $data[] = $habitacionInfo;
+            }
+
+            return $this->json([
+                'success' => true,
+                'message' => 'List rooms correct',
+                'habitacion' => $data,
+            ]);
+        } else {
+            return $this->json([
+                'success' => false,
+                'message' => 'There are no rooms',
+                'habitacion' => [],
+            ]);
+        }
+    }
 }
