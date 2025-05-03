@@ -715,4 +715,44 @@ final class HospitalDataController extends AbstractController
             ]);
         }
     }
+
+    #[Route('/detalle_diagnostico/{id}', name: 'api_get_patient_medical_data', methods: ['GET'])]
+    public function getGeneralPatientMedicalData(
+        int $id,
+        PacienteRepository $pacienteRepository,
+        DiagnosticoRepository $diagnosticoRepository,
+        DetalleDiagnosticoRepository $detalleDiagnosticoRepository
+    ): JsonResponse {
+        $error = fn(?int $diagnosticoId, string $message, int $status = 404) => $this->json([
+            "diagnostico_id" => $diagnosticoId,
+            "success" => false,
+            "content" => ["message" => $message]
+        ], $status);
+
+        $paciente = $pacienteRepository->find($id);
+        if (!$paciente) {
+            return $error(null, "No se ha encontrado el paciente.");
+        }
+
+        $ultimoDiagnostico = $diagnosticoRepository->findUltimoDiagnosticoPorPaciente($paciente);
+        if (!$ultimoDiagnostico) {
+            return $error(null, "No se ha encontrado el diagnostico del paciente.");
+        }
+
+        $detalle = $detalleDiagnosticoRepository->findUltimoPorDiagnostico($ultimoDiagnostico);
+        if (!$detalle) {
+            return $error($ultimoDiagnostico->getId(), "No se han encontrado los detalles de este diagnostico.");
+        }
+
+        return new JsonResponse([
+            'avd' => $detalle->getAvd(),
+            'o2' => $detalle->getO2(),
+            'o2_descripcion' => $detalle->getO2Descripcion(),
+            'panales' => $detalle->getPanales(),
+            'panales_descripcion' => $detalle->getPanalesDescripcion(),
+            'sv' => $detalle->getSv(),
+            'sr' => $detalle->getSr(),
+            'sng' => $detalle->getSng(),
+        ]);
+    }
 }
