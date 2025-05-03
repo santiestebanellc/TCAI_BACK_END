@@ -556,7 +556,7 @@ final class HospitalDataController extends AbstractController
             if (empty($habitaciones)) {
                 return $this->json([
                     'success' => false,
-                    'content' => [
+                    'habitacion' => [
                         'message' => 'No se encontraron habitaciones'
                     ]
                 ], Response::HTTP_NOT_FOUND);
@@ -575,7 +575,8 @@ final class HospitalDataController extends AbstractController
                     // Habitación vacía
                     $formattedResults[] = [
                         'habitacion_codigo' => $habitacionCodigo,
-                        'message' => 'empty room'
+                        'message' => 'empty room',
+                        'isEmpty' => true,
                     ];
                     continue;
                 }
@@ -629,13 +630,15 @@ final class HospitalDataController extends AbstractController
                         'protesis' => $dieta->getProtesi() ? 'Sí' : 'No',
                         'asistencia' => $dieta->getAutonomo() ? 'Independiente' : 'Dependiente',
                         'observaciones' => $registro->getObservacion()->getDescripcion()
-                    ]
+                    ],
+                    'isEmpty' => false,
+                    'alerta' => true
                 ];
             }
 
             return $this->json([
                 'success' => true,
-                'content' => $formattedResults
+                'habitacion' => $formattedResults,
             ], Response::HTTP_OK);
         } catch (\Exception $e) {
             return $this->json([
