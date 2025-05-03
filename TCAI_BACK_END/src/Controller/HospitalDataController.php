@@ -556,9 +556,10 @@ final class HospitalDataController extends AbstractController
             if (empty($habitaciones)) {
                 return $this->json([
                     'success' => false,
-                    'content' => [
+                    'habitacion' => [
                         'message' => 'No se encontraron habitaciones'
-                    ]
+                    ],
+                    'isEmpty' => true
                 ], Response::HTTP_NOT_FOUND);
             }
 
@@ -635,7 +636,9 @@ final class HospitalDataController extends AbstractController
 
             return $this->json([
                 'success' => true,
-                'content' => $formattedResults
+                'habitacion' => $formattedResults,
+                'isEmpty' => false,
+                'alerta' => true
             ], Response::HTTP_OK);
         } catch (\Exception $e) {
             return $this->json([
