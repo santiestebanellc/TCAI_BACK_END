@@ -582,7 +582,9 @@ final class HospitalDataController extends AbstractController
                     'fecha_nacimiento' => $paciente->getFechaNacimiento() ? $paciente->getFechaNacimiento()->format('Y-m-d') : null,
                     'direccion_completa' => $paciente->getDireccionCompleta(),
                     'lengua_materna' => $paciente->getLenguaMaterna(),
+                    'alergias' => $paciente->getAlergias(),
                     'antecedentes' => $paciente->getAntecedentes(),
+                    'nombre_cuidador' => $paciente->getNombreCuidador(),
                     'telefono_cuidador' => $paciente->getTelefonoCuidador()
                 ]
             ];
