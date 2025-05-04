@@ -122,6 +122,64 @@ final class HospitalDataController extends AbstractController
         }
     }
 
+    #[Route('/registro/paciente/{id}', name: 'api_registros_by_paciente', methods: ['GET'])]
+    public function getRegistrosByPaciente(int $id, RegistroRepository $registroRepository, PacienteRepository $pacienteRepository): JsonResponse
+    {
+        try {
+            $paciente = $pacienteRepository->find($id);
+
+            if (!$paciente) {
+                return new JsonResponse([
+                    'success' => false,
+                    'content' => [
+                        'message' => 'Paciente no encontrado'
+                    ]
+                ], Response::HTTP_NOT_FOUND);
+            }
+
+            $registros = $registroRepository->findBy(['paciente_id' => $paciente]);
+
+            if (empty($registros)) {
+                return new JsonResponse([
+                    'success' => false,
+                    'content' => [
+                        'message' => 'No se encontraron registros para este paciente'
+                    ]
+                ], Response::HTTP_NOT_FOUND);
+            }
+
+            $formattedResults = [];
+            foreach ($registros as $registro) {
+                $auxiliar = $registro->getAuxiliarId();
+                $observacion = $registro->getObservacion();
+
+                $formattedResults[] = [
+                    'registro_id' => $registro->getId(),
+                    'registro' => [
+                        'fecha' => $registro->getFecha() ? $registro->getFecha()->format('Y-m-d H:i:s') : null,
+                        'toma' => $registro->getToma(),
+                        'nombre_auxiliar' => $auxiliar ? $auxiliar->getNombre() : null,
+                        'numero_auxiliar' => $auxiliar ? $auxiliar->getNumTrabajador() : null,
+                        'observacion' => $observacion ? $observacion->getDescripcion() : null
+                    ]
+                ];
+            }
+
+            return new JsonResponse([
+                'success' => true,
+                'content' => $formattedResults
+            ], Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'success' => false,
+                'content' => [
+                    'message' => 'Error interno: ' . $e->getMessage()
+                ]
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
     #[Route('/registro/{id}', name: 'api_registro_by_id', methods: ['GET'])]
     public function getRegistroById(int $id, RegistroRepository $registroRepository, DietaHasTipoDietaRepository $dietaHasTipoDietaRepository, TipoDietaRepository $tipoDietaRepository): JsonResponse
     {
