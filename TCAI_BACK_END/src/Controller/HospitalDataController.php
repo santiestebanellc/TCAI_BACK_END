@@ -169,7 +169,6 @@ final class HospitalDataController extends AbstractController
                 'success' => true,
                 'content' => $formattedResults
             ], Response::HTTP_OK);
-
         } catch (\Exception $e) {
             return new JsonResponse([
                 'success' => false,
@@ -454,71 +453,138 @@ final class HospitalDataController extends AbstractController
         }
     }
 
+    // #[Route('/personal-data/{habitacion_codigo}', name: 'api_personal_data', methods: ['GET'])]
+    // public function getPersonalData(
+    //     string $habitacion_codigo,
+    //     HabitacionRepository $habitacionRepository,
+    //     PacienteRepository $pacienteRepository,
+    //     DiagnosticoRepository $diagnosticoRepository,
+    //     RegistroRepository $registroRepository,
+    //     PacienteHasHabitacionesRepository $pacienteHasHabitacionesRepository
+    // ): JsonResponse {
+    //     try {
+    //         $habitaciones = $habitacionRepository->findAll();
+    //         $data = [];
+
+    //         if (!empty($habitaciones)) {
+    //             foreach ($habitaciones as $habitacion) {
+    //                 $habitacionInfo = [
+    //                     'habitacion_codigo' => $habitacion->getCodigo(),
+    //                 ];
+
+    //                 // Obtener el último paciente relacionado con la habitación
+    //                 $paciente = $pacienteHasHabitacionesRepository->findUltimoPacientePorHabitacion($habitacion);
+
+    //                 if (!$paciente) {
+    //                     $habitacionInfo['isEmpty'] = true;
+    //                 } else {
+    //                     $habitacionInfo['isEmpty'] = false;
+
+    //                     // Obtener el último diagnóstico del paciente
+    //                     $ultimoDiagnostico = $diagnosticoRepository->findUltimoDiagnosticoPorPaciente($paciente);
+
+    //                     // Obtener el último registro del paciente
+    //                     $ultimoRegistro = $registroRepository->findByUltimoPorPaciente($paciente);
+
+    //                     // Detalles del paciente
+    //                     $habitacionInfo['paciente'] = [
+    //                         'nombre' => $paciente->getNombre(),
+    //                         'apellidos' => $paciente->getApellidos(),
+    //                         'edad' => $this->calcularEdad($paciente->getFechaNacimiento()),
+    //                         'diagnostico' => $ultimoDiagnostico ? $ultimoDiagnostico->getDiagnostico() : null,
+    //                     ];
+
+    //                     // Detalles del último registro
+    //                     $habitacionInfo['registro'] = $ultimoRegistro ? [
+    //                         'fecha' => $ultimoRegistro->getFecha()->format('Y-m-d H:i:s'),
+    //                         'nombre_auxiliar' => $ultimoRegistro->getAuxiliarId()->getNombre(),
+    //                         'numero_auxiliar' => $ultimoRegistro->getAuxiliarId()->getNumTrabajador(),
+    //                         'observaciones' => $ultimoRegistro->getObservacion()->getDescripcion(),
+    //                         'alerta' => true,
+    //                     ] : null;
+    //                 }
+    //             }
+
+    //             $data[] = $habitacionInfo;
+
+    //             return $this->json([
+    //                 'success' => true,
+    //                 'content' => [$data]
+    //             ], Response::HTTP_OK);
+    //         } else {
+    //             return $this->json([
+    //                 'success' => false,
+    //                 'message' => 'There are no rooms',
+    //                 'habitacion' => [],
+    //             ]);
+    //         }
+    //     } catch (\Exception $e) {
+    //         return $this->json([
+    //             'success' => false,
+    //             'content' => [
+    //                 'message' => 'Error interno: ' . $e->getMessage()
+    //             ]
+    //         ], Response::HTTP_INTERNAL_SERVER_ERROR);
+    //     }
+    // }
+
     #[Route('/personal-data/{habitacion_codigo}', name: 'api_personal_data', methods: ['GET'])]
     public function getPersonalData(
         string $habitacion_codigo,
+        EntityManagerInterface $entityManager,
         HabitacionRepository $habitacionRepository,
-        PacienteRepository $pacienteRepository,
-        DiagnosticoRepository $diagnosticoRepository,
-        RegistroRepository $registroRepository,
-        PacienteHasHabitacionesRepository $pacienteHasHabitacionesRepository
+        PacienteRepository $pacienteRepository
     ): JsonResponse {
         try {
-            $habitaciones = $habitacionRepository->findAll();
-            $data = [];
+            // Buscar la habitación por su código
+            $habitacion = $habitacionRepository->findOneBy(['codigo' => $habitacion_codigo]);
 
-            if (!empty($habitaciones)) {
-                foreach ($habitaciones as $habitacion) {
-                    $habitacionInfo = [
-                        'habitacion_codigo' => $habitacion->getCodigo(),
-                    ];
-
-                    // Obtener el último paciente relacionado con la habitación
-                    $paciente = $pacienteHasHabitacionesRepository->findUltimoPacientePorHabitacion($habitacion);
-
-                    if (!$paciente) {
-                        $habitacionInfo['isEmpty'] = true;
-                    } else {
-                        $habitacionInfo['isEmpty'] = false;
-
-                        // Obtener el último diagnóstico del paciente
-                        $ultimoDiagnostico = $diagnosticoRepository->findUltimoDiagnosticoPorPaciente($paciente);
-
-                        // Obtener el último registro del paciente
-                        $ultimoRegistro = $registroRepository->findByUltimoPorPaciente($paciente);
-
-                        // Detalles del paciente
-                        $habitacionInfo['paciente'] = [
-                            'nombre' => $paciente->getNombre(),
-                            'apellidos' => $paciente->getApellidos(),
-                            'edad' => $this->calcularEdad($paciente->getFechaNacimiento()),
-                            'diagnostico' => $ultimoDiagnostico ? $ultimoDiagnostico->getDiagnostico() : null,
-                        ];
-
-                        // Detalles del último registro
-                        $habitacionInfo['registro'] = $ultimoRegistro ? [
-                            'fecha' => $ultimoRegistro->getFecha()->format('Y-m-d H:i:s'),
-                            'nombre_auxiliar' => $ultimoRegistro->getAuxiliarId()->getNombre(),
-                            'numero_auxiliar' => $ultimoRegistro->getAuxiliarId()->getNumTrabajador(),
-                            'observaciones' => $ultimoRegistro->getObservacion()->getDescripcion(),
-                            'alerta' => true,
-                        ] : null;
-                    }
-                }
-
-                $data[] = $habitacionInfo;
-
-                return $this->json([
-                    'success' => true,
-                    'content' => [$data]
-                ], Response::HTTP_OK);
-            } else {
+            if (!$habitacion) {
                 return $this->json([
                     'success' => false,
-                    'message' => 'There are no rooms',
-                    'habitacion' => [],
-                ]);
+                    'content' => [
+                        'message' => 'Habitación no encontrada'
+                    ]
+                ], Response::HTTP_NOT_FOUND);
             }
+
+            // Buscar la asignación más reciente de paciente a la habitación
+            $asignacion = $entityManager->getRepository('App\Entity\PacienteHasHabitaciones')
+                ->findOneBy(['habitacion_id' => $habitacion], ['timestamp' => 'DESC']);
+
+            if (!$asignacion) {
+                return $this->json([
+                    'success' => true,
+                    'content' => [
+                        [
+                            'habitacion_codigo' => $habitacion_codigo,
+                            'message' => 'empty room'
+                        ]
+                    ]
+                ], Response::HTTP_OK);
+            }
+
+            // Obtener el paciente
+            $paciente = $asignacion->getPacienteId();
+
+            // Formatear la respuesta
+            $formattedResult = [
+                'habitacion_codigo' => $habitacion_codigo,
+                'paciente' => [
+                    'nombre' => $paciente->getNombre(),
+                    'apellidos' => $paciente->getApellidos(),
+                    'fecha_nacimiento' => $paciente->getFechaNacimiento() ? $paciente->getFechaNacimiento()->format('Y-m-d') : null,
+                    'direccion_completa' => $paciente->getDireccionCompleta(),
+                    'lengua_materna' => $paciente->getLenguaMaterna(),
+                    'antecedentes' => $paciente->getAntecedentes(),
+                    'telefono_cuidador' => $paciente->getTelefonoCuidador()
+                ]
+            ];
+
+            return $this->json([
+                'success' => true,
+                'content' => [$formattedResult]
+            ], Response::HTTP_OK);
         } catch (\Exception $e) {
             return $this->json([
                 'success' => false,
