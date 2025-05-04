@@ -620,6 +620,7 @@ final class HospitalDataController extends AbstractController
                 $formattedResults[] = [
                     'habitacion_codigo' => $habitacionCodigo,
                     'paciente' => [
+                        'id' => $paciente->getId(),
                         'nombre' => $paciente->getNombre(),
                         'apellidos' => $paciente->getApellidos(),
                         'edad' => $edad
@@ -684,6 +685,7 @@ final class HospitalDataController extends AbstractController
 
                     // Detalles del paciente
                     $habitacionInfo['paciente'] = [
+                        'id' => $paciente->getId(),
                         'nombre' => $paciente->getNombre(),
                         'apellidos' => $paciente->getApellidos(),
                         'edad' => $this->calcularEdad($paciente->getFechaNacimiento()),
