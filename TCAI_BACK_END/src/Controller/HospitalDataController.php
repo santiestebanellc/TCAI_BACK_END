@@ -226,6 +226,7 @@ final class HospitalDataController extends AbstractController
                         'ta_sistolica' => $registro->getConstantesVitalesId()->getTaSistolica(),
                         'ta_diastolica' => $registro->getConstantesVitalesId()->getTaDiastolica(),
                         'frecuencia_respiratoria' => $registro->getConstantesVitalesId()->getFrecuenciaRespiratoria(),
+                        'pulso' => $registro->getConstantesVitalesId()->getPulso(),
                         'temperatura' => $registro->getConstantesVitalesId()->getTemperatura(),
                         'saturacion_oxigeno' => $registro->getConstantesVitalesId()->getSaturacionOxigeno()
                     ],
