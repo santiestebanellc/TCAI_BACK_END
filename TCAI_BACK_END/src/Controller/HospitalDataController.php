@@ -254,7 +254,7 @@ final class HospitalDataController extends AbstractController
                     'movilizacion' => [
                         'sedestacion' => $registro->getMovilizacionId()->getSedestacion(),
                         'ayuda_deambulacion' => $registro->getMovilizacionId()->getAyudaDeambulacion(),
-                        'ayuda_decripcion' => $registro->getMovilizacionId()->getAyudaDescripcion(),
+                        'ayuda_descripcion' => $registro->getMovilizacionId()->getAyudaDescripcion(),
                         'cambios_posturales' => $registro->getMovilizacionId()->getCambiosPosturales(),
                     ],
 
@@ -265,8 +265,14 @@ final class HospitalDataController extends AbstractController
                     ],
 
                     // Observacion section
-                    'observacion' => $registro->getObservacion()->getDescripcion()
-                ]
+                    'observacion' => $registro->getObservacion()->getDescripcion(),
+
+                    'fecha' => $registro->getFecha() ? $registro->getFecha()->format('Y-m-d H:i:s') : null,
+                    'auxiliar' => [
+                        'nombre' => $registro->getAuxiliarId()->getNombre(),
+                        'num_trabajador' => $registro->getAuxiliarId()->getNumTrabajador()
+                    ]
+                ],
             ];
 
             return new JsonResponse([
