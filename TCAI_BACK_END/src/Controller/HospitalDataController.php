@@ -723,6 +723,7 @@ final class HospitalDataController extends AbstractController
         DiagnosticoRepository $diagnosticoRepository,
         DetalleDiagnosticoRepository $detalleDiagnosticoRepository
     ): JsonResponse {
+
         $error = fn(?int $diagnosticoId, string $message, int $status = 404) => $this->json([
             "diagnostico_id" => $diagnosticoId,
             "success" => false,
@@ -743,16 +744,19 @@ final class HospitalDataController extends AbstractController
         if (!$detalle) {
             return $error($ultimoDiagnostico->getId(), "No se han encontrado los detalles de este diagnostico.");
         }
-
-        return new JsonResponse([
-            'avd' => $detalle->getAvd(),
-            'o2' => $detalle->getO2(),
-            'o2_descripcion' => $detalle->getO2Descripcion(),
-            'panales' => $detalle->getPanales(),
-            'panales_descripcion' => $detalle->getPanalesDescripcion(),
-            'sv' => $detalle->getSv(),
-            'sr' => $detalle->getSr(),
-            'sng' => $detalle->getSng(),
+        return $this->json([
+            'success' => true,
+            'message' => 'Medical data found',
+            'detalle_diagnostico' => [
+                'avd' => $detalle->getAvd(),
+                'o2' => $detalle->getO2(),
+                'o2_descripcion' => $detalle->getO2Descripcion(),
+                'panales' => $detalle->getPanales(),
+                'panales_descripcion' => $detalle->getPanalesDescripcion(),
+                'sv' => $detalle->getSv(),
+                'sr' => $detalle->getSr(),
+                'sng' => $detalle->getSng(),
+            ],
         ]);
     }
 }
