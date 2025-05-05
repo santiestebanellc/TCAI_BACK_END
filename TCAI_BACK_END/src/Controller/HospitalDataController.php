@@ -882,7 +882,7 @@ final class HospitalDataController extends AbstractController
         return $this->json([
             'success' => true,
             'message' => 'Medical data found',
-            'detalle_diagnostico' => [
+            'diagnostico' => [
                 'avd' => $detalle->getAvd(),
                 'o2' => $detalle->getO2(),
                 'o2_descripcion' => $detalle->getO2Descripcion(),
