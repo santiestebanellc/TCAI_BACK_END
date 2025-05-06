@@ -97,7 +97,7 @@ final class HospitalDataController extends AbstractController
                 $diagnostico = $detalleDiagnostico->getDiagnosticoId();
                 $formattedResults[] = [
                     'diagnostico_id' => $diagnostico->getId(),
-                    'detalle_diagnostico' => [
+                    'diagnostico' => [
                         'fecha' => $diagnostico->getFecha() ? $diagnostico->getFecha()->format('Y-m-d H:i:s') : null,
                         'toma' => $diagnostico->getToma(),
                         'nombre_auxiliar' => $diagnostico->getAuxiliarId()->getNombre(),
