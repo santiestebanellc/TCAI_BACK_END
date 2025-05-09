@@ -33,6 +33,7 @@ use App\Entity\Registro;
 use App\Entity\DetalleDiagnostico;
 use App\Entity\DietaHasTipoDieta;
 use App\Entity\Drenaje;
+use App\Entity\Diagnostico;
 use App\Entity\Higiene;
 use App\Entity\Movilizacion;
 use App\Entity\Paciente;
@@ -42,6 +43,7 @@ use App\Entity\TipoHigiene;
 use App\Entity\TipoTextura;
 
 // REPOSITORIES
+use App\Repository\AuxiliarRepository;
 use App\Repository\TipoTexturaRepository;
 use App\Repository\PacienteRepository;
 use App\Repository\DetalleDiagnosticoRepository;
@@ -663,65 +665,81 @@ public function getRegistrosByPacienteHistorial(
     }
 
 
-
     #[Route('/detalle_diagnostico', name: 'api_create_detalle_diagnostico', methods: ['POST'])]
     public function createDetalleDiagnostico(
         Request $request,
         EntityManagerInterface $em,
         PacienteRepository $pacienteRepository,
+        AuxiliarRepository $auxiliarRepository
     ): JsonResponse {
         try {
             $data = json_decode($request->getContent(), true);
-
-            // Validar datos necesarios
-            if (!isset($data['paciente_id'], $data['avd'], $data['o2'], $data['panales'])) {
-                return new JsonResponse([
-                    'success' => false,
-                    'message' => 'Faltan datos requeridos (paciente_id, avd, o2, panales)'
-                ], Response::HTTP_BAD_REQUEST);
+    
+            $requiredFields = ['paciente_id', 'auxiliar_id', 'avd', 'o2', 'o2_descripcion', 'panales', 'panales_descripcion', 'sv', 'sr', 'sng'];
+            foreach ($requiredFields as $field) {
+                if (!isset($data[$field])) {
+                    return new JsonResponse([
+                        'success' => false,
+                        'message' => "Falta el campo obligatorio: $field"
+                    ], JsonResponse::HTTP_BAD_REQUEST);
+                }
             }
-
+    
             $paciente = $pacienteRepository->find($data['paciente_id']);
             if (!$paciente) {
                 return new JsonResponse([
                     'success' => false,
                     'message' => 'Paciente no encontrado'
-                ], Response::HTTP_NOT_FOUND);
+                ], JsonResponse::HTTP_NOT_FOUND);
             }
-
-            // Crear Diagnostico básico
-            $diagnostico = new \App\Entity\Diagnostico();
+    
+            $auxiliar = $auxiliarRepository->find($data['auxiliar_id']);
+            if (!$auxiliar) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Auxiliar no encontrado'
+                ], JsonResponse::HTTP_NOT_FOUND);
+            }
+    
+            // Crear diagnóstico
+            $diagnostico = new Diagnostico();
             $diagnostico->setPacienteId($paciente);
-            $diagnostico->setFecha(new \DateTime());
-            $diagnostico->setToma('Automática');
-
-            // Simulación de auxiliar (puedes cambiarlo por autenticado o fijo)
-            $auxiliar = $paciente->getHabitacion()->getAuxiliar(); // O cualquier lógica
             $diagnostico->setAuxiliarId($auxiliar);
-
+            $diagnostico->setFecha(new \DateTime());
+            $diagnostico->setToma($this->calcularToma(new \DateTime()));
+            $diagnostico->setDiagnostico($data['diagnostico'] ?? '');
+            $diagnostico->setMotivo($data['motivo'] ?? '');
+    
             $em->persist($diagnostico);
             $em->flush();
-
-            // Crear DetalleDiagnostico
+    
+            // Crear detalle
             $detalle = new DetalleDiagnostico();
             $detalle->setDiagnosticoId($diagnostico);
             $detalle->setAvd($data['avd']);
-            $detalle->setO2((int)$data['o2']);
-            $detalle->setPanales((int)$data['panales']);
-
+            $detalle->setO2((int) $data['o2']);
+            $detalle->setO2Descripcion($data['o2_descripcion']);
+            $detalle->setPanales((int) $data['panales']);
+            $detalle->setPanalesDescripcion($data['panales_descripcion']);
+            $detalle->setSv($data['sv']);
+            $detalle->setSr($data['sr']);
+            $detalle->setSng($data['sng']);
+    
             $em->persist($detalle);
             $em->flush();
-
+    
             return new JsonResponse([
                 'success' => true,
-                'message' => 'DetalleDiagnostico creado con éxito',
-                'detalle_diagnostico_id' => $detalle->getId()
-            ], Response::HTTP_CREATED);
+                'message' => 'Diagnóstico y detalle creados con éxito',
+                'diagnostico_id' => $diagnostico->getId(),
+                'detalle_id' => $detalle->getId()
+            ], JsonResponse::HTTP_CREATED);
+    
         } catch (\Exception $e) {
             return new JsonResponse([
                 'success' => false,
                 'message' => 'Error interno: ' . $e->getMessage()
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            ], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
