@@ -122,6 +122,65 @@ final class HospitalDataController extends AbstractController
         }
     }
 
+    #[Route('/registro/paciente/historia/{id}', name: 'api_registro_historial_by_paciente', methods: ['GET'])]
+public function getRegistrosByPacienteHistorial(
+    int $id,
+    RegistroRepository $registroRepository,
+    PacienteRepository $pacienteRepository
+): JsonResponse {
+    try {
+        $paciente = $pacienteRepository->find($id);
+
+        if (!$paciente) {
+            return new JsonResponse([
+                'success' => false,
+                'content' => ['message' => 'Paciente no encontrado']
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        $registros = $registroRepository->findBy(['paciente_id' => $paciente]);
+
+        if (empty($registros)) {
+            return new JsonResponse([
+                'success' => false,
+                'content' => ['message' => 'No se encontraron registros para este paciente.']
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        $formattedResults = [];
+
+        foreach ($registros as $registro) {
+            $constantes = $registro->getConstantesVitalesId(); 
+
+            if ($constantes) {
+                $formattedResults[] = [
+                    'timestamp' => $registro->getFecha()->format('Y-m-d\TH:i:s\Z'),
+                    'constantes_vitales' => [
+                        'ta_sistolica' => $constantes->getTaSistolica(),
+                        'ta_diastolica' => $constantes->getTaDiastolica(),
+                        'temperatura' => $constantes->getTemperatura(),
+                        'pulso' => $constantes->getPulso(),
+                        'frecuencia_respiratoria' => $constantes->getFrecuenciaRespiratoria(),
+                        'spo2' => $constantes->getSaturacionOxigeno(),
+                    ]
+                ];
+            }
+        }
+
+        return $this->json([
+            'success' => true,
+            'content' => $formattedResults
+        ], Response::HTTP_OK);
+
+    } catch (\Exception $e) {
+        return $this->json([
+            'success' => false,
+            'content' => ['message' => $e->getMessage()]
+        ], Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
+}
+
+    
     #[Route('/registro/paciente/{id}', name: 'api_registros_by_paciente', methods: ['GET'])]
     public function getRegistrosByPaciente(int $id, RegistroRepository $registroRepository, PacienteRepository $pacienteRepository): JsonResponse
     {
