@@ -125,64 +125,63 @@ final class HospitalDataController extends AbstractController
     }
 
     #[Route('/registro/paciente/historia/{id}', name: 'api_registro_historial_by_paciente', methods: ['GET'])]
-public function getRegistrosByPacienteHistorial(
-    int $id,
-    RegistroRepository $registroRepository,
-    PacienteRepository $pacienteRepository
-): JsonResponse {
-    try {
-        $paciente = $pacienteRepository->find($id);
+    public function getRegistrosByPacienteHistorial(
+        int $id,
+        RegistroRepository $registroRepository,
+        PacienteRepository $pacienteRepository
+    ): JsonResponse {
+        try {
+            $paciente = $pacienteRepository->find($id);
 
-        if (!$paciente) {
-            return new JsonResponse([
-                'success' => false,
-                'content' => ['message' => 'Paciente no encontrado']
-            ], Response::HTTP_NOT_FOUND);
-        }
-
-        $registros = $registroRepository->findBy(['paciente_id' => $paciente]);
-
-        if (empty($registros)) {
-            return new JsonResponse([
-                'success' => false,
-                'content' => ['message' => 'No se encontraron registros para este paciente.']
-            ], Response::HTTP_NOT_FOUND);
-        }
-
-        $formattedResults = [];
-
-        foreach ($registros as $registro) {
-            $constantes = $registro->getConstantesVitalesId(); 
-
-            if ($constantes) {
-                $formattedResults[] = [
-                    'timestamp' => $registro->getFecha()->format('Y-m-d\TH:i:s\Z'),
-                    'constantes_vitales' => [
-                        'ta_sistolica' => $constantes->getTaSistolica(),
-                        'ta_diastolica' => $constantes->getTaDiastolica(),
-                        'temperatura' => $constantes->getTemperatura(),
-                        'pulso' => $constantes->getPulso(),
-                        'frecuencia_respiratoria' => $constantes->getFrecuenciaRespiratoria(),
-                        'spo2' => $constantes->getSaturacionOxigeno(),
-                    ]
-                ];
+            if (!$paciente) {
+                return new JsonResponse([
+                    'success' => false,
+                    'content' => ['message' => 'Paciente no encontrado']
+                ], Response::HTTP_NOT_FOUND);
             }
+
+            $registros = $registroRepository->findBy(['paciente_id' => $paciente]);
+
+            if (empty($registros)) {
+                return new JsonResponse([
+                    'success' => false,
+                    'content' => ['message' => 'No se encontraron registros para este paciente.']
+                ], Response::HTTP_NOT_FOUND);
+            }
+
+            $formattedResults = [];
+
+            foreach ($registros as $registro) {
+                $constantes = $registro->getConstantesVitalesId();
+
+                if ($constantes) {
+                    $formattedResults[] = [
+                        'timestamp' => $registro->getFecha()->format('Y-m-d\TH:i:s\Z'),
+                        'constantes_vitales' => [
+                            'ta_sistolica' => $constantes->getTaSistolica(),
+                            'ta_diastolica' => $constantes->getTaDiastolica(),
+                            'temperatura' => $constantes->getTemperatura(),
+                            'pulso' => $constantes->getPulso(),
+                            'frecuencia_respiratoria' => $constantes->getFrecuenciaRespiratoria(),
+                            'spo2' => $constantes->getSaturacionOxigeno(),
+                        ]
+                    ];
+                }
+            }
+
+            return $this->json([
+                'success' => true,
+                'content' => $formattedResults
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return $this->json([
+                'success' => false,
+                'content' => ['message' => $e->getMessage()]
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-
-        return $this->json([
-            'success' => true,
-            'content' => $formattedResults
-        ], Response::HTTP_OK);
-
-    } catch (\Exception $e) {
-        return $this->json([
-            'success' => false,
-            'content' => ['message' => $e->getMessage()]
-        ], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
-}
 
-    
+
     #[Route('/registro/paciente/{id}', name: 'api_registros_by_paciente', methods: ['GET'])]
     public function getRegistrosByPaciente(int $id, RegistroRepository $registroRepository, PacienteRepository $pacienteRepository): JsonResponse
     {
@@ -674,33 +673,33 @@ public function getRegistrosByPacienteHistorial(
     ): JsonResponse {
         try {
             $data = json_decode($request->getContent(), true);
-    
+
             $requiredFields = ['paciente_id', 'auxiliar_id', 'avd', 'o2', 'o2_descripcion', 'panales', 'panales_descripcion', 'sv', 'sr', 'sng'];
             foreach ($requiredFields as $field) {
                 if (!isset($data[$field])) {
                     return new JsonResponse([
                         'success' => false,
                         'message' => "Falta el campo obligatorio: $field"
-                    ], JsonResponse::HTTP_BAD_REQUEST);
+                    ], Response::HTTP_BAD_REQUEST);
                 }
             }
-    
+
             $paciente = $pacienteRepository->find($data['paciente_id']);
             if (!$paciente) {
                 return new JsonResponse([
                     'success' => false,
                     'message' => 'Paciente no encontrado'
-                ], JsonResponse::HTTP_NOT_FOUND);
+                ], Response::HTTP_NOT_FOUND);
             }
-    
+
             $auxiliar = $auxiliarRepository->find($data['auxiliar_id']);
             if (!$auxiliar) {
                 return new JsonResponse([
                     'success' => false,
                     'message' => 'Auxiliar no encontrado'
-                ], JsonResponse::HTTP_NOT_FOUND);
+                ], Response::HTTP_NOT_FOUND);
             }
-    
+
             // Crear diagnóstico
             $diagnostico = new Diagnostico();
             $diagnostico->setPacienteId($paciente);
@@ -709,10 +708,10 @@ public function getRegistrosByPacienteHistorial(
             $diagnostico->setToma($this->calcularToma(new \DateTime()));
             $diagnostico->setDiagnostico($data['diagnostico'] ?? '');
             $diagnostico->setMotivo($data['motivo'] ?? '');
-    
+
             $em->persist($diagnostico);
             $em->flush();
-    
+
             // Crear detalle
             $detalle = new DetalleDiagnostico();
             $detalle->setDiagnosticoId($diagnostico);
@@ -724,22 +723,21 @@ public function getRegistrosByPacienteHistorial(
             $detalle->setSv($data['sv']);
             $detalle->setSr($data['sr']);
             $detalle->setSng($data['sng']);
-    
+
             $em->persist($detalle);
             $em->flush();
-    
+
             return new JsonResponse([
                 'success' => true,
                 'message' => 'Diagnóstico y detalle creados con éxito',
                 'diagnostico_id' => $diagnostico->getId(),
                 'detalle_id' => $detalle->getId()
-            ], JsonResponse::HTTP_CREATED);
-    
+            ], Response::HTTP_CREATED);
         } catch (\Exception $e) {
             return new JsonResponse([
                 'success' => false,
                 'message' => 'Error interno: ' . $e->getMessage()
-            ], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -942,32 +940,47 @@ public function getRegistrosByPacienteHistorial(
             "content" => ["message" => $message]
         ], $status);
 
-        $paciente = $pacienteRepository->find($id);
-        if (!$paciente) {
-            return $error(null, "No se ha encontrado el paciente.");
+        // Find the detalle_diagnostico by ID
+        $diagnostico = $diagnosticoRepository->find($id);
+        if (!$diagnostico) {
+            return $error(null, "No se ha encontrado el diagnostico.");
         }
 
-        $ultimoDiagnostico = $diagnosticoRepository->findUltimoDiagnosticoPorPaciente($paciente);
-        if (!$ultimoDiagnostico) {
-            return $error(null, "No se ha encontrado el diagnostico del paciente.");
-        }
+        // $ultimoDiagnostico = $diagnosticoRepository->findUltimoDiagnosticoPorPaciente($paciente);
+        // if (!$ultimoDiagnostico) {
+        //     return $error(null, "No se ha encontrado el diagnostico del paciente.");
+        // }
 
-        $detalle = $detalleDiagnosticoRepository->findUltimoPorDiagnostico($ultimoDiagnostico);
+        $detalle = $detalleDiagnosticoRepository->find($diagnostico->getId());
         if (!$detalle) {
-            return $error($ultimoDiagnostico->getId(), "No se han encontrado los detalles de este diagnostico.");
+            return $error($detalle, "No se han encontrado los detalles de este diagnostico.");
         }
+
+        $panalesDescripcion = $diagnostico->getPanalesDescripcion();
+
+        [$panales_descripcion, $panales_cambios] = array_map('trim', explode('::', $panalesDescripcion, 2));
+
+
         return $this->json([
             'success' => true,
             'message' => 'Medical data found',
-            'diagnostico' => [
-                'avd' => $detalle->getAvd(),
-                'o2' => $detalle->getO2(),
-                'o2_descripcion' => $detalle->getO2Descripcion(),
-                'panales' => $detalle->getPanales(),
-                'panales_descripcion' => $detalle->getPanalesDescripcion(),
-                'sv' => $detalle->getSv(),
-                'sr' => $detalle->getSr(),
-                'sng' => $detalle->getSng(),
+            'content' => [
+                'diagnostico' => [
+                    'avd' => $detalle->getAvd(),
+                    'o2' => $detalle->getO2(),
+                    'o2_descripcion' => $detalle->getO2Descripcion(),
+                    'panales' => $detalle->getPanales(),
+                    'panales_descripcion' => $panales_descripcion,
+                    'panales_cambios' => (int) $panales_cambios,
+                    'sv' => $detalle->getSv(),
+                    'sr' => $detalle->getSr(),
+                    'sng' => $detalle->getSng(),
+                ],
+                'id' => $diagnostico->getId(),
+                'fecha' => $diagnostico->getFecha()->format('Y-m-d H:i:s'),
+                'toma' => $diagnostico->getToma(),
+                'paciente_id' => $diagnostico->getPacienteId()->getId(),
+                'auxiliar_id' => $diagnostico->getAuxiliarId()->getId(),
             ],
         ]);
     }
