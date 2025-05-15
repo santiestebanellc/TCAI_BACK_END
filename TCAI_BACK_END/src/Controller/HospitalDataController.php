@@ -956,11 +956,6 @@ final class HospitalDataController extends AbstractController
             return $error($detalle, "No se han encontrado los detalles de este diagnostico.");
         }
 
-        $panalesDescripcion = $diagnostico->getPanalesDescripcion();
-
-        [$panales_descripcion, $panales_cambios] = array_map('trim', explode('::', $panalesDescripcion, 2));
-
-
         return $this->json([
             'success' => true,
             'message' => 'Medical data found',
@@ -969,9 +964,7 @@ final class HospitalDataController extends AbstractController
                     'avd' => $detalle->getAvd(),
                     'o2' => $detalle->getO2(),
                     'o2_descripcion' => $detalle->getO2Descripcion(),
-                    'panales' => $detalle->getPanales(),
-                    'panales_descripcion' => $panales_descripcion,
-                    'panales_cambios' => (int) $panales_cambios,
+                    'panales_descripcion' => $detalle->getPanalesDescripcion(),
                     'sv' => $detalle->getSv(),
                     'sr' => $detalle->getSr(),
                     'sng' => $detalle->getSng(),
