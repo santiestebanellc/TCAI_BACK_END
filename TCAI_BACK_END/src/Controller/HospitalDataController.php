@@ -88,8 +88,10 @@ final class HospitalDataController extends AbstractController
 
             // Get detalle_diagnostico associated with the diagnostico IDs
             $detalleDiagnosticos = $detalleDiagnosticoRepository->createQueryBuilder('dd')
-                ->where('dd.diagnostico_id IN (:diagnosticoIds)')
+                ->innerJoin('dd.diagnostico_id', 'd')
+                ->where('d.id IN (:diagnosticoIds)')
                 ->setParameter('diagnosticoIds', $diagnosticoIds)
+                ->orderBy('d.fecha', 'DESC')
                 ->getQuery()
                 ->getResult();
 
@@ -197,7 +199,10 @@ final class HospitalDataController extends AbstractController
                 ], Response::HTTP_NOT_FOUND);
             }
 
-            $registros = $registroRepository->findBy(['paciente_id' => $paciente]);
+            $registros = $registroRepository->findBy(
+                ['paciente_id' => $paciente],
+                ['fecha' => 'DESC']
+            );
 
             if (empty($registros)) {
                 return new JsonResponse([
@@ -212,6 +217,7 @@ final class HospitalDataController extends AbstractController
             foreach ($registros as $registro) {
                 $auxiliar = $registro->getAuxiliarId();
                 $observacion = $registro->getObservacion();
+                $constantes_vitales = $registro->getConstantesVitalesId();
 
                 $formattedResults[] = [
                     'registro_id' => $registro->getId(),
@@ -220,6 +226,14 @@ final class HospitalDataController extends AbstractController
                         'toma' => $registro->getToma(),
                         'nombre_auxiliar' => $auxiliar ? $auxiliar->getNombre() : null,
                         'numero_auxiliar' => $auxiliar ? $auxiliar->getNumTrabajador() : null,
+                        'constantes_vitales' => [
+                            'ta_sistolica' => $constantes_vitales ? $constantes_vitales->getTaSistolica() : null,
+                            'ta_diastolica' => $constantes_vitales ? $constantes_vitales->getTaDiastolica() : null,
+                            'frecuencia_respiratoria' => $constantes_vitales ? $constantes_vitales->getFrecuenciaRespiratoria() : null,
+                            'pulso' => $constantes_vitales ? $constantes_vitales->getPulso() : null,
+                            'temperatura' => $constantes_vitales ? $constantes_vitales->getTemperatura() : null,
+                            'saturacion_oxigeno' => $constantes_vitales ? $constantes_vitales->getSaturacionOxigeno() : null
+                        ],
                         'observacion' => $observacion ? $observacion->getDescripcion() : null
                     ]
                 ];
@@ -501,10 +515,6 @@ final class HospitalDataController extends AbstractController
         }
     }
 
-
-
-
-
     // Calcula la toma (Mañana, Tarde, Noche) según la fecha
     private function calcularToma(\DateTimeInterface $fecha): string
     {
@@ -518,81 +528,6 @@ final class HospitalDataController extends AbstractController
             return 'N'; // Noche
         }
     }
-
-    // #[Route('/personal-data/{habitacion_codigo}', name: 'api_personal_data', methods: ['GET'])]
-    // public function getPersonalData(
-    //     string $habitacion_codigo,
-    //     HabitacionRepository $habitacionRepository,
-    //     PacienteRepository $pacienteRepository,
-    //     DiagnosticoRepository $diagnosticoRepository,
-    //     RegistroRepository $registroRepository,
-    //     PacienteHasHabitacionesRepository $pacienteHasHabitacionesRepository
-    // ): JsonResponse {
-    //     try {
-    //         $habitaciones = $habitacionRepository->findAll();
-    //         $data = [];
-
-    //         if (!empty($habitaciones)) {
-    //             foreach ($habitaciones as $habitacion) {
-    //                 $habitacionInfo = [
-    //                     'habitacion_codigo' => $habitacion->getCodigo(),
-    //                 ];
-
-    //                 // Obtener el último paciente relacionado con la habitación
-    //                 $paciente = $pacienteHasHabitacionesRepository->findUltimoPacientePorHabitacion($habitacion);
-
-    //                 if (!$paciente) {
-    //                     $habitacionInfo['isEmpty'] = true;
-    //                 } else {
-    //                     $habitacionInfo['isEmpty'] = false;
-
-    //                     // Obtener el último diagnóstico del paciente
-    //                     $ultimoDiagnostico = $diagnosticoRepository->findUltimoDiagnosticoPorPaciente($paciente);
-
-    //                     // Obtener el último registro del paciente
-    //                     $ultimoRegistro = $registroRepository->findByUltimoPorPaciente($paciente);
-
-    //                     // Detalles del paciente
-    //                     $habitacionInfo['paciente'] = [
-    //                         'nombre' => $paciente->getNombre(),
-    //                         'apellidos' => $paciente->getApellidos(),
-    //                         'edad' => $this->calcularEdad($paciente->getFechaNacimiento()),
-    //                         'diagnostico' => $ultimoDiagnostico ? $ultimoDiagnostico->getDiagnostico() : null,
-    //                     ];
-
-    //                     // Detalles del último registro
-    //                     $habitacionInfo['registro'] = $ultimoRegistro ? [
-    //                         'fecha' => $ultimoRegistro->getFecha()->format('Y-m-d H:i:s'),
-    //                         'nombre_auxiliar' => $ultimoRegistro->getAuxiliarId()->getNombre(),
-    //                         'numero_auxiliar' => $ultimoRegistro->getAuxiliarId()->getNumTrabajador(),
-    //                         'observaciones' => $ultimoRegistro->getObservacion()->getDescripcion(),
-    //                         'alerta' => true,
-    //                     ] : null;
-    //                 }
-    //             }
-
-    //             $data[] = $habitacionInfo;
-
-    //             return $this->json([
-    //                 'success' => true,
-    //                 'content' => [$data]
-    //             ], Response::HTTP_OK);
-    //         } else {
-    //             return $this->json([
-    //                 'success' => false,
-    //                 'message' => 'There are no rooms',
-    //                 'habitacion' => [],
-    //             ]);
-    //         }
-    //     } catch (\Exception $e) {
-    //         return $this->json([
-    //             'success' => false,
-    //             'content' => [
-    //                 'message' => 'Error interno: ' . $e->getMessage()
-    //             ]
-    //         ], Response::HTTP_INTERNAL_SERVER_ERROR);
-    //     }
-    // }
 
     #[Route('/personal-data/{habitacion_codigo}', name: 'api_personal_data', methods: ['GET'])]
     public function getPersonalData(
