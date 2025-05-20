@@ -899,6 +899,7 @@ final class HospitalDataController extends AbstractController
                     'avd' => $detalle->getAvd(),
                     'o2' => $detalle->getO2(),
                     'o2_descripcion' => $detalle->getO2Descripcion(),
+                    'panales' => $detalle->getPanales(),
                     'panales_descripcion' => $detalle->getPanalesDescripcion(),
                     'sv' => $detalle->getSv(),
                     'sr' => $detalle->getSr(),
