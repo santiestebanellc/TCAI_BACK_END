@@ -253,15 +253,173 @@ final class HospitalDataController extends AbstractController
         }
     }
 
+   #[Route('/alertas', name: 'api_alertas_all', methods: ['GET'])]
+public function getAllAlertas(RegistroRepository $registroRepository, PacienteRepository $pacienteRepository): JsonResponse
+{
+    try {
+        $pacientes = $pacienteRepository->findAll();
+
+        if (empty($pacientes)) {
+            return new JsonResponse([
+                'success' => false,
+                'content' => [
+                    'message' => 'No se encontraron pacientes'
+                ]
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        $rangosNormales = [
+            'ta_sistolica' => ['min' => 90, 'max' => 120],
+            'ta_diastolica' => ['min' => 60, 'max' => 80],
+            'frecuencia_respiratoria' => ['min' => 12, 'max' => 20],
+            'pulso' => ['min' => 60, 'max' => 100],
+            'temperatura' => ['min' => 36.1, 'max' => 37.2],
+            'saturacion_oxigeno' => ['min' => 95, 'max' => 100],
+        ];
+
+        $alertas = [];
+        foreach ($pacientes as $index => $paciente) {
+            $registros = $registroRepository->findBy(
+                ['paciente_id' => $paciente],
+                ['fecha' => 'DESC'],
+                1,
+                0
+            );
+
+            if (empty($registros)) {
+                continue;
+            }
+
+            $registro = $registros[0];
+            $constantesVitales = $registro->getConstantesVitalesId();
+            if (!$constantesVitales) {
+                continue;
+            }
+
+            // Generar un número de habitación como "H001", "H002", etc.
+            $roomNumber = sprintf('H%03d', $index + 1); // H001, H002, ...
+
+            $alerta = [
+                'registro_id' => $registro->getId(),
+                'fecha' => $registro->getFecha() ? $registro->getFecha()->format('Y-m-d H:i:s') : null,
+                'paciente_id' => $paciente->getId(),
+                'paciente_nombre' => $paciente->getNombre(),
+                'room' => $roomNumber, // Añadimos el campo room
+                'alertas' => []
+            ];
+
+            if ($constantesVitales->getTaSistolica() !== null && 
+                ($constantesVitales->getTaSistolica() < $rangosNormales['ta_sistolica']['min'] || 
+                 $constantesVitales->getTaSistolica() > $rangosNormales['ta_sistolica']['max'])) {
+                $alerta['alertas'][] = [
+                    'parametro' => 'ta_sistolica',
+                    'valor' => $constantesVitales->getTaSistolica(),
+                    'mensaje' => 'Presión arterial sistólica fuera del rango normal (' . 
+                                 $rangosNormales['ta_sistolica']['min'] . '-' . 
+                                 $rangosNormales['ta_sistolica']['max'] . ' mmHg)'
+                ];
+            }
+
+            if ($constantesVitales->getTaDiastolica() !== null && 
+                ($constantesVitales->getTaDiastolica() < $rangosNormales['ta_diastolica']['min'] || 
+                 $constantesVitales->getTaDiastolica() > $rangosNormales['ta_diastolica']['max'])) {
+                $alerta['alertas'][] = [
+                    'parametro' => 'ta_diastolica',
+                    'valor' => $constantesVitales->getTaDiastolica(),
+                    'mensaje' => 'Presión arterial diastólica fuera del rango normal (' . 
+                                 $rangosNormales['ta_diastolica']['min'] . '-' . 
+                                 $rangosNormales['ta_diastolica']['max'] . ' mmHg)'
+                ];
+            }
+
+            if ($constantesVitales->getFrecuenciaRespiratoria() !== null && 
+                ($constantesVitales->getFrecuenciaRespiratoria() < $rangosNormales['frecuencia_respiratoria']['min'] || 
+                 $constantesVitales->getFrecuenciaRespiratoria() > $rangosNormales['frecuencia_respiratoria']['max'])) {
+                $alerta['alertas'][] = [
+                    'parametro' => 'frecuencia_respiratoria',
+                    'valor' => $constantesVitales->getFrecuenciaRespiratoria(),
+                    'mensaje' => 'Frecuencia respiratoria fuera del rango normal (' . 
+                                 $rangosNormales['frecuencia_respiratoria']['min'] . '-' . 
+                                 $rangosNormales['frecuencia_respiratoria']['max'] . ' respiraciones/min)'
+                ];
+            }
+
+            if ($constantesVitales->getPulso() !== null && 
+                ($constantesVitales->getPulso() < $rangosNormales['pulso']['min'] || 
+                 $constantesVitales->getPulso() > $rangosNormales['pulso']['max'])) {
+                $alerta['alertas'][] = [
+                    'parametro' => 'pulso',
+                    'valor' => $constantesVitales->getPulso(),
+                    'mensaje' => 'Pulso fuera del rango normal (' . 
+                                 $rangosNormales['pulso']['min'] . '-' . 
+                                 $rangosNormales['pulso']['max'] . ' latidos/min)'
+                ];
+            }
+
+            if ($constantesVitales->getTemperatura() !== null && 
+                ($constantesVitales->getTemperatura() < $rangosNormales['temperatura']['min'] || 
+                 $constantesVitales->getTemperatura() > $rangosNormales['temperatura']['max'])) {
+                $alerta['alertas'][] = [
+                    'parametro' => 'temperatura',
+                    'valor' => $constantesVitales->getTemperatura(),
+                    'mensaje' => 'Temperatura fuera del rango normal (' . 
+                                 $rangosNormales['temperatura']['min'] . '-' . 
+                                 $rangosNormales['temperatura']['max'] . ' °C)'
+                ];
+            }
+
+            if ($constantesVitales->getSaturacionOxigeno() !== null && 
+                ($constantesVitales->getSaturacionOxigeno() < $rangosNormales['saturacion_oxigeno']['min'] || 
+                 $constantesVitales->getSaturacionOxigeno() > $rangosNormales['saturacion_oxigeno']['max'])) {
+                $alerta['alertas'][] = [
+                    'parametro' => 'saturacion_oxigeno',
+                    'valor' => $constantesVitales->getSaturacionOxigeno(),
+                    'mensaje' => 'Saturación de oxígeno fuera del rango normal (' . 
+                                 $rangosNormales['saturacion_oxigeno']['min'] . '-' . 
+                                 $rangosNormales['saturacion_oxigeno']['max'] . ' %)'
+                ];
+            }
+
+            if (!empty($alerta['alertas'])) {
+                $alertas[] = $alerta;
+            }
+        }
+
+        if (empty($alertas)) {
+            return new JsonResponse([
+                'success' => true,
+                'content' => [
+                    'message' => 'No se encontraron alertas para ningún paciente',
+                    'alertas' => []
+                ]
+            ], Response::HTTP_OK);
+        }
+
+        return new JsonResponse([
+            'success' => true,
+            'content' => [
+                'message' => 'Alertas encontradas para todos los pacientes',
+                'alertas' => $alertas
+            ]
+        ], Response::HTTP_OK);
+    } catch (\Exception $e) {
+        return new JsonResponse([
+            'success' => false,
+            'content' => [
+                'message' => 'Error al procesar la solicitud: ' . $e->getMessage()
+            ]
+        ], Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
+}
+
+
     #[Route('/registro/{id}', name: 'api_registro_by_id', methods: ['GET'])]
     public function getRegistroById(int $id, RegistroRepository $registroRepository, DietaHasTipoDietaRepository $dietaHasTipoDietaRepository, TipoDietaRepository $tipoDietaRepository): JsonResponse
     {
         try {
 
-            // Find the registro by ID
             $registro = $registroRepository->find($id);
 
-            // Return 404 if not found
             if (!$registro) {
                 return $this->json([
                     'success' => false,
@@ -269,16 +427,12 @@ final class HospitalDataController extends AbstractController
                 ], Response::HTTP_NOT_FOUND);
             }
 
-            // Get the entities associated with the registro
             $dieta = $registro->getDietaId();
 
-            // Handle the tipo_dieta many-to-many relationship
             $tipoDietaDescriptions = [];
 
-            // Get all DietaHasTipoDieta records for this dieta
             $dietaHasTipoDietas = $dietaHasTipoDietaRepository->findBy(['dieta_id' => $dieta->getId()]);
 
-            // Extract the description from each TipoDieta
             foreach ($dietaHasTipoDietas as $relation) {
                 $tipoDietaId = $relation->getTipoDietaId();
                 $tipoDieta = $tipoDietaRepository->find($tipoDietaId);
@@ -288,13 +442,10 @@ final class HospitalDataController extends AbstractController
                 }
             }
 
-            // Combine all descriptions into a single string
             $tipoDietaString = implode(', ', $tipoDietaDescriptions);
 
-            // Construct the response data according to the required format
             $responseData = [
                 'registro' => [
-                    // Constantes vitales section
                     'constantes_vitales' => [
                         'ta_sistolica' => $registro->getConstantesVitalesId()->getTaSistolica(),
                         'ta_diastolica' => $registro->getConstantesVitalesId()->getTaDiastolica(),
@@ -304,7 +455,6 @@ final class HospitalDataController extends AbstractController
                         'saturacion_oxigeno' => $registro->getConstantesVitalesId()->getSaturacionOxigeno()
                     ],
 
-                    // Dieta section with the tipo_dieta relationship
                     'dieta' => [
                         'autonomo' => $dieta->getAutonomo(),
                         'protesi' => $dieta->getProtesi(),
@@ -312,19 +462,15 @@ final class HospitalDataController extends AbstractController
                         'tipo_textura' => $dieta->getTipoTexturaId()->getDescripcion(),
                     ],
 
-                    // Sueroterapia section
                     'sueroterapia' => $registro->getSueroterapiaId()->getDosis(),
 
-                    // Balance hidrico section
                     'balance_hidrico' => [
                         'diuresis' => $registro->getBalanceHidricoId()->getDiuresis(),
                         'deposicion' => $registro->getBalanceHidricoId()->getDeposicion(),
                     ],
 
-                    // Drenaje section
                     'drenaje' => $registro->getDrenajeId()->getDescripcion(),
 
-                    // Movilizacion section
                     'movilizacion' => [
                         'sedestacion' => $registro->getMovilizacionId()->getSedestacion(),
                         'ayuda_deambulacion' => $registro->getMovilizacionId()->getAyudaDeambulacion(),
@@ -332,13 +478,11 @@ final class HospitalDataController extends AbstractController
                         'cambios_posturales' => $registro->getMovilizacionId()->getCambiosPosturales(),
                     ],
 
-                    // Higiene section
                     'higiene' => [
                         'tipo_higiene' => $registro->getHigieneId()->getTipo()->getDescripcion(),
                         'higiene_descripcion' => $registro->getHigieneId()->getDescripcion(),
                     ],
 
-                    // Observacion section
                     'observacion' => $registro->getObservacion()->getDescripcion(),
 
                     'fecha' => $registro->getFecha() ? $registro->getFecha()->format('Y-m-d H:i:s') : null,
