@@ -62,13 +62,13 @@ final class Version20250417152741 extends AbstractMigration
 
         // SEEDERS
         // 1. Tipos de higiene
-        $this->addSql("INSERT INTO tipo_higiene (descripcion) VALUES ('Baño completo'), ('Higiene parcial'), ('Cambio de ropa')");
+        $this->addSql("INSERT INTO tipo_higiene (descripcion) VALUES  ('Allitat'), ('Parcial al llit'), ('Dutxa amb ajuda'), ('Autònom')");
 
         // 2. Tipos de textura
-        $this->addSql("INSERT INTO tipo_textura (descripcion) VALUES ('Sólida'), ('Puré'), ('Líquida')");
+        $this->addSql("INSERT INTO tipo_textura (descripcion) VALUES ('Absoluta'), ('Hídrica'), ('Líquida'), ('Túrmix'), ('Semitova'), ('Tova'), ('Fàcil masticació'), ('Basal Vegetariana'), ('Basal Vegana'), ('Basal Halal'), ('Basal Mediterrània')");
 
         // 3. Tipos de dieta
-        $this->addSql("INSERT INTO tipo_dieta (descripcion) VALUES ('Baja en sal'), ('Diabética'), ('Alta en fibra')");
+        $this->addSql("INSERT INTO tipo_dieta (descripcion) VALUES ('Diabètica'), ('Hipolipídica'), ('Hipocalòrica'), ('Hipercalòrica'), ('Hipoproteica'), ('Hiperproteica'), ('Astringent'), ('Baixa en residus'), ('Celíaca'), ('Rica en fibra'), ('Sense lactosa'), ('Sense fruits secs'), ('Sense ou'), ('Sense porc')");
 
         // 4. Auxiliares (3 auxiliares con contraseñas hasheadas usando bcrypt)
         $this->addSql("INSERT INTO auxiliar (num_trabajador, nombre, apellidos, contraseña) VALUES 
@@ -123,23 +123,23 @@ final class Version20250417152741 extends AbstractMigration
 
         // 9. Detalles de diagnóstico (uno por diagnóstico, total 17)
         $this->addSql("INSERT INTO detalle_diagnostico (o2, o2_descripcion, panales, panales_descripcion, sv, sr, sng, avd, diagnostico_id_id) VALUES
-            (2, 'Oxígeno a 2 L/min', 2, 'Cambio cada 4 horas', 'Sonda vesical colocada', 'No aplica', 'No aplica', 'Dependiente', 1),
-            (0, 'No requiere oxígeno', 0, 'No usa pañales', 'No aplica', 'No aplica', 'No aplica', 'Independiente', 2),
-            (3, 'Oxígeno a 3 L/min', 0, 'No usa pañales', 'No aplica', 'No aplica', 'No aplica', 'Parcialmente dependiente', 3),
-            (0, 'No requiere oxígeno', 1, 'Cambio cada 6 horas', 'No aplica', 'No aplica', 'No aplica', 'Independiente', 4),
-            (0, 'No requiere oxígeno', 0, 'No usa pañales', 'No aplica', 'No aplica', 'No aplica', 'Dependiente', 5),
-            (0, 'No requiere oxígeno', 0, 'No usa pañales', 'No aplica', 'No aplica', 'No aplica', 'Independiente', 6),
-            (0, 'No requiere oxígeno', 0, 'No usa pañales', 'No aplica', 'No aplica', 'Sonda nasogástrica', 'Parcialmente dependiente', 7),
-            (0, 'No requiere oxígeno', 3, 'Cambio cada 3 horas', 'No aplica', 'No aplica', 'No aplica', 'Dependiente', 8),
-            (0, 'No requiere oxígeno', 0, 'No usa pañales', 'Sonda vesical', 'No aplica', 'No aplica', 'Independiente', 9),
-            (0, 'No requiere oxígeno', 0, 'No usa pañales', 'No aplica', 'No aplica', 'No aplica', 'Independiente', 10),
-            (0, 'No requiere oxígeno', 0, 'No usa pañales', 'No aplica', 'No aplica', 'No aplica', 'Independiente', 11),
-            (0, 'No requiere oxígeno', 0, 'No usa pañales', 'No aplica', 'No aplica', 'No aplica', 'Independiente', 12),
-            (0, 'No requiere oxígeno', 0, 'No usa pañales', 'No aplica', 'No aplica', 'No aplica', 'Parcialmente dependiente', 13),
-            (0, 'No requiere oxígeno', 0, 'No usa pañales', 'No aplica', 'No aplica', 'No aplica', 'Independiente', 14),
-            (2, 'Oxígeno a 2 L/min', 2, 'Cambio cada 4 horas', 'No aplica', 'No aplica', 'No aplica', 'Dependiente', 15),
-            (0, 'No requiere oxígeno', 0, 'No usa pañales', 'No aplica', 'No aplica', 'No aplica', 'Independiente', 16),
-            (0, 'No requiere oxígeno', 0, 'No usa pañales', 'No aplica', 'No aplica', 'Sonda nasogástrica', 'Dependiente', 17)");
+        (1, 'Oxigen a 3 L/min per cànula nasal', 1, 'Canvi cada 4 hores::6', 'Sonda vesical col·locada', 'Aspiració de secrecions cada 6h', 'No aplica', 'Dependent total', 1),
+        (1, 'Oxigen a 2 L/min per mascareta', 0, NULL, 'Sonda vesical col·locada', 'Aspiració de secrecions cada 8h', 'No aplica', 'Dependent parcial', 2),
+        (0, 'Sense oxigen suplementari', 1, 'Canvi cada 8 hores::3', 'No sonda vesical', 'Sense aspiració', 'No aplica', 'Independent', 3),
+        (1, 'Oxigen a 5 L/min per cànula nasal', 1, 'Canvi cada 3 hores::8', 'Sonda vesical col·locada', 'Aspiració cada 4h', 'No aplica', 'Dependent total', 4),
+        (1, 'Oxigen a 1 L/min per mascareta', 0, NULL, 'Sonda vesical retirada', 'Sense aspiració', 'No aplica', 'Dependent parcial', 5),
+        (0, 'Sense oxigen', 1, 'Canvi cada 6 hores::4', 'No sonda vesical', 'Aspiració cada 12h', 'No aplica', 'Independent', 6),
+        (1, 'Oxigen a 4 L/min per cànula nasal', 1, 'Canvi cada 2 hores::12', 'Sonda vesical col·locada', 'Aspiració cada 6h', 'No aplica', 'Dependent total', 7),
+        (1, 'Oxigen a 3 L/min per mascareta', 0, NULL, 'Sonda vesical col·locada', 'Aspiració cada 6h', 'No aplica', 'Dependent parcial', 8),
+        (0, 'Sense oxigen suplementari', 1, 'Canvi cada 24 hores::1', 'No sonda vesical', 'Sense aspiració', 'No aplica', 'Independent', 9),
+        (1, 'Oxigen a 2 L/min per cànula nasal', 1, 'Canvi cada 3 hores::8', 'Sonda vesical col·locada', 'Aspiració cada 4h', 'No aplica', 'Dependent total', 10),
+        (1, 'Oxigen a 5 L/min per mascareta', 1, 'Canvi cada 2 hores::12', 'Sonda vesical col·locada', 'Aspiració cada 2h', 'No aplica', 'Dependent total', 11),
+        (0, 'Sense oxigen', 0, NULL, 'No sonda vesical', 'Sense aspiració', 'No aplica', 'Independent', 12),
+        (1, 'Oxigen a 4 L/min per mascareta', 1, 'Canvi cada 6 hores::4', 'Sonda vesical col·locada', 'Aspiració cada 8h', 'No aplica', 'Dependent parcial', 13),
+        (1, 'Oxigen a 1 L/min per cànula nasal', 1, 'Canvi cada 4 hores::6', 'Sonda vesical retirada', 'Aspiració cada 6h', 'No aplica', 'Dependent parcial', 14),
+        (0, 'Sense oxigen suplementari', 0, NULL, 'No sonda vesical', 'Sense aspiració', 'No aplica', 'Independent', 15),
+        (1, 'Oxigen a 3 L/min per cànula nasal', 1, 'Canvi cada 6 hores::4', 'Sonda vesical col·locada', 'Aspiració cada 6h', 'No aplica', 'Dependent total', 16),
+        (1, 'Oxigen a 2 L/min per mascareta', 0, NULL, 'Sonda vesical col·locada', 'Aspiració cada 4h', 'No aplica', 'Dependent parcial', 17);");
 
         // 10. Dietas (una por registro, total 49)
         $this->addSql("INSERT INTO dieta (autonomo, protesi, tipo_textura_id_id) VALUES
@@ -163,23 +163,107 @@ final class Version20250417152741 extends AbstractMigration
 
         // 12. Constantes vitales (una por registro, total 49: 7 pacientes x 7 registros)
         $this->addSql("INSERT INTO constantes_vitales (ta_sistolica, ta_diastolica, frecuencia_respiratoria, pulso, temperatura, saturacion_oxigeno) VALUES
-            ('120', '80', 16.0, 72.0, 36.5, 98.0), ('130', '85', 18.0, 80.0, 37.0, 97.0), ('125', '82', 17.0, 75.0, 36.8, 96.0), ('122', '78', 16.0, 70.0, 36.6, 98.0), ('128', '83', 18.0, 78.0, 37.1, 95.0), ('123', '80', 17.0, 73.0, 36.7, 97.0), ('121', '79', 16.0, 71.0, 36.5, 98.0),
-            ('110', '70', 20.0, 85.0, 37.2, 94.0), ('115', '75', 19.0, 82.0, 37.0, 95.0), ('112', '72', 21.0, 88.0, 37.3, 93.0), ('108', '68', 20.0, 84.0, 37.1, 94.0), ('114', '74', 19.0, 83.0, 37.0, 95.0), ('111', '71', 20.0, 86.0, 37.2, 94.0), ('109', '69', 19.0, 85.0, 37.1, 95.0),
-            ('140', '90', 14.0, 68.0, 36.4, 99.0), ('145', '95', 15.0, 70.0, 36.5, 98.0), ('142', '92', 14.0, 69.0, 36.3, 99.0), ('138', '88', 15.0, 67.0, 36.4, 98.0), ('143', '93', 14.0, 68.0, 36.5, 99.0), ('141', '91', 15.0, 69.0, 36.4, 98.0), ('139', '89', 14.0, 68.0, 36.5, 99.0),
-            ('118', '78', 18.0, 76.0, 37.0, 96.0), ('120', '80', 17.0, 74.0, 36.9, 97.0), ('116', '76', 18.0, 75.0, 37.1, 96.0), ('119', '79', 17.0, 73.0, 37.0, 97.0), ('117', '77', 18.0, 74.0, 36.9, 96.0), ('115', '75', 17.0, 75.0, 37.0, 97.0), ('118', '78', 18.0, 76.0, 36.9, 96.0),
-            ('130', '85', 16.0, 80.0, 36.8, 95.0), ('132', '87', 17.0, 82.0, 36.9, 94.0), ('128', '83', 16.0, 81.0, 36.7, 95.0), ('131', '86', 17.0, 83.0, 36.8, 94.0), ('129', '84', 16.0, 80.0, 36.9, 95.0), ('130', '85', 17.0, 82.0, 36.8, 94.0), ('132', '87', 16.0, 81.0, 36.9, 95.0),
-            ('112', '72', 19.0, 78.0, 37.2, 93.0), ('114', '74', 18.0, 77.0, 37.1, 94.0), ('110', '70', 19.0, 79.0, 37.3, 93.0), ('113', '73', 18.0, 78.0, 37.2, 94.0), ('111', '71', 19.0, 77.0, 37.1, 93.0), ('112', '72', 18.0, 78.0, 37.2, 94.0), ('114', '74', 19.0, 79.0, 37.1, 93.0),
-            ('125', '80', 15.0, 70.0, 36.6, 98.0), ('127', '82', 16.0, 72.0, 36.7, 97.0), ('123', '78', 15.0, 71.0, 36.6, 98.0), ('126', '81', 16.0, 73.0, 36.7, 97.0), ('124', '79', 15.0, 70.0, 36.6, 98.0), ('125', '80', 16.0, 72.0, 36.7, 97.0), ('127', '82', 15.0, 71.0, 36.6, 98.0)");
+    ('145', '92', 22.0, 88.0, 38.2, 92.0),
+    ('138', '85', 18.0, 82.0, 37.8, 95.0),
+    ('132', '88', 16.0, 78.0, 37.2, 96.0),
+    ('128', '82', 14.0, 75.0, 36.8, 97.0),
+    ('125', '80', 16.0, 72.0, 36.5, 98.0),
+    ('122', '78', 18.0, 74.0, 36.9, 97.0),
+    ('120', '75', 20.0, 76.0, 37.1, 96.0),
+    ('88', '48', 14.0, 68.0, 36.4, 98.0),
+    ('92', '52', 16.0, 70.0, 36.6, 97.0),
+    ('95', '55', 18.0, 72.0, 36.8, 96.0),
+    ('110', '65', 20.0, 75.0, 37.0, 95.0),
+    ('118', '70', 16.0, 73.0, 36.7, 97.0),
+    ('125', '75', 14.0, 68.0, 36.5, 98.0),
+    ('130', '78', 12.0, 65.0, 36.3, 99.0),
+    ('155', '95', 24.0, 105.0, 38.8, 88.0),
+    ('148', '90', 22.0, 102.0, 38.5, 90.0),
+    ('142', '88', 20.0, 98.0, 38.2, 92.0),
+    ('135', '85', 18.0, 95.0, 37.9, 94.0),
+    ('130', '82', 16.0, 90.0, 37.5, 95.0),
+    ('125', '80', 14.0, 85.0, 37.2, 96.0),
+    ('122', '78', 16.0, 88.0, 37.0, 97.0),
+    ('118', '75', 11.0, 48.0, 34.8, 93.0),
+    ('125', '80', 13.0, 52.0, 35.2, 94.0),
+    ('132', '85', 15.0, 58.0, 35.8, 95.0),
+    ('138', '88', 17.0, 65.0, 36.2, 96.0),
+    ('142', '90', 19.0, 70.0, 36.5, 97.0),
+    ('145', '92', 21.0, 75.0, 36.8, 98.0),
+    ('148', '95', 23.0, 80.0, 37.0, 99.0),
+    ('85', '45', 10.0, 45.0, 34.5, 91.0),
+    ('90', '50', 12.0, 48.0, 35.0, 92.0),
+    ('95', '55', 14.0, 52.0, 35.5, 93.0),
+    ('105', '60', 16.0, 58.0, 36.0, 94.0),
+    ('115', '65', 18.0, 65.0, 36.5, 95.0),
+    ('125', '70', 20.0, 70.0, 37.0, 96.0),
+    ('135', '75', 22.0, 75.0, 37.5, 97.0),
+    ('165', '105', 28.0, 115.0, 39.2, 85.0),
+    ('158', '98', 25.0, 110.0, 38.9, 87.0),
+    ('150', '95', 22.0, 105.0, 38.5, 89.0),
+    ('145', '90', 20.0, 98.0, 38.2, 91.0),
+    ('140', '85', 18.0, 92.0, 37.8, 93.0),
+    ('135', '82', 16.0, 88.0, 37.5, 95.0),
+    ('130', '80', 14.0, 85.0, 37.2, 96.0),
+    ('175', '110', 32.0, 125.0, 39.8, 80.0),
+    ('168', '105', 28.0, 118.0, 39.4, 82.0),
+    ('160', '100', 25.0, 112.0, 39.0, 85.0),
+    ('155', '95', 22.0, 105.0, 38.6, 88.0),
+    ('148', '90', 20.0, 98.0, 38.2, 90.0),
+    ('142', '85', 18.0, 92.0, 37.8, 92.0),
+    ('138', '82', 16.0, 88.0, 37.5, 94.0)");
 
         // 13. Balance hídrico (una por registro, total 49)
         $this->addSql("INSERT INTO balance_hidrico (diuresis, deposicion) VALUES
-            (500, 'Normal'), (450, 'Blanda'), (600, 'Normal'), (550, 'Dura'), (400, 'Normal'), (500, 'Blanda'), (450, 'Normal'),
-            (300, 'Normal'), (350, 'Blanda'), (400, 'Normal'), (320, 'Dura'), (360, 'Normal'), (340, 'Blanda'), (380, 'Normal'),
-            (700, 'Normal'), (650, 'Blanda'), (720, 'Normal'), (680, 'Dura'), (700, 'Normal'), (660, 'Blanda'), (690, 'Normal'),
-            (400, 'Normal'), (420, 'Blanda'), (450, 'Normal'), (430, 'Dura'), (410, 'Normal'), (440, 'Blanda'), (420, 'Normal'),
-            (550, 'Normal'), (500, 'Blanda'), (520, 'Normal'), (510, 'Dura'), (530, 'Normal'), (540, 'Blanda'), (500, 'Normal'),
-            (350, 'Normal'), (360, 'Blanda'), (340, 'Normal'), (370, 'Dura'), (350, 'Normal'), (380, 'Blanda'), (360, 'Normal'),
-            (600, 'Normal'), (620, 'Blanda'), (610, 'Normal'), (630, 'Dura'), (600, 'Normal'), (640, 'Blanda'), (620, 'Normal')");
+    (420, 'XX'),
+    (380, 'X'),
+    (450, 'XXX'),
+    (500, 'XX'),
+    (520, 'X'),
+    (480, 'XX'),
+    (510, 'XXX'),
+    (380, 'X'),
+    (420, 'XX'),
+    (460, 'X'),
+    (490, 'XXX'),
+    (520, 'XX'),
+    (480, 'X'),
+    (450, 'XX'),
+    (320, 'X'),
+    (280, 'XX'),
+    (350, 'X'),
+    (400, 'XXX'),
+    (430, 'XX'),
+    (460, 'X'),
+    (480, 'XX'),
+    (180, ''),
+    (220, 'X'),
+    (280, ''),
+    (320, 'XX'),
+    (380, 'X'),
+    (420, 'XXX'),
+    (450, 'XX'),
+    (150, ''),
+    (180, 'X'),
+    (220, ''),
+    (280, 'X'),
+    (320, 'XX'),
+    (380, 'XXX'),
+    (420, 'XX'),
+    (280, 'X'),
+    (320, ''),
+    (380, 'XX'),
+    (420, 'X'),
+    (460, 'XXX'),
+    (490, 'XX'),
+    (520, 'X'),
+    (200, ''),
+    (240, 'X'),
+    (280, ''),
+    (320, 'XX'),
+    (380, 'X'),
+    (420, 'XXX'),
+    (460, 'XX')");
 
         // 14. Drenaje (una por registro, total 49)
         $this->addSql("INSERT INTO drenaje (descripcion) VALUES
