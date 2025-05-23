@@ -123,23 +123,23 @@ final class Version20250417152741 extends AbstractMigration
 
         // 9. Detalles de diagnóstico (uno por diagnóstico, total 17)
         $this->addSql("INSERT INTO detalle_diagnostico (o2, o2_descripcion, panales, panales_descripcion, sv, sr, sng, avd, diagnostico_id_id) VALUES
-        (1, 'Oxigen a 3 L/min per cànula nasal', 1, 'Canvi cada 4 hores::6', 'Sonda vesical col·locada', 'Aspiració de secrecions cada 6h', 'No aplica', 'Dependent total', 1),
-        (1, 'Oxigen a 2 L/min per mascareta', 0, NULL, 'Sonda vesical col·locada', 'Aspiració de secrecions cada 8h', 'No aplica', 'Dependent parcial', 2),
-        (0, 'Sense oxigen suplementari', 1, 'Canvi cada 8 hores::3', 'No sonda vesical', 'Sense aspiració', 'No aplica', 'Independent', 3),
-        (1, 'Oxigen a 5 L/min per cànula nasal', 1, 'Canvi cada 3 hores::8', 'Sonda vesical col·locada', 'Aspiració cada 4h', 'No aplica', 'Dependent total', 4),
-        (1, 'Oxigen a 1 L/min per mascareta', 0, NULL, 'Sonda vesical retirada', 'Sense aspiració', 'No aplica', 'Dependent parcial', 5),
-        (0, 'Sense oxigen', 1, 'Canvi cada 6 hores::4', 'No sonda vesical', 'Aspiració cada 12h', 'No aplica', 'Independent', 6),
-        (1, 'Oxigen a 4 L/min per cànula nasal', 1, 'Canvi cada 2 hores::12', 'Sonda vesical col·locada', 'Aspiració cada 6h', 'No aplica', 'Dependent total', 7),
-        (1, 'Oxigen a 3 L/min per mascareta', 0, NULL, 'Sonda vesical col·locada', 'Aspiració cada 6h', 'No aplica', 'Dependent parcial', 8),
-        (0, 'Sense oxigen suplementari', 1, 'Canvi cada 24 hores::1', 'No sonda vesical', 'Sense aspiració', 'No aplica', 'Independent', 9),
-        (1, 'Oxigen a 2 L/min per cànula nasal', 1, 'Canvi cada 3 hores::8', 'Sonda vesical col·locada', 'Aspiració cada 4h', 'No aplica', 'Dependent total', 10),
-        (1, 'Oxigen a 5 L/min per mascareta', 1, 'Canvi cada 2 hores::12', 'Sonda vesical col·locada', 'Aspiració cada 2h', 'No aplica', 'Dependent total', 11),
-        (0, 'Sense oxigen', 0, NULL, 'No sonda vesical', 'Sense aspiració', 'No aplica', 'Independent', 12),
-        (1, 'Oxigen a 4 L/min per mascareta', 1, 'Canvi cada 6 hores::4', 'Sonda vesical col·locada', 'Aspiració cada 8h', 'No aplica', 'Dependent parcial', 13),
-        (1, 'Oxigen a 1 L/min per cànula nasal', 1, 'Canvi cada 4 hores::6', 'Sonda vesical retirada', 'Aspiració cada 6h', 'No aplica', 'Dependent parcial', 14),
-        (0, 'Sense oxigen suplementari', 0, NULL, 'No sonda vesical', 'Sense aspiració', 'No aplica', 'Independent', 15),
-        (1, 'Oxigen a 3 L/min per cànula nasal', 1, 'Canvi cada 6 hores::4', 'Sonda vesical col·locada', 'Aspiració cada 6h', 'No aplica', 'Dependent total', 16),
-        (1, 'Oxigen a 2 L/min per mascareta', 0, NULL, 'Sonda vesical col·locada', 'Aspiració cada 4h', 'No aplica', 'Dependent parcial', 17);");
+        (1, 'Oxigen a 3 L/min per cànula nasal', 1, 'Canvi cada 4 hores::6', 'Sonda vesical col·locada', 'Aspiració de secrecions cada 6h', 'No aplica', 'dependent', 1),
+        (1, 'Oxigen a 2 L/min per mascareta', 0, NULL, 'Sonda vesical col·locada', 'Aspiració de secrecions cada 8h', 'No aplica', 'semi-dependent', 2),
+        (0, 'Sense oxigen suplementari', 1, 'Canvi cada 8 hores::3', 'No sonda vesical', 'Sense aspiració', 'No aplica', 'independent', 3),
+        (1, 'Oxigen a 5 L/min per cànula nasal', 1, 'Canvi cada 3 hores::8', 'Sonda vesical col·locada', 'Aspiració cada 4h', 'No aplica', 'dependent', 4),
+        (1, 'Oxigen a 1 L/min per mascareta', 0, NULL, 'Sonda vesical retirada', 'Sense aspiració', 'No aplica', 'semi-dependent', 5),
+        (0, 'Sense oxigen', 1, 'Canvi cada 6 hores::4', 'No sonda vesical', 'Aspiració cada 12h', 'No aplica', 'independent', 6),
+        (1, 'Oxigen a 4 L/min per cànula nasal', 1, 'Canvi cada 2 hores::12', 'Sonda vesical col·locada', 'Aspiració cada 6h', 'No aplica', 'dependent', 7),
+        (1, 'Oxigen a 3 L/min per mascareta', 0, NULL, 'Sonda vesical col·locada', 'Aspiració cada 6h', 'No aplica', 'semi-dependent', 8),
+        (0, 'Sense oxigen suplementari', 1, 'Canvi cada 24 hores::1', 'No sonda vesical', 'Sense aspiració', 'No aplica', 'independent', 9),
+        (1, 'Oxigen a 2 L/min per cànula nasal', 1, 'Canvi cada 3 hores::8', 'Sonda vesical col·locada', 'Aspiració cada 4h', 'No aplica', 'dependent', 10),
+        (1, 'Oxigen a 5 L/min per mascareta', 1, 'Canvi cada 2 hores::12', 'Sonda vesical col·locada', 'Aspiració cada 2h', 'No aplica', 'dependent', 11),
+        (0, 'Sense oxigen', 0, NULL, 'No sonda vesical', 'Sense aspiració', 'No aplica', 'independent', 12),
+        (1, 'Oxigen a 4 L/min per mascareta', 1, 'Canvi cada 6 hores::4', 'Sonda vesical col·locada', 'Aspiració cada 8h', 'No aplica', 'semi-dependent', 13),
+        (1, 'Oxigen a 1 L/min per cànula nasal', 1, 'Canvi cada 4 hores::6', 'Sonda vesical retirada', 'Aspiració cada 6h', 'No aplica', 'semi-dependent', 14),
+        (0, 'Sense oxigen suplementari', 0, NULL, 'No sonda vesical', 'Sense aspiració', 'No aplica', 'independent', 15),
+        (1, 'Oxigen a 3 L/min per cànula nasal', 1, 'Canvi cada 6 hores::4', 'Sonda vesical col·locada', 'Aspiració cada 6h', 'No aplica', 'dependent', 16),
+        (1, 'Oxigen a 2 L/min per mascareta', 0, NULL, 'Sonda vesical col·locada', 'Aspiració cada 4h', 'No aplica', 'semi-dependent', 17);");
 
         // 10. Dietas (una por registro, total 49)
         $this->addSql("INSERT INTO dieta (autonomo, protesi, tipo_textura_id_id) VALUES
