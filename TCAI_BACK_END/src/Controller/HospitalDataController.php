@@ -828,7 +828,7 @@ public function getAllAlertas(RegistroRepository $registroRepository, PacienteRe
         return $edad->y;
     }
 
-  #[Route('/diets', name: 'api_all_diets', methods: ['GET'])]
+#[Route('/diets', name: 'api_all_diets', methods: ['GET'])]
 public function getAllDiets(
     Request $request,
     EntityManagerInterface $entityManager,
@@ -840,9 +840,13 @@ public function getAllDiets(
     try {
         $page = max(1, (int)$request->query->get('page', 1));
         $itemsPerPage = max(1, (int)$request->query->get('itemsPerPage', 16));
-        $search = trim($request->query->get('search', ''));
+        $search = mb_strtolower(trim($request->query->get('search', '')));
 
-        $habitaciones = $habitacionRepository->findAll();
+        // Obtener todas las habitaciones ordenadas por código
+        $habitaciones = $habitacionRepository->createQueryBuilder('h')
+            ->orderBy('h.codigo', 'ASC')
+            ->getQuery()
+            ->getResult();
 
         if (empty($habitaciones)) {
             return $this->json([
@@ -853,17 +857,18 @@ public function getAllDiets(
             ], Response::HTTP_NOT_FOUND);
         }
 
-        $filteredResults = [];
+        $results = [];
 
         foreach ($habitaciones as $habitacion) {
             $habitacionCodigo = $habitacion->getCodigo();
 
+            // Último paciente asignado a la habitación
             $asignacion = $entityManager->getRepository('App\Entity\PacienteHasHabitaciones')
                 ->findOneBy(['habitacion_id' => $habitacion], ['timestamp' => 'DESC']);
 
             if (!$asignacion) {
                 // Habitación vacía
-                $filteredResults[] = [
+                $results[] = [
                     'habitacion_codigo' => $habitacionCodigo,
                     'message' => 'empty room',
                     'isEmpty' => true,
@@ -873,40 +878,34 @@ public function getAllDiets(
 
             $paciente = $asignacion->getPacienteId();
 
-            // Si hay término de búsqueda, filtrar por nombre o apellidos (sin importar mayúsculas)
+            // Aplicar filtro si hay búsqueda
             if ($search !== '') {
                 $nombre = mb_strtolower($paciente->getNombre());
                 $apellidos = mb_strtolower($paciente->getApellidos());
-                $searchLower = mb_strtolower($search);
-
-                if (strpos($nombre, $searchLower) === false && strpos($apellidos, $searchLower) === false) {
-                    continue; // No coincide, saltar esta habitación
+                if (strpos($nombre, $search) === false && strpos($apellidos, $search) === false) {
+                    continue;
                 }
             }
 
             $edad = $this->calcularEdad($paciente->getFechaNacimiento());
 
             $registro = $registroRepository->findOneBy(['paciente_id' => $paciente], ['fecha' => 'DESC']);
-            if (!$registro) {
+            if (!$registro || !$registro->getDietaId()) {
                 continue;
             }
 
             $dieta = $registro->getDietaId();
-
             $tipoDietaDescriptions = [];
-            $dietaHasTipoDietas = $dietaHasTipoDietaRepository->findBy(['dieta_id' => $dieta->getId()]);
 
+            $dietaHasTipoDietas = $dietaHasTipoDietaRepository->findBy(['dieta_id' => $dieta->getId()]);
             foreach ($dietaHasTipoDietas as $relation) {
-                $tipoDietaId = $relation->getTipoDietaId();
-                $tipoDieta = $tipoDietaRepository->find($tipoDietaId);
+                $tipoDieta = $tipoDietaRepository->find($relation->getTipoDietaId());
                 if ($tipoDieta) {
                     $tipoDietaDescriptions[] = $tipoDieta->getDescripcion();
                 }
             }
 
-            $tipoDietaString = implode(', ', $tipoDietaDescriptions);
-
-            $filteredResults[] = [
+            $results[] = [
                 'habitacion_codigo' => $habitacionCodigo,
                 'paciente' => [
                     'id' => $paciente->getId(),
@@ -915,23 +914,22 @@ public function getAllDiets(
                     'edad' => $edad
                 ],
                 'detalle' => [
-                    'tipo_dieta' => $tipoDietaString,
-                    'textura' => $dieta->getTipoTexturaId()->getDescripcion(),
+                    'tipo_dieta' => implode(', ', $tipoDietaDescriptions),
+                    'textura' => $dieta->getTipoTexturaId()?->getDescripcion(),
                     'protesis' => $dieta->getProtesi() ? 'Sí' : 'No',
                     'asistencia' => $dieta->getAutonomo() ? 'Independiente' : 'Dependiente',
-                    'observaciones' => $registro->getObservacion()->getDescripcion()
+                    'observaciones' => $registro->getObservacion()?->getDescripcion() ?? '',
                 ],
                 'isEmpty' => false,
                 'alerta' => true
             ];
         }
 
-        // Paginación manual
-        $totalItems = count($filteredResults);
+        // Paginación
+        $totalItems = count($results);
         $totalPages = (int) ceil($totalItems / $itemsPerPage);
-
         $offset = ($page - 1) * $itemsPerPage;
-        $pagedResults = array_slice($filteredResults, $offset, $itemsPerPage);
+        $pagedResults = array_slice($results, $offset, $itemsPerPage);
 
         return $this->json([
             'success' => true,
@@ -953,6 +951,8 @@ public function getAllDiets(
         ], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 }
+
+
 
 
   #[Route('/general', name: 'app_habitacion_index', methods: ['GET'])]
