@@ -828,6 +828,217 @@ public function getAllAlertas(RegistroRepository $registroRepository, PacienteRe
         return $edad->y;
     }
 
+/* #[Route('/diets', name: 'api_all_diets', methods: ['GET'])]
+public function getAllDiets(
+    Request $request,
+    EntityManagerInterface $entityManager,
+    HabitacionRepository $habitacionRepository,
+    RegistroRepository $registroRepository,
+    DietaHasTipoDietaRepository $dietaHasTipoDietaRepository,
+    TipoDietaRepository $tipoDietaRepository
+): JsonResponse {
+    try {
+        $page = max(1, (int)$request->query->get('page', 1));
+        $itemsPerPage = max(1, (int)$request->query->get('itemsPerPage', 16));
+        $search = mb_strtolower(trim($request->query->get('search', '')));
+
+        // Obtener todas las habitaciones ordenadas por código
+        $habitaciones = $habitacionRepository->createQueryBuilder('h')
+            ->orderBy('h.codigo', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        if (empty($habitaciones)) {
+            return $this->json([
+                'success' => false,
+                'habitacion' => [
+                    'message' => 'No se encontraron habitaciones'
+                ]
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        $results = [];
+
+        foreach ($habitaciones as $habitacion) {
+            $habitacionCodigo = $habitacion->getCodigo();
+
+            // Último paciente asignado a la habitación
+            $asignacion = $entityManager->getRepository('App\Entity\PacienteHasHabitaciones')
+                ->findOneBy(['habitacion_id' => $habitacion], ['timestamp' => 'DESC']);
+
+            if (!$asignacion) {
+                // Habitación vacía
+                $results[] = [
+                    'habitacion_codigo' => $habitacionCodigo,
+                    'message' => 'empty room',
+                    'isEmpty' => true,
+                ];
+                continue;
+            }
+
+            $paciente = $asignacion->getPacienteId();
+
+            // Aplicar filtro si hay búsqueda
+            if ($search !== '') {
+                $nombre = mb_strtolower($paciente->getNombre());
+                $apellidos = mb_strtolower($paciente->getApellidos());
+                if (strpos($nombre, $search) === false && strpos($apellidos, $search) === false) {
+                    continue;
+                }
+            }
+
+            $edad = $this->calcularEdad($paciente->getFechaNacimiento());
+
+            $registro = $registroRepository->findOneBy(['paciente_id' => $paciente], ['fecha' => 'DESC']);
+            if (!$registro || !$registro->getDietaId()) {
+                continue;
+            }
+
+            $dieta = $registro->getDietaId();
+            $tipoDietaDescriptions = [];
+
+            $dietaHasTipoDietas = $dietaHasTipoDietaRepository->findBy(['dieta_id' => $dieta->getId()]);
+            foreach ($dietaHasTipoDietas as $relation) {
+                $tipoDieta = $tipoDietaRepository->find($relation->getTipoDietaId());
+                if ($tipoDieta) {
+                    $tipoDietaDescriptions[] = $tipoDieta->getDescripcion();
+                }
+            }
+
+            $results[] = [
+                'habitacion_codigo' => $habitacionCodigo,
+                'paciente' => [
+                    'id' => $paciente->getId(),
+                    'nombre' => $paciente->getNombre(),
+                    'apellidos' => $paciente->getApellidos(),
+                    'edad' => $edad
+                ],
+                'detalle' => [
+                    'tipo_dieta' => implode(', ', $tipoDietaDescriptions),
+                    'textura' => $dieta->getTipoTexturaId()?->getDescripcion(),
+                    'protesis' => $dieta->getProtesi() ? 'Sí' : 'No',
+                    'asistencia' => $dieta->getAutonomo() ? 'Independiente' : 'Dependiente',
+                    'observaciones' => $registro->getObservacion()?->getDescripcion() ?? '',
+                ],
+                'isEmpty' => false,
+                'alerta' => true
+            ];
+        }
+
+        // Paginación
+        $totalItems = count($results);
+        $totalPages = (int) ceil($totalItems / $itemsPerPage);
+        $offset = ($page - 1) * $itemsPerPage;
+        $pagedResults = array_slice($results, $offset, $itemsPerPage);
+
+        return $this->json([
+            'success' => true,
+            'habitacion' => $pagedResults,
+            'pagination' => [
+                'total_items' => $totalItems,
+                'total_pages' => $totalPages,
+                'current_page' => $page,
+                'items_per_page' => $itemsPerPage,
+            ]
+        ], Response::HTTP_OK);
+
+    } catch (\Exception $e) {
+        return $this->json([
+            'success' => false,
+            'content' => [
+                'message' => 'Error interno: ' . $e->getMessage()
+            ]
+        ], Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
+}
+
+
+
+
+  #[Route('/general', name: 'app_habitacion_index', methods: ['GET'])]
+public function getAllRooms(
+    Request $request,
+    HabitacionRepository $habitacionRepository,
+    PacienteHasHabitacionesRepository $pacienteHasHabitacionesRepository,
+    DiagnosticoRepository $diagnosticoRepository,
+    RegistroRepository $registroRepository
+): JsonResponse {
+    $page = max(1, (int) $request->query->get('page', 1));
+    $limit = max(1, (int) $request->query->get('limit', 16));
+    $offset = ($page - 1) * $limit;
+    $search = $request->query->get('search', '');
+
+    if ($search) {
+        $habitaciones = $habitacionRepository->createQueryBuilder('h')
+            ->where('h.codigo LIKE :search')
+            ->setParameter('search', '%' . $search . '%')
+            ->setFirstResult($offset)
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+
+        $totalHabitaciones = $habitacionRepository->createQueryBuilder('h')
+            ->select('COUNT(h.id)')
+            ->where('h.codigo LIKE :search')
+            ->setParameter('search', '%' . $search . '%')
+            ->getQuery()
+            ->getSingleScalarResult();
+    } else {
+        $habitaciones = $habitacionRepository->findBy([], null, $limit, $offset);
+        $totalHabitaciones = $habitacionRepository->count([]);
+    }
+
+    $data = [];
+
+    foreach ($habitaciones as $habitacion) {
+        $habitacionInfo = [
+            'habitacion_codigo' => $habitacion->getCodigo(),
+        ];
+
+        $paciente = $pacienteHasHabitacionesRepository->findUltimoPacientePorHabitacion($habitacion);
+
+        if (!$paciente) {
+            $habitacionInfo['isEmpty'] = true;
+        } else {
+            $habitacionInfo['isEmpty'] = false;
+
+            $ultimoDiagnostico = $diagnosticoRepository->findUltimoDiagnosticoPorPaciente($paciente);
+            $ultimoRegistro = $registroRepository->findByUltimoPorPaciente($paciente);
+
+            $habitacionInfo['paciente'] = [
+                'id' => $paciente->getId(),
+                'nombre' => $paciente->getNombre(),
+                'apellidos' => $paciente->getApellidos(),
+                'edad' => $this->calcularEdad($paciente->getFechaNacimiento()),
+                'diagnostico' => $ultimoDiagnostico ? $ultimoDiagnostico->getDiagnostico() : null,
+            ];
+
+            $habitacionInfo['registro'] = $ultimoRegistro ? [
+                'fecha' => $ultimoRegistro->getFecha()->format('Y-m-d H:i:s'),
+                'nombre_auxiliar' => $ultimoRegistro->getAuxiliarId()->getNombre(),
+                'numero_auxiliar' => $ultimoRegistro->getAuxiliarId()->getNumTrabajador(),
+                'observaciones' => $ultimoRegistro->getObservacion()->getDescripcion(),
+                'alerta' => true,
+            ] : null;
+        }
+
+        $data[] = $habitacionInfo;
+    }
+
+    return $this->json([
+        'success' => true,
+        'message' => 'List rooms correct',
+        'habitacion' => $data,
+        'pagination' => [
+            'current_page' => $page,
+            'per_page' => $limit,
+            'total_items' => (int) $totalHabitaciones,
+            'total_pages' => ceil($totalHabitaciones / $limit),
+        ],
+    ]);
+} */
+
+
 #[Route('/diets', name: 'api_all_diets', methods: ['GET'])]
 public function getAllDiets(
     Request $request,
