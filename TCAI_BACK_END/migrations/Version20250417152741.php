@@ -22,7 +22,7 @@ final class Version20250417152741 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('CREATE TABLE auxiliar (id INT AUTO_INCREMENT NOT NULL, num_trabajador VARCHAR(10) DEFAULT NULL, nombre VARCHAR(50) DEFAULT NULL, apellidos VARCHAR(150) DEFAULT NULL, contraseña VARCHAR(255) DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE balance_hidrico (id INT AUTO_INCREMENT NOT NULL, diuresis INT DEFAULT NULL, deposicion VARCHAR(255) DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
-        $this->addSql('CREATE TABLE constantes_vitales (id INT AUTO_INCREMENT NOT NULL, ta_sistolica VARCHAR(7) DEFAULT NULL, ta_diastolica VARCHAR(7) DEFAULT NULL, frecuencia_respiratoria NUMERIC(4, 1) DEFAULT NULL, pulso NUMERIC(4, 1) DEFAULT NULL, temperatura NUMERIC(4, 1) DEFAULT NULL, saturacion_oxigeno NUMERIC(4, 1) DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
+        $this->addSql('CREATE TABLE constantes_vitales (id INT AUTO_INCREMENT NOT NULL, ta_sistolica INT DEFAULT NULL, ta_diastolica INT DEFAULT NULL, frecuencia_respiratoria NUMERIC(4, 1) DEFAULT NULL, pulso NUMERIC(4, 1) DEFAULT NULL, temperatura NUMERIC(4, 1) DEFAULT NULL, saturacion_oxigeno NUMERIC(4, 1) DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE detalle_diagnostico (id INT AUTO_INCREMENT NOT NULL, o2 INT DEFAULT NULL, o2_descripcion LONGTEXT DEFAULT NULL, panales INT DEFAULT NULL, panales_descripcion LONGTEXT DEFAULT NULL, sv LONGTEXT DEFAULT NULL, sr LONGTEXT DEFAULT NULL, sng LONGTEXT DEFAULT NULL, avd VARCHAR(255) DEFAULT NULL, diagnostico_id_id INT DEFAULT NULL, INDEX IDX_D78E393B9EB8F283 (diagnostico_id_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE diagnostico (id INT AUTO_INCREMENT NOT NULL, diagnostico LONGTEXT DEFAULT NULL, motivo LONGTEXT DEFAULT NULL, fecha DATETIME DEFAULT NULL, toma VARCHAR(1) DEFAULT NULL, paciente_id_id INT DEFAULT NULL, auxiliar_id_id INT DEFAULT NULL, INDEX IDX_9B91D4488AA1655E (paciente_id_id), INDEX IDX_9B91D448767EE6F6 (auxiliar_id_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE dieta (id INT AUTO_INCREMENT NOT NULL, autonomo INT DEFAULT NULL, protesi INT DEFAULT NULL, tipo_textura_id_id INT DEFAULT NULL, INDEX IDX_D3447AEE43060ACC (tipo_textura_id_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
@@ -74,7 +74,8 @@ final class Version20250417152741 extends AbstractMigration
         $this->addSql("INSERT INTO auxiliar (num_trabajador, nombre, apellidos, contraseña) VALUES 
             ('A001', 'Ana', 'García López', '$2y$13\$W8XzK6qQz8z1y2b3n4m5pO6r7s8t9u0v1w2x3y4z5A6B7C8D9E0F'),
             ('A002', 'Luis', 'Martínez Pérez', '$2y$13\$X9Y0Z1a2b3c4d5e6f7g8hI9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x'),
-            ('A003', 'María', 'Rodríguez Sánchez', '$2y$13\$Y0Z1A2B3C4D5E6F7G8H9I0J1K2L3M4N5O6P7Q8R9S0T1U2V3W4X5')");
+            ('A003', 'María', 'Rodríguez Sánchez', '$2y$13\$Y0Z1A2B3C4D5E6F7G8H9I0J1K2L3M4N5O6P7Q8R9S0T1U2V3W4X5'),
+            ('A004', 'Test', 'Test Test', 'test')");
 
         // 5. Habitaciones (15 habitaciones)
         $this->addSql("INSERT INTO habitacion (codigo) VALUES 
@@ -163,55 +164,55 @@ final class Version20250417152741 extends AbstractMigration
 
         // 12. Constantes vitales (una por registro, total 49: 7 pacientes x 7 registros)
         $this->addSql("INSERT INTO constantes_vitales (ta_sistolica, ta_diastolica, frecuencia_respiratoria, pulso, temperatura, saturacion_oxigeno) VALUES
-    ('145', '92', 22.0, 88.0, 38.2, 92.0),
-    ('138', '85', 18.0, 82.0, 37.8, 95.0),
-    ('132', '88', 16.0, 78.0, 37.2, 96.0),
-    ('128', '82', 14.0, 75.0, 36.8, 97.0),
-    ('125', '80', 16.0, 72.0, 36.5, 98.0),
-    ('122', '78', 18.0, 74.0, 36.9, 97.0),
-    ('120', '75', 20.0, 76.0, 37.1, 96.0),
-    ('88', '48', 14.0, 68.0, 36.4, 98.0),
-    ('92', '52', 16.0, 70.0, 36.6, 97.0),
-    ('95', '55', 18.0, 72.0, 36.8, 96.0),
-    ('110', '65', 20.0, 75.0, 37.0, 95.0),
-    ('118', '70', 16.0, 73.0, 36.7, 97.0),
-    ('125', '75', 14.0, 68.0, 36.5, 98.0),
-    ('130', '78', 12.0, 65.0, 36.3, 99.0),
-    ('155', '95', 24.0, 105.0, 38.8, 88.0),
-    ('148', '90', 22.0, 102.0, 38.5, 90.0),
-    ('142', '88', 20.0, 98.0, 38.2, 92.0),
-    ('135', '85', 18.0, 95.0, 37.9, 94.0),
-    ('130', '82', 16.0, 90.0, 37.5, 95.0),
-    ('125', '80', 14.0, 85.0, 37.2, 96.0),
-    ('122', '78', 16.0, 88.0, 37.0, 97.0),
-    ('118', '75', 11.0, 48.0, 34.8, 93.0),
-    ('125', '80', 13.0, 52.0, 35.2, 94.0),
-    ('132', '85', 15.0, 58.0, 35.8, 95.0),
-    ('138', '88', 17.0, 65.0, 36.2, 96.0),
-    ('142', '90', 19.0, 70.0, 36.5, 97.0),
-    ('145', '92', 21.0, 75.0, 36.8, 98.0),
-    ('148', '95', 23.0, 80.0, 37.0, 99.0),
-    ('85', '45', 10.0, 45.0, 34.5, 91.0),
-    ('90', '50', 12.0, 48.0, 35.0, 92.0),
-    ('95', '55', 14.0, 52.0, 35.5, 93.0),
-    ('105', '60', 16.0, 58.0, 36.0, 94.0),
-    ('115', '65', 18.0, 65.0, 36.5, 95.0),
-    ('125', '70', 20.0, 70.0, 37.0, 96.0),
-    ('135', '75', 22.0, 75.0, 37.5, 97.0),
-    ('165', '105', 28.0, 115.0, 39.2, 85.0),
-    ('158', '98', 25.0, 110.0, 38.9, 87.0),
-    ('150', '95', 22.0, 105.0, 38.5, 89.0),
-    ('145', '90', 20.0, 98.0, 38.2, 91.0),
-    ('140', '85', 18.0, 92.0, 37.8, 93.0),
-    ('135', '82', 16.0, 88.0, 37.5, 95.0),
-    ('130', '80', 14.0, 85.0, 37.2, 96.0),
-    ('175', '110', 32.0, 125.0, 39.8, 80.0),
-    ('168', '105', 28.0, 118.0, 39.4, 82.0),
-    ('160', '100', 25.0, 112.0, 39.0, 85.0),
-    ('155', '95', 22.0, 105.0, 38.6, 88.0),
-    ('148', '90', 20.0, 98.0, 38.2, 90.0),
-    ('142', '85', 18.0, 92.0, 37.8, 92.0),
-    ('138', '82', 16.0, 88.0, 37.5, 94.0)");
+    (145, 92, 22.0, 88.0, 38.2, 92.0),
+    (138, 85, 18.0, 82.0, 37.8, 95.0),
+    (132, 88, 16.0, 78.0, 37.2, 96.0),
+    (128, 82, 14.0, 75.0, 36.8, 97.0),
+    (125, 80, 16.0, 72.0, 36.5, 98.0),
+    (122, 78, 18.0, 74.0, 36.9, 97.0),
+    (120, 75, 20.0, 76.0, 37.1, 96.0),
+    (88, 48, 14.0, 68.0, 36.4, 98.0),
+    (92, 52, 16.0, 70.0, 36.6, 97.0),
+    (95, 55, 18.0, 72.0, 36.8, 96.0),
+    (110, 65, 20.0, 75.0, 37.0, 95.0),
+    (118, 70, 16.0, 73.0, 36.7, 97.0),
+    (125, 75, 14.0, 68.0, 36.5, 98.0),
+    (130, 78, 12.0, 65.0, 36.3, 99.0),
+    (155, 95, 24.0, 105.0, 38.8, 88.0),
+    (148, 90, 22.0, 102.0, 38.5, 90.0),
+    (142, 88, 20.0, 98.0, 38.2, 92.0),
+    (135, 85, 18.0, 95.0, 37.9, 94.0),
+    (130, 82, 16.0, 90.0, 37.5, 95.0),
+    (125, 80, 14.0, 85.0, 37.2, 96.0),
+    (122, 78, 16.0, 88.0, 37.0, 97.0),
+    (118, 75, 11.0, 48.0, 34.8, 93.0),
+    (125, 80, 13.0, 52.0, 35.2, 94.0),
+    (132, 85, 15.0, 58.0, 35.8, 95.0),
+    (138, 88, 17.0, 65.0, 36.2, 96.0),
+    (142, 90, 19.0, 70.0, 36.5, 97.0),
+    (145, 92, 21.0, 75.0, 36.8, 98.0),
+    (148, 95, 23.0, 80.0, 37.0, 99.0),
+    (85, 45, 10.0, 45.0, 34.5, 91.0),
+    (90, 50, 12.0, 48.0, 35.0, 92.0),
+    (95, 55, 14.0, 52.0, 35.5, 93.0),
+    (105, 60, 16.0, 58.0, 36.0, 94.0),
+    (115, 65, 18.0, 65.0, 36.5, 95.0),
+    (125, 70, 20.0, 70.0, 37.0, 96.0),
+    (135, 75, 22.0, 75.0, 37.5, 97.0),
+    (165, 105, 28.0, 115.0, 39.2, 85.0),
+    (158, 98, 25.0, 110.0, 38.9, 87.0),
+    (150, 95, 22.0, 105.0, 38.5, 89.0),
+    (145, 90, 20.0, 98.0, 38.2, 91.0),
+    (140, 85, 18.0, 92.0, 37.8, 93.0),
+    (135, 82, 16.0, 88.0, 37.5, 95.0),
+    (130, 80, 14.0, 85.0, 37.2, 96.0),
+    (175, 110, 32.0, 125.0, 39.8, 80.0),
+    (168, 105, 28.0, 118.0, 39.4, 82.0),
+    (160, 100, 25.0, 112.0, 39.0, 85.0),
+    (155, 95, 22.0, 105.0, 38.6, 88.0),
+    (148, 90, 20.0, 98.0, 38.2, 90.0),
+    (142, 85, 18.0, 92.0, 37.8, 92.0),
+    (138, 82, 16.0, 88.0, 37.5, 94.0)");
 
         // 13. Balance hídrico (una por registro, total 49)
         $this->addSql("INSERT INTO balance_hidrico (diuresis, deposicion) VALUES

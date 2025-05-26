@@ -253,164 +253,176 @@ final class HospitalDataController extends AbstractController
         }
     }
 
-   #[Route('/alertas', name: 'api_alertas_all', methods: ['GET'])]
-public function getAllAlertas(RegistroRepository $registroRepository, PacienteRepository $pacienteRepository): JsonResponse
-{
-    try {
-        $pacientes = $pacienteRepository->findAll();
+    #[Route('/alertas', name: 'api_alertas_all', methods: ['GET'])]
+    public function getAllAlertas(RegistroRepository $registroRepository, PacienteRepository $pacienteRepository): JsonResponse
+    {
+        try {
+            $pacientes = $pacienteRepository->findAll();
 
-        if (empty($pacientes)) {
-            return new JsonResponse([
-                'success' => false,
-                'content' => [
-                    'message' => 'No se encontraron pacientes'
-                ]
-            ], Response::HTTP_NOT_FOUND);
-        }
-
-        $rangosNormales = [
-            'ta_sistolica' => ['min' => 90, 'max' => 120],
-            'ta_diastolica' => ['min' => 60, 'max' => 80],
-            'frecuencia_respiratoria' => ['min' => 12, 'max' => 20],
-            'pulso' => ['min' => 60, 'max' => 100],
-            'temperatura' => ['min' => 36.1, 'max' => 37.2],
-            'saturacion_oxigeno' => ['min' => 95, 'max' => 100],
-        ];
-
-        $alertas = [];
-        foreach ($pacientes as $index => $paciente) {
-            $registros = $registroRepository->findBy(
-                ['paciente_id' => $paciente],
-                ['fecha' => 'DESC'],
-                1,
-                0
-            );
-
-            if (empty($registros)) {
-                continue;
+            if (empty($pacientes)) {
+                return new JsonResponse([
+                    'success' => false,
+                    'content' => [
+                        'message' => 'No se encontraron pacientes'
+                    ]
+                ], Response::HTTP_NOT_FOUND);
             }
 
-            $registro = $registros[0];
-            $constantesVitales = $registro->getConstantesVitalesId();
-            if (!$constantesVitales) {
-                continue;
-            }
-
-            // Generar un número de habitación como "H001", "H002", etc.
-            $roomNumber = sprintf('H%03d', $index + 1); // H001, H002, ...
-
-            $alerta = [
-                'registro_id' => $registro->getId(),
-                'fecha' => $registro->getFecha() ? $registro->getFecha()->format('Y-m-d H:i:s') : null,
-                'paciente_id' => $paciente->getId(),
-                'paciente_nombre' => $paciente->getNombre(),
-                'room' => $roomNumber, // Añadimos el campo room
-                'alertas' => []
+            $rangosNormales = [
+                'ta_sistolica' => ['min' => 90, 'max' => 120],
+                'ta_diastolica' => ['min' => 60, 'max' => 80],
+                'frecuencia_respiratoria' => ['min' => 12, 'max' => 20],
+                'pulso' => ['min' => 60, 'max' => 100],
+                'temperatura' => ['min' => 36.1, 'max' => 37.2],
+                'saturacion_oxigeno' => ['min' => 95, 'max' => 100],
             ];
 
-            if ($constantesVitales->getTaSistolica() !== null && 
-                ($constantesVitales->getTaSistolica() < $rangosNormales['ta_sistolica']['min'] || 
-                 $constantesVitales->getTaSistolica() > $rangosNormales['ta_sistolica']['max'])) {
-                $alerta['alertas'][] = [
-                    'parametro' => 'ta_sistolica',
-                    'valor' => $constantesVitales->getTaSistolica(),
-                    'mensaje' => 'Presión arterial sistólica fuera del rango normal (' . 
-                                 $rangosNormales['ta_sistolica']['min'] . '-' . 
-                                 $rangosNormales['ta_sistolica']['max'] . ' mmHg)'
+            $alertas = [];
+            foreach ($pacientes as $index => $paciente) {
+                $registros = $registroRepository->findBy(
+                    ['paciente_id' => $paciente],
+                    ['fecha' => 'DESC'],
+                    1,
+                    0
+                );
+
+                if (empty($registros)) {
+                    continue;
+                }
+
+                $registro = $registros[0];
+                $constantesVitales = $registro->getConstantesVitalesId();
+                if (!$constantesVitales) {
+                    continue;
+                }
+
+                // Generar un número de habitación como "H001", "H002", etc.
+                $roomNumber = sprintf('H%03d', $index + 1); // H001, H002, ...
+
+                $alerta = [
+                    'registro_id' => $registro->getId(),
+                    'fecha' => $registro->getFecha() ? $registro->getFecha()->format('Y-m-d H:i:s') : null,
+                    'paciente_id' => $paciente->getId(),
+                    'paciente_nombre' => $paciente->getNombre(),
+                    'room' => $roomNumber, // Añadimos el campo room
+                    'alertas' => []
                 ];
+
+                if (
+                    $constantesVitales->getTaSistolica() !== null &&
+                    ($constantesVitales->getTaSistolica() < $rangosNormales['ta_sistolica']['min'] ||
+                        $constantesVitales->getTaSistolica() > $rangosNormales['ta_sistolica']['max'])
+                ) {
+                    $alerta['alertas'][] = [
+                        'parametro' => 'ta_sistolica',
+                        'valor' => $constantesVitales->getTaSistolica(),
+                        'mensaje' => 'Presión arterial sistólica fuera del rango normal (' .
+                            $rangosNormales['ta_sistolica']['min'] . '-' .
+                            $rangosNormales['ta_sistolica']['max'] . ' mmHg)'
+                    ];
+                }
+
+                if (
+                    $constantesVitales->getTaDiastolica() !== null &&
+                    ($constantesVitales->getTaDiastolica() < $rangosNormales['ta_diastolica']['min'] ||
+                        $constantesVitales->getTaDiastolica() > $rangosNormales['ta_diastolica']['max'])
+                ) {
+                    $alerta['alertas'][] = [
+                        'parametro' => 'ta_diastolica',
+                        'valor' => $constantesVitales->getTaDiastolica(),
+                        'mensaje' => 'Presión arterial diastólica fuera del rango normal (' .
+                            $rangosNormales['ta_diastolica']['min'] . '-' .
+                            $rangosNormales['ta_diastolica']['max'] . ' mmHg)'
+                    ];
+                }
+
+                if (
+                    $constantesVitales->getFrecuenciaRespiratoria() !== null &&
+                    ($constantesVitales->getFrecuenciaRespiratoria() < $rangosNormales['frecuencia_respiratoria']['min'] ||
+                        $constantesVitales->getFrecuenciaRespiratoria() > $rangosNormales['frecuencia_respiratoria']['max'])
+                ) {
+                    $alerta['alertas'][] = [
+                        'parametro' => 'frecuencia_respiratoria',
+                        'valor' => $constantesVitales->getFrecuenciaRespiratoria(),
+                        'mensaje' => 'Frecuencia respiratoria fuera del rango normal (' .
+                            $rangosNormales['frecuencia_respiratoria']['min'] . '-' .
+                            $rangosNormales['frecuencia_respiratoria']['max'] . ' respiraciones/min)'
+                    ];
+                }
+
+                if (
+                    $constantesVitales->getPulso() !== null &&
+                    ($constantesVitales->getPulso() < $rangosNormales['pulso']['min'] ||
+                        $constantesVitales->getPulso() > $rangosNormales['pulso']['max'])
+                ) {
+                    $alerta['alertas'][] = [
+                        'parametro' => 'pulso',
+                        'valor' => $constantesVitales->getPulso(),
+                        'mensaje' => 'Pulso fuera del rango normal (' .
+                            $rangosNormales['pulso']['min'] . '-' .
+                            $rangosNormales['pulso']['max'] . ' latidos/min)'
+                    ];
+                }
+
+                if (
+                    $constantesVitales->getTemperatura() !== null &&
+                    ($constantesVitales->getTemperatura() < $rangosNormales['temperatura']['min'] ||
+                        $constantesVitales->getTemperatura() > $rangosNormales['temperatura']['max'])
+                ) {
+                    $alerta['alertas'][] = [
+                        'parametro' => 'temperatura',
+                        'valor' => $constantesVitales->getTemperatura(),
+                        'mensaje' => 'Temperatura fuera del rango normal (' .
+                            $rangosNormales['temperatura']['min'] . '-' .
+                            $rangosNormales['temperatura']['max'] . ' °C)'
+                    ];
+                }
+
+                if (
+                    $constantesVitales->getSaturacionOxigeno() !== null &&
+                    ($constantesVitales->getSaturacionOxigeno() < $rangosNormales['saturacion_oxigeno']['min'] ||
+                        $constantesVitales->getSaturacionOxigeno() > $rangosNormales['saturacion_oxigeno']['max'])
+                ) {
+                    $alerta['alertas'][] = [
+                        'parametro' => 'saturacion_oxigeno',
+                        'valor' => $constantesVitales->getSaturacionOxigeno(),
+                        'mensaje' => 'Saturación de oxígeno fuera del rango normal (' .
+                            $rangosNormales['saturacion_oxigeno']['min'] . '-' .
+                            $rangosNormales['saturacion_oxigeno']['max'] . ' %)'
+                    ];
+                }
+
+                if (!empty($alerta['alertas'])) {
+                    $alertas[] = $alerta;
+                }
             }
 
-            if ($constantesVitales->getTaDiastolica() !== null && 
-                ($constantesVitales->getTaDiastolica() < $rangosNormales['ta_diastolica']['min'] || 
-                 $constantesVitales->getTaDiastolica() > $rangosNormales['ta_diastolica']['max'])) {
-                $alerta['alertas'][] = [
-                    'parametro' => 'ta_diastolica',
-                    'valor' => $constantesVitales->getTaDiastolica(),
-                    'mensaje' => 'Presión arterial diastólica fuera del rango normal (' . 
-                                 $rangosNormales['ta_diastolica']['min'] . '-' . 
-                                 $rangosNormales['ta_diastolica']['max'] . ' mmHg)'
-                ];
+            if (empty($alertas)) {
+                return new JsonResponse([
+                    'success' => true,
+                    'content' => [
+                        'message' => 'No se encontraron alertas para ningún paciente',
+                        'alertas' => []
+                    ]
+                ], Response::HTTP_OK);
             }
 
-            if ($constantesVitales->getFrecuenciaRespiratoria() !== null && 
-                ($constantesVitales->getFrecuenciaRespiratoria() < $rangosNormales['frecuencia_respiratoria']['min'] || 
-                 $constantesVitales->getFrecuenciaRespiratoria() > $rangosNormales['frecuencia_respiratoria']['max'])) {
-                $alerta['alertas'][] = [
-                    'parametro' => 'frecuencia_respiratoria',
-                    'valor' => $constantesVitales->getFrecuenciaRespiratoria(),
-                    'mensaje' => 'Frecuencia respiratoria fuera del rango normal (' . 
-                                 $rangosNormales['frecuencia_respiratoria']['min'] . '-' . 
-                                 $rangosNormales['frecuencia_respiratoria']['max'] . ' respiraciones/min)'
-                ];
-            }
-
-            if ($constantesVitales->getPulso() !== null && 
-                ($constantesVitales->getPulso() < $rangosNormales['pulso']['min'] || 
-                 $constantesVitales->getPulso() > $rangosNormales['pulso']['max'])) {
-                $alerta['alertas'][] = [
-                    'parametro' => 'pulso',
-                    'valor' => $constantesVitales->getPulso(),
-                    'mensaje' => 'Pulso fuera del rango normal (' . 
-                                 $rangosNormales['pulso']['min'] . '-' . 
-                                 $rangosNormales['pulso']['max'] . ' latidos/min)'
-                ];
-            }
-
-            if ($constantesVitales->getTemperatura() !== null && 
-                ($constantesVitales->getTemperatura() < $rangosNormales['temperatura']['min'] || 
-                 $constantesVitales->getTemperatura() > $rangosNormales['temperatura']['max'])) {
-                $alerta['alertas'][] = [
-                    'parametro' => 'temperatura',
-                    'valor' => $constantesVitales->getTemperatura(),
-                    'mensaje' => 'Temperatura fuera del rango normal (' . 
-                                 $rangosNormales['temperatura']['min'] . '-' . 
-                                 $rangosNormales['temperatura']['max'] . ' °C)'
-                ];
-            }
-
-            if ($constantesVitales->getSaturacionOxigeno() !== null && 
-                ($constantesVitales->getSaturacionOxigeno() < $rangosNormales['saturacion_oxigeno']['min'] || 
-                 $constantesVitales->getSaturacionOxigeno() > $rangosNormales['saturacion_oxigeno']['max'])) {
-                $alerta['alertas'][] = [
-                    'parametro' => 'saturacion_oxigeno',
-                    'valor' => $constantesVitales->getSaturacionOxigeno(),
-                    'mensaje' => 'Saturación de oxígeno fuera del rango normal (' . 
-                                 $rangosNormales['saturacion_oxigeno']['min'] . '-' . 
-                                 $rangosNormales['saturacion_oxigeno']['max'] . ' %)'
-                ];
-            }
-
-            if (!empty($alerta['alertas'])) {
-                $alertas[] = $alerta;
-            }
-        }
-
-        if (empty($alertas)) {
             return new JsonResponse([
                 'success' => true,
                 'content' => [
-                    'message' => 'No se encontraron alertas para ningún paciente',
-                    'alertas' => []
+                    'message' => 'Alertas encontradas para todos los pacientes',
+                    'alertas' => $alertas
                 ]
             ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'success' => false,
+                'content' => [
+                    'message' => 'Error al procesar la solicitud: ' . $e->getMessage()
+                ]
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-
-        return new JsonResponse([
-            'success' => true,
-            'content' => [
-                'message' => 'Alertas encontradas para todos los pacientes',
-                'alertas' => $alertas
-            ]
-        ], Response::HTTP_OK);
-    } catch (\Exception $e) {
-        return new JsonResponse([
-            'success' => false,
-            'content' => [
-                'message' => 'Error al procesar la solicitud: ' . $e->getMessage()
-            ]
-        ], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
-}
 
 
     #[Route('/registro/{id}', name: 'api_registro_by_id', methods: ['GET'])]
@@ -504,158 +516,6 @@ public function getAllAlertas(RegistroRepository $registroRepository, PacienteRe
                     'message' => 'Error interno: ' . $e->getMessage()
                 ]
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    #[Route('/registro/paciente/{id}', name: 'create_registros_by_paciente', methods: ['POST'])]
-    public function createRegistroByPaciente(
-        Request $request,
-        SerializerSerializerInterface $serializer,
-        ValidatorInterface $validator,
-        EntityManagerInterface $em,
-        PacienteRepository $pacienteRepository,
-        int $id
-    ): JsonResponse {
-        try {
-
-            // Get paciente
-            $paciente = $pacienteRepository->find($id);
-
-            if (!$paciente) {
-                return new JsonResponse([
-                    'success' => false,
-                    'content' => [
-                        'message' => 'Paciente no encontrado'
-                    ]
-                ], Response::HTTP_NOT_FOUND);
-            }
-
-            $data = $request->getContent();
-            $registroInput = $serializer->deserialize($data, RegistroInput::class, 'json');
-            $errors = $validator->validate($registroInput);
-
-            if (count($errors) > 0) {
-                return $this->json($errors, 400);
-            }
-
-            $registro = new Registro();
-            $fecha = new \DateTime('now', new \DateTimeZone('UTC'));
-            $fecha->setTimezone(new \DateTimeZone('Europe/Madrid'));
-            $registro->setFecha($fecha);
-            $registro->setToma($this->calcularToma($fecha));
-
-            $registro->setPacienteId($paciente);
-            // $registro->setAuxiliarId($em->getReference(Auxiliar::class, $registroInput->auxiliarId));
-
-            // AUXILIAR AUTH 
-            // $auxiliar = $em->getRepository(Auxiliar::class)->findOneBy([
-            //     'numTrabajador' => $this->getUser()->getUserIdentifier()
-            // ]);
-            // $registro->setAuxiliar($auxiliar);
-
-            // Observacion
-            if ($registroInput->observacion) {
-                $obs = new Observacion();
-                $obs->setDescripcion($registroInput->observacion->descripcion);
-                $em->persist($obs);
-                $registro->setObservacion($obs);
-            }
-
-            // Dieta
-            if ($registroInput->dieta) {
-                $dieta = new Dieta();
-                $dieta->setAutonomo($registroInput->dieta->autonomo);
-                $dieta->setProtesi($registroInput->dieta->protesi);
-                $dieta->setTipoTexturaId($em->getReference(TipoTextura::class, $registroInput->dieta->tipoTexturaId));
-                $em->persist($dieta);
-
-                foreach ($registroInput->dieta->tipoDietaId as $tipo) {
-                    $tipoDieta = new DietaHasTipoDieta();
-
-                    $tipoDieta->setDietaId($dieta);
-                    $tipoDieta->setTipoDietaId($em->getReference(TipoDieta::class, $tipo));
-                    $em->persist($tipoDieta);
-                }
-
-                $registro->setDietaId($dieta);
-            }
-
-            // Drenaje
-            if ($registroInput->drenaje) {
-                $dren = new Drenaje();
-                $dren->setDescripcion($registroInput->drenaje->descripcion);
-                $em->persist($dren);
-                $registro->setDrenajeId($dren);
-            }
-
-            // Higiene
-            if ($registroInput->higiene) {
-                $hig = new Higiene();
-                $hig->setDescripcion($registroInput->higiene->descripcion);
-                $hig->setTipo($em->getReference(TipoHigiene::class, $registroInput->higiene->tipoId));
-                $em->persist($hig);
-                $registro->setHigieneId($hig);
-            }
-
-            // Constantes Vitales
-            if ($registroInput->constantesVitales) {
-                $cv = new ConstantesVitales();
-                $cv->setTaSistolica($registroInput->constantesVitales->taSistolica);
-                $cv->setTaDiastolica($registroInput->constantesVitales->taDiastolica);
-                $cv->setFrecuenciaRespiratoria($registroInput->constantesVitales->frecuenciaRespiratoria);
-                $cv->setPulso($registroInput->constantesVitales->pulso);
-                $cv->setTemperatura($registroInput->constantesVitales->temperatura);
-                $cv->setSaturacionOxigeno($registroInput->constantesVitales->saturacionOxigeno);
-                $em->persist($cv);
-                $registro->setConstantesVitalesId($cv);
-            }
-
-            // Movilización
-            if ($registroInput->movilizacion) {
-                $mov = new Movilizacion();
-                $mov->setSedestacion($registroInput->movilizacion->sedestacion);
-                $mov->setAyudaDeambulacion($registroInput->movilizacion->ayudaDeambulacion);
-                $mov->setAyudaDescripcion($registroInput->movilizacion->ayudaDescripcion);
-                $mov->setCambiosPosturales($registroInput->movilizacion->cambiosPosturales);
-                $em->persist($mov);
-                $registro->setMovilizacionId($mov);
-            }
-
-            // Sueroterapia
-            if ($registroInput->sueroterapia) {
-                $stp = new Sueroterapia();
-                $stp->setDosis($registroInput->sueroterapia->dosis);
-                $em->persist($stp);
-                $registro->setSueroterapiaId($stp);
-            }
-
-            // Balance Hidrico
-            if ($registroInput->balanceHidrico) {
-                $bh = new BalanceHidrico();
-                $bh->setDiuresis($registroInput->balanceHidrico->diuresis);
-                $bh->setDeposicion($registroInput->balanceHidrico->deposicion);
-                $em->persist($bh);
-                $registro->setBalanceHidricoId($bh);
-            }
-
-            // Save all
-            $em->persist($registro);
-            $em->flush();
-
-            return $this->json([
-                'success' => true,
-                'content' => [
-                    'message' => 'Registro created successfully',
-                    'registro_id' => $registro->getId()
-                ]
-            ], 201);
-        } catch (\Exception $e) {
-            return $this->json([
-                'success' => false,
-                'content' => [
-                    'message' => $e->getMessage()
-                ]
-            ], 400);
         }
     }
 

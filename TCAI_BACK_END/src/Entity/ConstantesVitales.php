@@ -14,11 +14,11 @@ class ConstantesVitales
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 7, nullable: true)]
-    private ?string $ta_sistolica = null;
+    #[ORM\Column(type: Types::INTEGER, nullable: true)]
+    private ?int $ta_sistolica = null;
 
-    #[ORM\Column(length: 7, nullable: true)]
-    private ?string $ta_diastolica = null;
+    #[ORM\Column(type: Types::INTEGER, nullable: true)]
+    private ?int $ta_diastolica = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 4, scale: 1, nullable: true)]
     private ?string $frecuencia_respiratoria = null;
@@ -37,24 +37,24 @@ class ConstantesVitales
         return $this->id;
     }
 
-    public function getTaSistolica(): ?string
+    public function getTaSistolica(): ?int
     {
         return $this->ta_sistolica;
     }
 
-    public function setTaSistolica(?string $ta_sistolica): static
+    public function setTaSistolica(?int $ta_sistolica): static
     {
         $this->ta_sistolica = $ta_sistolica;
 
         return $this;
     }
 
-    public function getTaDiastolica(): ?string
+    public function getTaDiastolica(): ?int
     {
         return $this->ta_diastolica;
     }
 
-    public function setTaDiastolica(?string $ta_diastolica): static
+    public function setTaDiastolica(?int $ta_diastolica): static
     {
         $this->ta_diastolica = $ta_diastolica;
 
