@@ -2,8 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\TipoDieta;
-use App\Form\TipoDietaType;
 use App\Repository\TipoDietaRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;

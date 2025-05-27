@@ -18,8 +18,8 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://127.0.0.1:8000/registro/1",
-							"protocol": "https",
+							"raw": "http://127.0.0.1:8000/registro/1",
+							"protocol": "http",
 							"host": [
 								"127",
 								"0",
@@ -44,8 +44,8 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://127.0.0.1:8000/registro/paciente/1",
-							"protocol": "https",
+							"raw": "http://127.0.0.1:8000/registro/paciente/1",
+							"protocol": "http",
 							"host": [
 								"127",
 								"0",
@@ -57,6 +57,67 @@
 								"registro",
 								"paciente",
 								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Registro Historical Copy",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/registro/paciente/historia/1",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"registro",
+								"paciente",
+								"historia",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Registro",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"paciente_id\": 1,\n  \"auxiliar_id\": 2,\n  \"observacion\": {\n    \"descripcion\": \"Paciente presenta buen estado general.\"\n  },\n  \"dieta\": {\n    \"autonomo\": 1,\n    \"protesi\": 0,\n    \"tipoTexturaId\": 3,\n    \"tipoDietaId\": [1, 2]\n  },\n  \"drenaje\": {\n    \"descripcion\": \"Drenaje activo en zona abdominal.\"\n  },\n  \"higiene\": {\n    \"descripcion\": \"Higiene realizada con ayuda parcial.\",\n    \"tipoId\": 4\n  },\n  \"constantesVitales\": {\n    \"taSistolica\": 120,\n    \"taDiastolica\": 80,\n    \"frecuenciaRespiratoria\": 16,\n    \"pulso\": 72,\n    \"temperatura\": 36.5,\n    \"saturacionOxigeno\": 98\n  },\n  \"movilizacion\": {\n    \"sedestacion\": \"1\",\n    \"ayudaDeambulacion\": 1,\n    \"ayudaDescripcion\": \"Bastón utilizado\",\n    \"cambiosPosturales\": \"0\"\n  },\n  \"sueroterapia\": {\n    \"dosis\": 500\n  },\n  \"balanceHidrico\": {\n    \"diuresis\": 1500,\n    \"deposicion\": \"2\"\n  }\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/paciente/registro/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"paciente",
+								"registro",
+								""
 							]
 						}
 					},
@@ -76,8 +137,8 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://127.0.0.1:8000/diagnostico/paciente/1",
-							"protocol": "https",
+							"raw": "http://127.0.0.1:8000/diagnostico/paciente/1",
+							"protocol": "http",
 							"host": [
 								"127",
 								"0",
@@ -100,6 +161,63 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Get Patient Medical Data",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/detalle_diagnostico/1",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"detalle_diagnostico",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New MedicalData",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"paciente_id\": 1,\n  \"auxiliar_id\": 2,\n  \"avd\": \"Paciente requiere ayuda parcial para AVD.\",\n  \"o2\": 1,\n  \"o2_descripcion\": \"Uso de gafas nasales a 2 l/min.\",\n  \"panales\": 1,\n  \"panales_descripcion\": \"Uso de pañal absorbente nocturno.\",\n  \"sv\": \"Presión arterial 120/80, pulso 72.\",\n  \"sr\": \"Reflejos conservados, sin signos patológicos.\",\n  \"sng\": \"No se requiere sonda nasogástrica.\",\n  \"diagnostico\": \"Hipertensión arterial controlada.\",\n  \"motivo\": \"Evaluación rutinaria.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/detalle_diagnostico",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"detalle_diagnostico"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -115,8 +233,8 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://127.0.0.1:8000/general",
-							"protocol": "https",
+							"raw": "http://127.0.0.1:8000/general",
+							"protocol": "http",
 							"host": [
 								"127",
 								"0",
@@ -140,8 +258,8 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://127.0.0.1:8000/diets",
-							"protocol": "https",
+							"raw": "http://127.0.0.1:8000/diets",
+							"protocol": "http",
 							"host": [
 								"127",
 								"0",
@@ -155,17 +273,139 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Personal Data",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/personal-data/h004",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"personal-data",
+								"h004"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Alerts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/alertas",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"alertas"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
 		{
-			"name": "login",
+			"name": "Types",
+			"item": [
+				{
+					"name": "Tipo Dieta",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/tipo/dieta",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"tipo",
+								"dieta"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Tipo Textura",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/tipo/textura",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"tipo",
+								"textura"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Tipo Higiene",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/tipo/higiene",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"tipo",
+								"higiene"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Login",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"num_trabajador\": \"A001\",\n  \"contraseña\": \"$2y$13$W8XzK6qQz8z1y2b3n4m5pO6r7s8t9u0v1w2x3y4z5A6B7C8D9E0F\"\n}",
+					"raw": "{\n  \"num_trabajador\": \"A004\",\n  \"contrasena\": \"test\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -173,8 +413,8 @@
 					}
 				},
 				"url": {
-					"raw": "https://127.0.0.1:8000/login",
-					"protocol": "https",
+					"raw": "http://127.0.0.1:8000/login",
+					"protocol": "http",
 					"host": [
 						"127",
 						"0",

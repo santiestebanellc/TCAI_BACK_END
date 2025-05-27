@@ -2,7 +2,20 @@
 
 namespace App\Controller;
 
+//Others
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Serializer\SerializerInterface as SerializerSerializerInterface;
+
+//Data Transfer Objects
 use App\Dto\RegistroInput;
+
+// Entities
 use App\Entity\BalanceHidrico;
 use App\Entity\ConstantesVitales;
 use App\Entity\Dieta;
@@ -16,42 +29,66 @@ use App\Entity\Sueroterapia;
 use App\Entity\TipoDieta;
 use App\Entity\TipoHigiene;
 use App\Entity\TipoTextura;
-use App\Form\RegistroType;
+
+//Repositories
 use App\Repository\AuxiliarRepository;
+use App\Repository\DietaHasTipoDietaRepository;
 use App\Repository\PacienteRepository;
 use App\Repository\RegistroRepository;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Component\Serializer\SerializerInterface as SerializerSerializerInterface;
+use App\Repository\TipoDietaRepository;
 
 final class RegistroController extends AbstractController
 {
     // GET
-
-    #[Route(path: 'paciente/{pacienteId}/registro/{id}', name: 'app_registro_index', methods: ['GET'])]
-    public function getRegistroById(RegistroRepository $registroRepository, $pacienteId, $id): JsonResponse
-    {
+    #[Route('/registro/paciente/historia/{id}', name: 'api_registro_historial_by_paciente', methods: ['GET'])]
+    public function getRegistrosByPacienteHistorial(
+        int $id,
+        RegistroRepository $registroRepository,
+        PacienteRepository $pacienteRepository
+    ): JsonResponse {
         try {
-            $registro = $registroRepository->findBy(
-                ['paciente_id' => $pacienteId, 'id' => $id],
-            );
+            $paciente = $pacienteRepository->find($id);
 
-            if ($registro) {
-                return $this->json([
-                    'success' => true,
-                    'content' => $registro
-                ], Response::HTTP_OK);
-            } else {
-                return $this->json([
-                    'success' => true,
-                    'content' => ['message' => "No s'ha trobat cap registre amb aquest id"]
-                ], Response::HTTP_OK);
+            if (!$paciente) {
+                return new JsonResponse([
+                    'success' => false,
+                    'content' => ['message' => 'Paciente no encontrado']
+                ], Response::HTTP_NOT_FOUND);
             }
+
+            $registros = $registroRepository->findBy(['paciente_id' => $paciente]);
+
+            if (empty($registros)) {
+                return new JsonResponse([
+                    'success' => false,
+                    'content' => ['message' => 'No se encontraron registros para este paciente.']
+                ], Response::HTTP_NOT_FOUND);
+            }
+
+            $formattedResults = [];
+
+            foreach ($registros as $registro) {
+                $constantes = $registro->getConstantesVitalesId();
+
+                if ($constantes) {
+                    $formattedResults[] = [
+                        'timestamp' => $registro->getFecha()->format('Y-m-d\TH:i:s\Z'),
+                        'constantes_vitales' => [
+                            'ta_sistolica' => $constantes->getTaSistolica(),
+                            'ta_diastolica' => $constantes->getTaDiastolica(),
+                            'temperatura' => $constantes->getTemperatura(),
+                            'pulso' => $constantes->getPulso(),
+                            'frecuencia_respiratoria' => $constantes->getFrecuenciaRespiratoria(),
+                            'spo2' => $constantes->getSaturacionOxigeno(),
+                        ]
+                    ];
+                }
+            }
+
+            return $this->json([
+                'success' => true,
+                'content' => $formattedResults
+            ], Response::HTTP_OK);
         } catch (\Exception $e) {
             return $this->json([
                 'success' => false,
@@ -60,37 +97,178 @@ final class RegistroController extends AbstractController
         }
     }
 
-    #[Route(path: '/paciente/registro/historia/{pacienteId}', name: 'app_registro_index', methods: ['GET'])]
-    public function getHistoriaRegistrosByPacienteId(RegistroRepository $registroRepository, $pacienteId): JsonResponse
-    {
+    #[Route('/registro/paciente/{id}', name: 'api_registros_by_paciente', methods: ['GET'])]
+    public function getRegistrosByPaciente(
+        int $id,
+        RegistroRepository $registroRepository,
+        PacienteRepository $pacienteRepository
+    ): JsonResponse {
         try {
+            $paciente = $pacienteRepository->find($id);
+
+            if (!$paciente) {
+                return new JsonResponse([
+                    'success' => false,
+                    'content' => [
+                        'message' => 'Paciente no encontrado'
+                    ]
+                ], Response::HTTP_NOT_FOUND);
+            }
+
             $registros = $registroRepository->findBy(
-                ['paciente_id' => $pacienteId],
-                ['fecha' => 'DESC'],
-                15
+                ['paciente_id' => $paciente],
+                ['fecha' => 'DESC']
             );
 
-            if ($registros) {
-                return $this->json([
-                    'success' => true,
-                    'content' => $registros
-                ], Response::HTTP_OK);
-            } else {
-                return $this->json([
-                    'success' => true,
-                    'content' => ['message' => "El pacient amb id" . $pacienteId . "no te cap registre."]
-                ], Response::HTTP_OK);
+            if (empty($registros)) {
+                return new JsonResponse([
+                    'success' => false,
+                    'content' => [
+                        'message' => 'No se encontraron registros para este paciente'
+                    ]
+                ], Response::HTTP_NOT_FOUND);
             }
+
+            $formattedResults = [];
+            foreach ($registros as $registro) {
+                $auxiliar = $registro->getAuxiliarId();
+                $observacion = $registro->getObservacion();
+                $constantes_vitales = $registro->getConstantesVitalesId();
+
+                $formattedResults[] = [
+                    'registro_id' => $registro->getId(),
+                    'registro' => [
+                        'fecha' => $registro->getFecha() ? $registro->getFecha()->format('Y-m-d H:i:s') : null,
+                        'toma' => $registro->getToma(),
+                        'nombre_auxiliar' => $auxiliar ? $auxiliar->getNombre() : null,
+                        'numero_auxiliar' => $auxiliar ? $auxiliar->getNumTrabajador() : null,
+                        'constantes_vitales' => [
+                            'ta_sistolica' => $constantes_vitales ? $constantes_vitales->getTaSistolica() : null,
+                            'ta_diastolica' => $constantes_vitales ? $constantes_vitales->getTaDiastolica() : null,
+                            'frecuencia_respiratoria' => $constantes_vitales ? $constantes_vitales->getFrecuenciaRespiratoria() : null,
+                            'pulso' => $constantes_vitales ? $constantes_vitales->getPulso() : null,
+                            'temperatura' => $constantes_vitales ? $constantes_vitales->getTemperatura() : null,
+                            'saturacion_oxigeno' => $constantes_vitales ? $constantes_vitales->getSaturacionOxigeno() : null
+                        ],
+                        'observacion' => $observacion ? $observacion->getDescripcion() : null
+                    ]
+                ];
+            }
+
+            return new JsonResponse([
+                'success' => true,
+                'content' => $formattedResults
+            ], Response::HTTP_OK);
         } catch (\Exception $e) {
-            return $this->json([
+            return new JsonResponse([
                 'success' => false,
-                'content' => ['message' => $e->getMessage()]
+                'content' => [
+                    'message' => 'Error interno: ' . $e->getMessage()
+                ]
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    #[Route('/registro/{id}', name: 'api_registro_by_id', methods: ['GET'])]
+    public function getRegistroById(
+        int $id,
+        RegistroRepository $registroRepository,
+        DietaHasTipoDietaRepository $dietaHasTipoDietaRepository,
+        TipoDietaRepository $tipoDietaRepository
+    ): JsonResponse {
+        try {
+
+            $registro = $registroRepository->find($id);
+
+            if (!$registro) {
+                return $this->json([
+                    'success' => false,
+                    'message' => 'Registro not found'
+                ], Response::HTTP_NOT_FOUND);
+            }
+
+            $dieta = $registro->getDietaId();
+
+            $tipoDietaDescriptions = [];
+
+            $dietaHasTipoDietas = $dietaHasTipoDietaRepository->findBy(['dieta_id' => $dieta->getId()]);
+
+            foreach ($dietaHasTipoDietas as $relation) {
+                $tipoDietaId = $relation->getTipoDietaId();
+                $tipoDieta = $tipoDietaRepository->find($tipoDietaId);
+
+                if ($tipoDieta) {
+                    $tipoDietaDescriptions[] = $tipoDieta->getDescripcion();
+                }
+            }
+
+            $tipoDietaString = implode(', ', $tipoDietaDescriptions);
+
+            $responseData = [
+                'registro' => [
+                    'constantes_vitales' => [
+                        'ta_sistolica' => $registro->getConstantesVitalesId()->getTaSistolica(),
+                        'ta_diastolica' => $registro->getConstantesVitalesId()->getTaDiastolica(),
+                        'frecuencia_respiratoria' => $registro->getConstantesVitalesId()->getFrecuenciaRespiratoria(),
+                        'pulso' => $registro->getConstantesVitalesId()->getPulso(),
+                        'temperatura' => $registro->getConstantesVitalesId()->getTemperatura(),
+                        'saturacion_oxigeno' => $registro->getConstantesVitalesId()->getSaturacionOxigeno()
+                    ],
+
+                    'dieta' => [
+                        'autonomo' => $dieta->getAutonomo(),
+                        'protesi' => $dieta->getProtesi(),
+                        'tipo_dieta' => $tipoDietaString,
+                        'tipo_textura' => $dieta->getTipoTexturaId()->getDescripcion(),
+                    ],
+
+                    'sueroterapia' => $registro->getSueroterapiaId()->getDosis(),
+
+                    'balance_hidrico' => [
+                        'diuresis' => $registro->getBalanceHidricoId()->getDiuresis(),
+                        'deposicion' => $registro->getBalanceHidricoId()->getDeposicion(),
+                    ],
+
+                    'drenaje' => $registro->getDrenajeId()->getDescripcion(),
+
+                    'movilizacion' => [
+                        'sedestacion' => $registro->getMovilizacionId()->getSedestacion(),
+                        'ayuda_deambulacion' => $registro->getMovilizacionId()->getAyudaDeambulacion(),
+                        'ayuda_descripcion' => $registro->getMovilizacionId()->getAyudaDescripcion(),
+                        'cambios_posturales' => $registro->getMovilizacionId()->getCambiosPosturales(),
+                    ],
+
+                    'higiene' => [
+                        'tipo_higiene' => $registro->getHigieneId()->getTipo()->getDescripcion(),
+                        'higiene_descripcion' => $registro->getHigieneId()->getDescripcion(),
+                    ],
+
+                    'observacion' => $registro->getObservacion()->getDescripcion(),
+
+                    'fecha' => $registro->getFecha() ? $registro->getFecha()->format('Y-m-d H:i:s') : null,
+                    'auxiliar' => [
+                        'nombre' => $registro->getAuxiliarId()->getNombre(),
+                        'num_trabajador' => $registro->getAuxiliarId()->getNumTrabajador()
+                    ]
+                ],
+            ];
+
+            return new JsonResponse([
+                'success' => true,
+                'content' => $responseData
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'success' => false,
+                'content' => [
+                    'message' => 'Error interno: ' . $e->getMessage()
+                ]
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
     // POST
-
     #[Route('/paciente/registro/', name: 'create_registros_by_paciente', methods: ['POST'])]
     public function createRegistroByPaciente(
         Request $request,
@@ -135,7 +313,7 @@ final class RegistroController extends AbstractController
             $fecha = new \DateTime('now', new \DateTimeZone('UTC'));
             $fecha->setTimezone(new \DateTimeZone('Europe/Madrid'));
             $registro->setFecha($fecha);
-            $registro->setToma($this->calcularToma($fecha));
+            $registro->setToma(HospitalUtils::calcularToma($fecha));
 
             $registro->setAuxiliarId($auxiliar);
             $registro->setPacienteId($paciente);
@@ -244,23 +422,6 @@ final class RegistroController extends AbstractController
                     'message' => $e->getMessage(),
                 ]
             ], 400);
-        }
-    }
-
-
-    /* OTRAS FUNCIONES */
-
-    // Calcula la toma (Mañana, Tarde, Noche) según la fecha
-    private function calcularToma(\DateTimeInterface $fecha): string
-    {
-        $hora = (int) $fecha->format('H');
-
-        if ($hora >= 6 && $hora < 14) {
-            return 'M'; // Mañana
-        } elseif ($hora >= 14 && $hora < 22) {
-            return 'T'; // Tarde
-        } else {
-            return 'N'; // Noche
         }
     }
 }
