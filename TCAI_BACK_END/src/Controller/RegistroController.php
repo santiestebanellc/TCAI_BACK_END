@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Component\Serializer\SerializerInterface as SerializerSerializerInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 
 //Data Transfer Objects
 use App\Dto\RegistroInput;
@@ -272,16 +272,14 @@ final class RegistroController extends AbstractController
     #[Route('/paciente/registro/', name: 'create_registros_by_paciente', methods: ['POST'])]
     public function createRegistroByPaciente(
         Request $request,
-        SerializerSerializerInterface $serializer,
+        SerializerInterface $serializer,
         ValidatorInterface $validator,
         EntityManagerInterface $em,
         PacienteRepository $pacienteRepository,
         AuxiliarRepository $auxiliarRepository
     ): JsonResponse {
         try {
-
             $data = $request->getContent();
-
             $registroInput = $serializer->deserialize($data, RegistroInput::class, 'json');
             $errors = $validator->validate($registroInput);
 
@@ -290,8 +288,9 @@ final class RegistroController extends AbstractController
             }
 
             $data = json_decode($request->getContent(), true);
+
             // Get paciente
-            $paciente = $pacienteRepository->find($data['paciente_id']);
+            $paciente = $pacienteRepository->find($data['paciente_id'] ?? null);
             if (!$paciente) {
                 return new JsonResponse([
                     'success' => false,
@@ -299,9 +298,8 @@ final class RegistroController extends AbstractController
                 ], Response::HTTP_NOT_FOUND);
             }
 
-
-
-            $auxiliar = $auxiliarRepository->find($data['auxiliar_id']);
+            // Get auxiliar
+            $auxiliar = $auxiliarRepository->find($data['auxiliar_id'] ?? null);
             if (!$auxiliar) {
                 return new JsonResponse([
                     'success' => false,
@@ -314,13 +312,11 @@ final class RegistroController extends AbstractController
             $fecha->setTimezone(new \DateTimeZone('Europe/Madrid'));
             $registro->setFecha($fecha);
             $registro->setToma(HospitalUtils::calcularToma($fecha));
-
             $registro->setAuxiliarId($auxiliar);
             $registro->setPacienteId($paciente);
 
-
             // Observacion
-            if ($registroInput->observacion) {
+            if ($registroInput->observacion && !empty(trim($registroInput->observacion->descripcion))) {
                 $obs = new Observacion();
                 $obs->setDescripcion($registroInput->observacion->descripcion);
                 $em->persist($obs);
@@ -329,25 +325,41 @@ final class RegistroController extends AbstractController
 
             // Dieta
             if ($registroInput->dieta) {
-                $dieta = new Dieta();
-                $dieta->setAutonomo($registroInput->dieta->autonomo);
-                $dieta->setProtesi($registroInput->dieta->protesi);
-                $dieta->setTipoTexturaId($em->getReference(TipoTextura::class, $registroInput->dieta->tipoTexturaId));
-                $em->persist($dieta);
+                $hasDietaData =
+                    $registroInput->dieta->autonomo !== null ||
+                    $registroInput->dieta->protesi !== null ||
+                    $registroInput->dieta->tipoTexturaId !== null ||
+                    (!empty($registroInput->dieta->tipoDietaId) && is_array($registroInput->dieta->tipoDietaId));
 
-                foreach ($registroInput->dieta->tipoDietaId as $tipo) {
-                    $tipoDieta = new DietaHasTipoDieta();
+                if ($hasDietaData) {
+                    $dieta = new Dieta();
+                    $dieta->setAutonomo($registroInput->dieta->autonomo);
+                    $dieta->setProtesi($registroInput->dieta->protesi);
 
-                    $tipoDieta->setDietaId($dieta);
-                    $tipoDieta->setTipoDietaId($em->getReference(TipoDieta::class, $tipo));
-                    $em->persist($tipoDieta);
+                    // Set tipoTexturaId only if valid
+                    if ($registroInput->dieta->tipoTexturaId !== null) {
+                        $tipoTextura = $em->getReference(TipoTextura::class, $registroInput->dieta->tipoTexturaId);
+                        $dieta->setTipoTexturaId($tipoTextura);
+                    }
+
+                    $em->persist($dieta);
+
+                    // Handle tipoDietaId
+                    if (!empty($registroInput->dieta->tipoDietaId) && is_array($registroInput->dieta->tipoDietaId)) {
+                        foreach ($registroInput->dieta->tipoDietaId as $tipo) {
+                            $tipoDieta = new DietaHasTipoDieta();
+                            $tipoDieta->setDietaId($dieta);
+                            $tipoDieta->setTipoDietaId($em->getReference(TipoDieta::class, $tipo));
+                            $em->persist($tipoDieta);
+                        }
+                    }
+
+                    $registro->setDietaId($dieta);
                 }
-
-                $registro->setDietaId($dieta);
             }
 
             // Drenaje
-            if ($registroInput->drenaje) {
+            if ($registroInput->drenaje && !empty(trim($registroInput->drenaje->descripcion))) {
                 $dren = new Drenaje();
                 $dren->setDescripcion($registroInput->drenaje->descripcion);
                 $em->persist($dren);
@@ -355,40 +367,60 @@ final class RegistroController extends AbstractController
             }
 
             // Higiene
-            if ($registroInput->higiene) {
+            if ($registroInput->higiene && ($registroInput->higiene->tipoId !== null || !empty(trim($registroInput->higiene->descripcion)))) {
                 $hig = new Higiene();
                 $hig->setDescripcion($registroInput->higiene->descripcion);
-                $hig->setTipo($em->getReference(TipoHigiene::class, $registroInput->higiene->tipoId));
+                if ($registroInput->higiene->tipoId !== null) {
+                    $hig->setTipo($em->getReference(TipoHigiene::class, $registroInput->higiene->tipoId));
+                }
                 $em->persist($hig);
                 $registro->setHigieneId($hig);
             }
 
             // Constantes Vitales
             if ($registroInput->constantesVitales) {
-                $cv = new ConstantesVitales();
-                $cv->setTaSistolica($registroInput->constantesVitales->taSistolica);
-                $cv->setTaDiastolica($registroInput->constantesVitales->taDiastolica);
-                $cv->setFrecuenciaRespiratoria($registroInput->constantesVitales->frecuenciaRespiratoria);
-                $cv->setPulso($registroInput->constantesVitales->pulso);
-                $cv->setTemperatura($registroInput->constantesVitales->temperatura);
-                $cv->setSaturacionOxigeno($registroInput->constantesVitales->saturacionOxigeno);
-                $em->persist($cv);
-                $registro->setConstantesVitalesId($cv);
+                $hasCVData =
+                    $registroInput->constantesVitales->taSistolica !== null ||
+                    $registroInput->constantesVitales->taDiastolica !== null ||
+                    $registroInput->constantesVitales->frecuenciaRespiratoria !== null ||
+                    $registroInput->constantesVitales->pulso !== null ||
+                    $registroInput->constantesVitales->temperatura !== null ||
+                    $registroInput->constantesVitales->saturacionOxigeno !== null;
+
+                if ($hasCVData) {
+                    $cv = new ConstantesVitales();
+                    $cv->setTaSistolica($registroInput->constantesVitales->taSistolica);
+                    $cv->setTaDiastolica($registroInput->constantesVitales->taDiastolica);
+                    $cv->setFrecuenciaRespiratoria($registroInput->constantesVitales->frecuenciaRespiratoria);
+                    $cv->setPulso($registroInput->constantesVitales->pulso);
+                    $cv->setTemperatura($registroInput->constantesVitales->temperatura);
+                    $cv->setSaturacionOxigeno($registroInput->constantesVitales->saturacionOxigeno);
+                    $em->persist($cv);
+                    $registro->setConstantesVitalesId($cv);
+                }
             }
 
             // Movilización
             if ($registroInput->movilizacion) {
-                $mov = new Movilizacion();
-                $mov->setSedestacion($registroInput->movilizacion->sedestacion);
-                $mov->setAyudaDeambulacion($registroInput->movilizacion->ayudaDeambulacion);
-                $mov->setAyudaDescripcion($registroInput->movilizacion->ayudaDescripcion);
-                $mov->setCambiosPosturales($registroInput->movilizacion->cambiosPosturales);
-                $em->persist($mov);
-                $registro->setMovilizacionId($mov);
+                $hasMovData =
+                    !empty(trim($registroInput->movilizacion->sedestacion)) ||
+                    $registroInput->movilizacion->ayudaDeambulacion !== null ||
+                    !empty(trim($registroInput->movilizacion->ayudaDescripcion)) ||
+                    !empty(trim($registroInput->movilizacion->cambiosPosturales));
+
+                if ($hasMovData) {
+                    $mov = new Movilizacion();
+                    $mov->setSedestacion($registroInput->movilizacion->sedestacion);
+                    $mov->setAyudaDeambulacion($registroInput->movilizacion->ayudaDeambulacion);
+                    $mov->setAyudaDescripcion($registroInput->movilizacion->ayudaDescripcion);
+                    $mov->setCambiosPosturales($registroInput->movilizacion->cambiosPosturales);
+                    $em->persist($mov);
+                    $registro->setMovilizacionId($mov);
+                }
             }
 
             // Sueroterapia
-            if ($registroInput->sueroterapia) {
+            if ($registroInput->sueroterapia && $registroInput->sueroterapia->dosis !== null) {
                 $stp = new Sueroterapia();
                 $stp->setDosis($registroInput->sueroterapia->dosis);
                 $em->persist($stp);
@@ -397,11 +429,17 @@ final class RegistroController extends AbstractController
 
             // Balance Hidrico
             if ($registroInput->balanceHidrico) {
-                $bh = new BalanceHidrico();
-                $bh->setDiuresis($registroInput->balanceHidrico->diuresis);
-                $bh->setDeposicion($registroInput->balanceHidrico->deposicion);
-                $em->persist($bh);
-                $registro->setBalanceHidricoId($bh);
+                $hasBHData =
+                    $registroInput->balanceHidrico->diuresis !== null ||
+                    !empty(trim($registroInput->balanceHidrico->deposicion));
+
+                if ($hasBHData) {
+                    $bh = new BalanceHidrico();
+                    $bh->setDiuresis($registroInput->balanceHidrico->diuresis);
+                    $bh->setDeposicion($registroInput->balanceHidrico->deposicion);
+                    $em->persist($bh);
+                    $registro->setBalanceHidricoId($bh);
+                }
             }
 
             // Save all
