@@ -87,7 +87,7 @@ final class HospitalDataController extends AbstractController
                     'fecha' => $ultimoRegistro->getFecha()->format('Y-m-d H:i:s'),
                     'nombre_auxiliar' => $ultimoRegistro->getAuxiliarId()->getNombre(),
                     'numero_auxiliar' => $ultimoRegistro->getAuxiliarId()->getNumTrabajador(),
-                    'observaciones' => $ultimoRegistro->getObservacion()->getDescripcion(),
+                    'observaciones' => $ultimoRegistro->getObservacion() ? $ultimoRegistro->getObservacion()->getDescripcion() : null,
                     'alerta' => true,
                 ] : null;
             }
