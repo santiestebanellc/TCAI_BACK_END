@@ -170,102 +170,170 @@ final class RegistroController extends AbstractController
     }
 
     #[Route('/registro/{id}', name: 'api_registro_by_id', methods: ['GET'])]
-    public function getRegistroById(
-        int $id,
-        RegistroRepository $registroRepository,
-        DietaHasTipoDietaRepository $dietaHasTipoDietaRepository,
-        TipoDietaRepository $tipoDietaRepository
-    ): JsonResponse {
-        try {
+public function getRegistroById(
+    int $id,
+    RegistroRepository $registroRepository,
+    DietaHasTipoDietaRepository $dietaHasTipoDietaRepository,
+    TipoDietaRepository $tipoDietaRepository
+): JsonResponse {
+    try {
+        $registro = $registroRepository->find($id);
 
-            $registro = $registroRepository->find($id);
-
-            if (!$registro) {
-                return $this->json([
-                    'success' => false,
-                    'message' => 'Registro not found'
-                ], Response::HTTP_NOT_FOUND);
-            }
-
-            $dieta = $registro->getDietaId();
-
-            $tipoDietaDescriptions = [];
-
-            $dietaHasTipoDietas = $dietaHasTipoDietaRepository->findBy(['dieta_id' => $dieta->getId()]);
-
-            foreach ($dietaHasTipoDietas as $relation) {
-                $tipoDietaId = $relation->getTipoDietaId();
-                $tipoDieta = $tipoDietaRepository->find($tipoDietaId);
-
-                if ($tipoDieta) {
-                    $tipoDietaDescriptions[] = $tipoDieta->getDescripcion();
-                }
-            }
-
-            $tipoDietaString = implode(', ', $tipoDietaDescriptions);
-
-            $responseData = [
-                'registro' => [
-                    'constantes_vitales' => [
-                        'ta_sistolica' => $registro->getConstantesVitalesId()->getTaSistolica(),
-                        'ta_diastolica' => $registro->getConstantesVitalesId()->getTaDiastolica(),
-                        'frecuencia_respiratoria' => $registro->getConstantesVitalesId()->getFrecuenciaRespiratoria(),
-                        'pulso' => $registro->getConstantesVitalesId()->getPulso(),
-                        'temperatura' => $registro->getConstantesVitalesId()->getTemperatura(),
-                        'saturacion_oxigeno' => $registro->getConstantesVitalesId()->getSaturacionOxigeno()
-                    ],
-
-                    'dieta' => [
-                        'autonomo' => $dieta->getAutonomo(),
-                        'protesi' => $dieta->getProtesi(),
-                        'tipo_dieta' => $tipoDietaString,
-                        'tipo_textura' => $dieta->getTipoTexturaId()->getDescripcion(),
-                    ],
-
-                    'sueroterapia' => $registro->getSueroterapiaId()->getDosis(),
-
-                    'balance_hidrico' => [
-                        'diuresis' => $registro->getBalanceHidricoId()->getDiuresis(),
-                        'deposicion' => $registro->getBalanceHidricoId()->getDeposicion(),
-                    ],
-
-                    'drenaje' => $registro->getDrenajeId()->getDescripcion(),
-
-                    'movilizacion' => [
-                        'sedestacion' => $registro->getMovilizacionId()->getSedestacion(),
-                        'ayuda_deambulacion' => $registro->getMovilizacionId()->getAyudaDeambulacion(),
-                        'ayuda_descripcion' => $registro->getMovilizacionId()->getAyudaDescripcion(),
-                        'cambios_posturales' => $registro->getMovilizacionId()->getCambiosPosturales(),
-                    ],
-
-                    'higiene' => [
-                        'tipo_higiene' => $registro->getHigieneId()->getTipo()->getDescripcion(),
-                        'higiene_descripcion' => $registro->getHigieneId()->getDescripcion(),
-                    ],
-
-                    'observacion' => $registro->getObservacion()->getDescripcion(),
-
-                    'fecha' => $registro->getFecha() ? $registro->getFecha()->format('Y-m-d H:i:s') : null,
-                    'auxiliar' => [
-                        'nombre' => $registro->getAuxiliarId()->getNombre(),
-                        'num_trabajador' => $registro->getAuxiliarId()->getNumTrabajador()
-                    ]
-                ],
-            ];
-
-            return new JsonResponse([
-                'success' => true,
-                'content' => $responseData
-            ], Response::HTTP_OK);
-        } catch (\Exception $e) {
-            return new JsonResponse([
+        if (!$registro) {
+            return $this->json([
                 'success' => false,
-                'content' => [
-                    'message' => 'Error interno: ' . $e->getMessage()
-                ]
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+                'message' => 'Registro not found'
+            ], Response::HTTP_NOT_FOUND);
         }
+
+        // Helper function to safely get nested properties
+        $safeGet = function($object, $method, $default = null) {
+            return $object ? $object->$method() : $default;
+        };
+
+        // Build constantes vitales data
+        $constantesVitales = null;
+        if ($registro->getConstantesVitalesId()) {
+            $cv = $registro->getConstantesVitalesId();
+            $constantesVitales = [
+                'ta_sistolica' => $cv->getTaSistolica(),
+                'ta_diastolica' => $cv->getTaDiastolica(),
+                'frecuencia_respiratoria' => $cv->getFrecuenciaRespiratoria(),
+                'pulso' => $cv->getPulso(),
+                'temperatura' => $cv->getTemperatura(),
+                'saturacion_oxigeno' => $cv->getSaturacionOxigeno()
+            ];
+        }
+
+        // Build dieta data
+        $dietaData = null;
+        if ($registro->getDietaId()) {
+            $dieta = $registro->getDietaId();
+            
+            // Get tipo dieta descriptions
+            $tipoDietaDescriptions = [];
+            try {
+                $dietaHasTipoDietas = $dietaHasTipoDietaRepository->findBy(['dieta_id' => $dieta->getId()]);
+                
+                foreach ($dietaHasTipoDietas as $relation) {
+                    $tipoDietaId = $relation->getTipoDietaId();
+                    if ($tipoDietaId) {
+                        $tipoDieta = $tipoDietaRepository->find($tipoDietaId);
+                        if ($tipoDieta) {
+                            $tipoDietaDescriptions[] = $tipoDieta->getDescripcion();
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                // If there's an error getting diet types, continue with empty array
+                $tipoDietaDescriptions = [];
+            }
+
+            $tipoDietaString = !empty($tipoDietaDescriptions) ? implode(', ', $tipoDietaDescriptions) : null;
+
+            $dietaData = [
+                'autonomo' => $dieta->getAutonomo(),
+                'protesi' => $dieta->getProtesi(),
+                'tipo_dieta' => $tipoDietaString,
+                'tipo_textura' => $safeGet($dieta->getTipoTexturaId(), 'getDescripcion'),
+            ];
+        }
+
+        // Build sueroterapia data
+        $sueroterapiaData = null;
+        if ($registro->getSueroterapiaId()) {
+            $sueroterapiaData = $registro->getSueroterapiaId()->getDosis();
+        }
+
+        // Build balance hidrico data
+        $balanceHidricoData = null;
+        if ($registro->getBalanceHidricoId()) {
+            $bh = $registro->getBalanceHidricoId();
+            $balanceHidricoData = [
+                'diuresis' => $bh->getDiuresis(),
+                'deposicion' => $bh->getDeposicion(),
+            ];
+        }
+
+        // Build drenaje data
+        $drenajeData = null;
+        if ($registro->getDrenajeId()) {
+            $drenajeData = $registro->getDrenajeId()->getDescripcion();
+        }
+
+        // Build movilizacion data
+        $movilizacionData = null;
+        if ($registro->getMovilizacionId()) {
+            $mov = $registro->getMovilizacionId();
+            $movilizacionData = [
+                'sedestacion' => $mov->getSedestacion(),
+                'ayuda_deambulacion' => $mov->getAyudaDeambulacion(),
+                'ayuda_descripcion' => $mov->getAyudaDescripcion(),
+                'cambios_posturales' => $mov->getCambiosPosturales(),
+            ];
+        }
+
+        // Build higiene data
+        $higieneData = null;
+        if ($registro->getHigieneId()) {
+            $higiene = $registro->getHigieneId();
+            $higieneData = [
+                'tipo_higiene' => $safeGet($higiene->getTipo(), 'getDescripcion'),
+                'higiene_descripcion' => $higiene->getDescripcion(),
+            ];
+        }
+
+        // Build observacion data
+        $observacionData = null;
+        if ($registro->getObservacion()) {
+            $observacionData = $registro->getObservacion()->getDescripcion();
+        }
+
+        // Build auxiliar data
+        $auxiliarData = null;
+        if ($registro->getAuxiliarId()) {
+            $auxiliar = $registro->getAuxiliarId();
+            $auxiliarData = [
+                'nombre' => $auxiliar->getNombre(),
+                'num_trabajador' => $auxiliar->getNumTrabajador()
+            ];
+        }
+
+        $responseData = [
+            'registro' => [
+                'id' => $registro->getId(),
+                'fecha' => $registro->getFecha() ? $registro->getFecha()->format('Y-m-d H:i:s') : null,
+                'toma' => $registro->getToma(),
+                'constantes_vitales' => $constantesVitales,
+                'dieta' => $dietaData,
+                'sueroterapia' => $sueroterapiaData,
+                'balance_hidrico' => $balanceHidricoData,
+                'drenaje' => $drenajeData,
+                'movilizacion' => $movilizacionData,
+                'higiene' => $higieneData,
+                'observacion' => $observacionData,
+                'auxiliar' => $auxiliarData,
+                'paciente' => [
+                    'id' => $safeGet($registro->getPacienteId(), 'getId'),
+                    'nombre' => $safeGet($registro->getPacienteId(), 'getNombre'),
+                ]
+            ],
+        ];
+
+        return new JsonResponse([
+            'success' => true,
+            'content' => $responseData
+        ], Response::HTTP_OK);
+
+    } catch (\Exception $e) {
+        return new JsonResponse([
+            'success' => false,
+            'content' => [
+                'message' => 'Error interno: ' . $e->getMessage()
+            ]
+        ], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
+}
 
 
     // POST
