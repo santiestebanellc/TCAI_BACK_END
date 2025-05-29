@@ -25,90 +25,141 @@ use App\Repository\PacienteHasHabitacionesRepository;
 
 final class HospitalDataController extends AbstractController
 {
-    #[Route('/general', name: 'app_habitacion_index', methods: ['GET'])]
-    public function getAllRooms(
-        Request $request,
-        HabitacionRepository $habitacionRepository,
-        PacienteHasHabitacionesRepository $pacienteHasHabitacionesRepository,
-        DiagnosticoRepository $diagnosticoRepository,
-        RegistroRepository $registroRepository
-    ): JsonResponse {
-        $page = max(1, (int) $request->query->get('page', 1));
-        $limit = max(1, (int) $request->query->get('limit', 16));
-        $offset = ($page - 1) * $limit;
-        $search = $request->query->get('search', '');
+   #[Route('/general', name: 'app_habitacion_index', methods: ['GET'])]
+public function getAllRooms(
+    Request $request,
+    HabitacionRepository $habitacionRepository,
+    PacienteHasHabitacionesRepository $pacienteHasHabitacionesRepository,
+    DiagnosticoRepository $diagnosticoRepository,
+    RegistroRepository $registroRepository
+): JsonResponse {
+    $page = max(1, (int) $request->query->get('page', 1));
+    $limit = max(1, (int) $request->query->get('limit', 16));
+    $offset = ($page - 1) * $limit;
+    $search = $request->query->get('search', '');
 
-        if ($search) {
-            $habitaciones = $habitacionRepository->createQueryBuilder('h')
-                ->where('h.codigo LIKE :search')
-                ->setParameter('search', '%' . $search . '%')
-                ->setFirstResult($offset)
-                ->setMaxResults($limit)
-                ->getQuery()
-                ->getResult();
+    if ($search) {
+        $habitaciones = $habitacionRepository->createQueryBuilder('h')
+            ->where('h.codigo LIKE :search')
+            ->setParameter('search', '%' . $search . '%')
+            ->setFirstResult($offset)
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
 
-            $totalHabitaciones = $habitacionRepository->createQueryBuilder('h')
-                ->select('COUNT(h.id)')
-                ->where('h.codigo LIKE :search')
-                ->setParameter('search', '%' . $search . '%')
-                ->getQuery()
-                ->getSingleScalarResult();
+        $totalHabitaciones = $habitacionRepository->createQueryBuilder('h')
+            ->select('COUNT(h.id)')
+            ->where('h.codigo LIKE :search')
+            ->setParameter('search', '%' . $search . '%')
+            ->getQuery()
+            ->getSingleScalarResult();
+    } else {
+        $habitaciones = $habitacionRepository->findBy([], null, $limit, $offset);
+        $totalHabitaciones = $habitacionRepository->count([]);
+    }
+
+    $rangosNormales = [
+    'ta_sistolica' => ['min' => 90, 'max' => 140], // Changed min from 80 to 90
+    'ta_diastolica' => ['min' => 50, 'max' => 90], // Unchanged
+    'frecuencia_respiratoria' => ['min' => 12, 'max' => 20], // Changed from 10–24 to 12–20
+    'pulso' => ['min' => 50, 'max' => 100], // Changed max from 110 to 100
+    'temperatura' => ['min' => 34.9, 'max' => 38.5], // Changed from 35.5–38.0 to 34.9–38.5
+    'saturacion_oxigeno' => ['min' => 94, 'max' => 100], // Changed min from 90 to 94
+];
+
+    $data = [];
+
+    foreach ($habitaciones as $habitacion) {
+        $habitacionInfo = [
+            'habitacion_codigo' => $habitacion->getCodigo(),
+        ];
+
+        $paciente = $pacienteHasHabitacionesRepository->findUltimoPacientePorHabitacion($habitacion);
+
+        if (!$paciente) {
+            $habitacionInfo['isEmpty'] = true;
         } else {
-            $habitaciones = $habitacionRepository->findBy([], null, $limit, $offset);
-            $totalHabitaciones = $habitacionRepository->count([]);
-        }
+            $habitacionInfo['isEmpty'] = false;
 
-        $data = [];
+            $ultimoDiagnostico = $diagnosticoRepository->findUltimoDiagnosticoPorPaciente($paciente);
+            $ultimoRegistro = $registroRepository->findByUltimoPorPaciente($paciente);
 
-        foreach ($habitaciones as $habitacion) {
-            $habitacionInfo = [
-                'habitacion_codigo' => $habitacion->getCodigo(),
+            $habitacionInfo['paciente'] = [
+                'id' => $paciente->getId(),
+                'nombre' => $paciente->getNombre(),
+                'apellidos' => $paciente->getApellidos(),
+                'edad' => HospitalUtils::calcularEdad($paciente->getFechaNacimiento()),
+                'diagnostico' => $ultimoDiagnostico ? $ultimoDiagnostico->getDiagnostico() : null,
             ];
 
-            $paciente = $pacienteHasHabitacionesRepository->findUltimoPacientePorHabitacion($habitacion);
+            $alerta = false;
+            $vitalSigns = null;
+            if ($ultimoRegistro) {
+                $constantesVitales = $ultimoRegistro->getConstantesVitalesId();
+                if ($constantesVitales) {
+                    $vitalSigns = [
+                        'ta_sistolica' => $constantesVitales->getTaSistolica(),
+                        'ta_diastolica' => $constantesVitales->getTaDiastolica(),
+                        'frecuencia_respiratoria' => $constantesVitales->getFrecuenciaRespiratoria(),
+                        'pulso' => $constantesVitales->getPulso(),
+                        'temperatura' => $constantesVitales->getTemperatura(),
+                        'saturacion_oxigeno' => $constantesVitales->getSaturacionOxigeno(),
+                    ];
 
-            if (!$paciente) {
-                $habitacionInfo['isEmpty'] = true;
-            } else {
-                $habitacionInfo['isEmpty'] = false;
+                    if (
+                        ($constantesVitales->getTaSistolica() !== null &&
+                            ($constantesVitales->getTaSistolica() < $rangosNormales['ta_sistolica']['min'] ||
+                             $constantesVitales->getTaSistolica() > $rangosNormales['ta_sistolica']['max'])) ||
+                        ($constantesVitales->getTaDiastolica() !== null &&
+                            ($constantesVitales->getTaDiastolica() < $rangosNormales['ta_diastolica']['min'] ||
+                             $constantesVitales->getTaDiastolica() > $rangosNormales['ta_diastolica']['max'])) ||
+                        ($constantesVitales->getFrecuenciaRespiratoria() !== null &&
+                            ($constantesVitales->getFrecuenciaRespiratoria() < $rangosNormales['frecuencia_respiratoria']['min'] ||
+                             $constantesVitales->getFrecuenciaRespiratoria() > $rangosNormales['frecuencia_respiratoria']['max'])) ||
+                        ($constantesVitales->getPulso() !== null &&
+                            ($constantesVitales->getPulso() < $rangosNormales['pulso']['min'] ||
+                             $constantesVitales->getPulso() > $rangosNormales['pulso']['max'])) ||
+                        ($constantesVitales->getTemperatura() !== null &&
+                            ($constantesVitales->getTemperatura() < $rangosNormales['temperatura']['min'] ||
+                             $constantesVitales->getTemperatura() > $rangosNormales['temperatura']['max'])) ||
+                        ($constantesVitales->getSaturacionOxigeno() !== null &&
+                            ($constantesVitales->getSaturacionOxigeno() < $rangosNormales['saturacion_oxigeno']['min'] ||
+                             $constantesVitales->getSaturacionOxigeno() > $rangosNormales['saturacion_oxigeno']['max']))
+                    ) {
+                        $alerta = true;
+                    }
+                }
 
-                $ultimoDiagnostico = $diagnosticoRepository->findUltimoDiagnosticoPorPaciente($paciente);
-                $ultimoRegistro = $registroRepository->findByUltimoPorPaciente($paciente);
-
-                $habitacionInfo['paciente'] = [
-                    'id' => $paciente->getId(),
-                    'nombre' => $paciente->getNombre(),
-                    'apellidos' => $paciente->getApellidos(),
-                    'edad' => HospitalUtils::calcularEdad($paciente->getFechaNacimiento()),
-                    'diagnostico' => $ultimoDiagnostico ? $ultimoDiagnostico->getDiagnostico() : null,
-                ];
-
-                $habitacionInfo['registro'] = $ultimoRegistro ? [
+                $habitacionInfo['registro'] = [
                     'fecha' => $ultimoRegistro->getFecha()->format('Y-m-d H:i:s'),
                     'nombre_auxiliar' => $ultimoRegistro->getAuxiliarId()->getNombre(),
                     'numero_auxiliar' => $ultimoRegistro->getAuxiliarId()->getNumTrabajador(),
                     'observaciones' => $ultimoRegistro->getObservacion() ? $ultimoRegistro->getObservacion()->getDescripcion() : null,
-                    'alerta' => true,
-                ] : null;
+                    'alerta' => $alerta,
+                    'constantes_vitales' => $vitalSigns,
+                ];
+            } else {
+                $habitacionInfo['registro'] = null;
             }
-
-            $data[] = $habitacionInfo;
         }
 
-        return $this->json([
-            'success' => true,
-            'message' => 'List rooms correct',
-            'habitacion' => $data,
-            'pagination' => [
-                'current_page' => $page,
-                'per_page' => $limit,
-                'total_items' => (int) $totalHabitaciones,
-                'total_pages' => ceil($totalHabitaciones / $limit),
-            ],
-        ]);
+        $data[] = $habitacionInfo;
     }
 
-    #[Route('/diets', name: 'api_all_diets', methods: ['GET'])]
+    return $this->json([
+        'success' => true,
+        'message' => 'List rooms correct',
+        'habitacion' => $data,
+        'pagination' => [
+            'current_page' => $page,
+            'per_page' => $limit,
+            'total_items' => (int) $totalHabitaciones,
+            'total_pages' => ceil($totalHabitaciones / $limit),
+        ],
+    ]);
+}
+
+   #[Route('/diets', name: 'api_all_diets', methods: ['GET'])]
     public function getAllDiets(
         Request $request,
         EntityManagerInterface $entityManager,
@@ -122,7 +173,17 @@ final class HospitalDataController extends AbstractController
             $itemsPerPage = max(1, (int)$request->query->get('itemsPerPage', 16));
             $search = mb_strtolower(trim($request->query->get('search', '')));
 
-            // Obtener todas las habitaciones ordenadas por código
+            // Define less strict vital signs ranges
+           $rangosNormales = [
+    'ta_sistolica' => ['min' => 90, 'max' => 140], // Changed min from 80 to 90
+    'ta_diastolica' => ['min' => 50, 'max' => 90], // Unchanged
+    'frecuencia_respiratoria' => ['min' => 12, 'max' => 20], // Changed from 10–24 to 12–20
+    'pulso' => ['min' => 50, 'max' => 100], // Changed max from 110 to 100
+    'temperatura' => ['min' => 34.9, 'max' => 38.5], // Changed from 35.5–38.0 to 34.9–38.5
+    'saturacion_oxigeno' => ['min' => 94, 'max' => 100], // Changed min from 90 to 94
+];
+
+            // Get all rooms ordered by code
             $habitaciones = $habitacionRepository->createQueryBuilder('h')
                 ->orderBy('h.codigo', 'ASC')
                 ->getQuery()
@@ -142,12 +203,11 @@ final class HospitalDataController extends AbstractController
             foreach ($habitaciones as $habitacion) {
                 $habitacionCodigo = $habitacion->getCodigo();
 
-                // Último paciente asignado a la habitación
+                // Last patient assigned to the room
                 $asignacion = $entityManager->getRepository('App\Entity\PacienteHasHabitaciones')
                     ->findOneBy(['habitacion_id' => $habitacion], ['timestamp' => 'DESC']);
 
                 if (!$asignacion) {
-                    // Habitación vacía
                     $results[] = [
                         'habitacion_codigo' => $habitacionCodigo,
                         'message' => 'empty room',
@@ -158,7 +218,7 @@ final class HospitalDataController extends AbstractController
 
                 $paciente = $asignacion->getPacienteId();
 
-                // Aplicar filtro si hay búsqueda
+                // Apply search filter
                 if ($search !== '') {
                     $nombre = mb_strtolower($paciente->getNombre());
                     $apellidos = mb_strtolower($paciente->getApellidos());
@@ -185,6 +245,46 @@ final class HospitalDataController extends AbstractController
                     }
                 }
 
+                // Calculate alert based on vital signs
+                $alerta = false;
+                $vitalSigns = null;
+                if ($registro) {
+                    $constantesVitales = $registro->getConstantesVitalesId();
+                    if ($constantesVitales) {
+                        $vitalSigns = [
+                            'ta_sistolica' => $constantesVitales->getTaSistolica(),
+                            'ta_diastolica' => $constantesVitales->getTaDiastolica(),
+                            'frecuencia_respiratoria' => $constantesVitales->getFrecuenciaRespiratoria(),
+                            'pulso' => $constantesVitales->getPulso(),
+                            'temperatura' => $constantesVitales->getTemperatura(),
+                            'saturacion_oxigeno' => $constantesVitales->getSaturacionOxigeno(),
+                        ];
+
+                        if (
+                            ($constantesVitales->getTaSistolica() !== null &&
+                                ($constantesVitales->getTaSistolica() < $rangosNormales['ta_sistolica']['min'] ||
+                                 $constantesVitales->getTaSistolica() > $rangosNormales['ta_sistolica']['max'])) ||
+                            ($constantesVitales->getTaDiastolica() !== null &&
+                                ($constantesVitales->getTaDiastolica() < $rangosNormales['ta_diastolica']['min'] ||
+                                 $constantesVitales->getTaDiastolica() > $rangosNormales['ta_diastolica']['max'])) ||
+                            ($constantesVitales->getFrecuenciaRespiratoria() !== null &&
+                                ($constantesVitales->getFrecuenciaRespiratoria() < $rangosNormales['frecuencia_respiratoria']['min'] ||
+                                 $constantesVitales->getFrecuenciaRespiratoria() > $rangosNormales['frecuencia_respiratoria']['max'])) ||
+                            ($constantesVitales->getPulso() !== null &&
+                                ($constantesVitales->getPulso() < $rangosNormales['pulso']['min'] ||
+                                 $constantesVitales->getPulso() > $rangosNormales['pulso']['max'])) ||
+                            ($constantesVitales->getTemperatura() !== null &&
+                                ($constantesVitales->getTemperatura() < $rangosNormales['temperatura']['min'] ||
+                                 $constantesVitales->getTemperatura() > $rangosNormales['temperatura']['max'])) ||
+                            ($constantesVitales->getSaturacionOxigeno() !== null &&
+                                ($constantesVitales->getSaturacionOxigeno() < $rangosNormales['saturacion_oxigeno']['min'] ||
+                                 $constantesVitales->getSaturacionOxigeno() > $rangosNormales['saturacion_oxigeno']['max']))
+                        ) {
+                            $alerta = true;
+                        }
+                    }
+                }
+
                 $results[] = [
                     'habitacion_codigo' => $habitacionCodigo,
                     'paciente' => [
@@ -201,11 +301,12 @@ final class HospitalDataController extends AbstractController
                         'observaciones' => $registro->getObservacion()?->getDescripcion() ?? '',
                     ],
                     'isEmpty' => false,
-                    'alerta' => true
+                    'alerta' => $alerta,
+                    'constantes_vitales' => $vitalSigns,
                 ];
             }
 
-            // Paginación
+            // Pagination
             $totalItems = count($results);
             $totalPages = (int) ceil($totalItems / $itemsPerPage);
             $offset = ($page - 1) * $itemsPerPage;
